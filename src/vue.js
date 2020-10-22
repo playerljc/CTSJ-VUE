@@ -8,6 +8,7 @@ import { propsModule } from 'snabbdom/build/package/modules/props';
 import { attributesModule } from 'snabbdom/build/package/modules/attributes';
 import { eventListenersModule } from 'snabbdom/build/package/modules/eventlisteners';
 import { datasetModule } from 'snabbdom/build/package/modules/dataset';
+import { toVNode } from 'snabbdom/build/package/tovnode';
 
 // 生命周期钩子
 const LIFECYCLE_HOOKS = [
@@ -112,6 +113,10 @@ function hasVHtml(attrNames) {
   return hasVAttr(attrNames, `${DIRECT_PREFIX}html`);
 }
 
+function hasVShow(attrNames) {
+  return hasVAttr(attrNames, `${DIRECT_PREFIX}show`);
+}
+
 function hasVModel(attrNames) {
   return hasVAttr(attrNames, `${DIRECT_PREFIX}model`);
 }
@@ -181,26 +186,36 @@ function parseVBind(context, el, attrNames) {
   });
 }
 
-function iteratorVFor({ context, el, itItemStr, itItemObj }, index) {
-  const cloneEl = el.cloneNode(true);
-  // 删除v-for属性
-  cloneEl.removeAttribute(`${DIRECT_PREFIX}for`);
+function parseVOn(context, el, attrNames) {
+  // 可以有多个v-on
+  // <div v-on:click="count + 1" v-on:blur="" v-on:change="" v-on:input=""></div>
 
-  if (itItemStr.startsWith('(') && itItemStr.endsWith(')')) {
-    // item   ,    index
-    itItemStr = itItemStr.substring(1, itItemStr.length - 1).trim();
-    if (itItemStr.indexOf(',') !== -1) {
-      const itItemArr = itItemStr.split(',').map((t) => t.trim());
-      context[itItemArr[0].trim()] = itItemObj;
-      context[itItemArr[1].trim()] = index;
-    } else {
-      context[itItemStr] = itItemObj;
-    }
-  } else {
-    context[itItemStr] = itItemObj;
-  }
+  const onAttrs = attrNames.filter((n) => n.indexOf(`${DIRECT_PREFIX}on`) !== -1);
+  return onAttrs.map((attrName) => {
+    const entry = {
+      name: getDirectName(attrName), // 指令名，不包括 v- 前缀。(on)
+      value: '', // 指令的绑定值，例如：v-my-directive="1 + 1" 中，绑定值为 2。
+      expression: el.getAttribute(attrName), // 字符串形式的指令表达式。例如 v-my-directive="1 + 1" 中，表达式为 "1 + 1"。
+      arg: getDirectArg(attrName), // 传给指令的参数，可选。例如 v-my-directive:foo 中，参数为 "foo"。
+      modifiers: getDirectModifiers(attrName), // 一个包含修饰符的对象。例如：v-my-directive.foo.bar 中，修饰符对象为 { foo: true, bar: true }。
+    };
+    // entry.value = execExpression(context, entry.expression);
+    return entry;
+  });
+}
 
-  return renderElementNode.call(this, context, cloneEl);
+function parseVShow(context, el, attrNames) {
+  const attrName = attrNames.find((n) => n.indexOf(`${DIRECT_PREFIX}show`) !== -1);
+  const value = el.getAttribute(attrName);
+  return execExpression(context, value);
+}
+
+function parseVHtml(context, el, attrNames) {
+  const attrName = attrNames.find((n) => n.indexOf(`${DIRECT_PREFIX}html`) !== -1);
+  const value = el.getAttribute(attrName);
+  // 在此处需要进行实体字符的替换
+  // <div>111</div>
+  return execExpression(context, value);
 }
 
 // parseVFor
@@ -268,6 +283,28 @@ function parseVFor(context, el, attrNames) {
   }
 
   return VNodes;
+}
+
+function iteratorVFor({ context, el, itItemStr, itItemObj }, index) {
+  const cloneEl = el.cloneNode(true);
+  // 删除v-for属性
+  cloneEl.removeAttribute(`${DIRECT_PREFIX}for`);
+
+  if (itItemStr.startsWith('(') && itItemStr.endsWith(')')) {
+    // item   ,    index
+    itItemStr = itItemStr.substring(1, itItemStr.length - 1).trim();
+    if (itItemStr.indexOf(',') !== -1) {
+      const itItemArr = itItemStr.split(',').map((t) => t.trim());
+      context[itItemArr[0].trim()] = itItemObj;
+      context[itItemArr[1].trim()] = index;
+    } else {
+      context[itItemStr] = itItemObj;
+    }
+  } else {
+    context[itItemStr] = itItemObj;
+  }
+
+  return renderElementNode.call(this, context, cloneEl);
 }
 
 function createContext() {
@@ -385,6 +422,7 @@ function createVNode(tagName) {
       attrs: {},
       dataset: {},
       style: {},
+      on: {},
     },
     [],
   );
@@ -399,8 +437,7 @@ function createTextVNode(value) {
 
 // render
 function render(templateStr, el, isMount) {
-  const dom = createElement(templateStr);
-  const vnode = renderLoop.call(this, this.$dataProxy, dom);
+  const vnode = renderLoop.call(this, this.$dataProxy, createElement(templateStr));
   if (isMount) {
     patch(el, vnode);
   } else {
@@ -456,11 +493,24 @@ function renderElementNode(context, el) {
 
   let VNode;
 
+  /**
+   * for(item in items)   (new)context -> item
+   *  for(item1 in items)        context -> item1
+   *   for(item11 in items)       context -> item11
+   *    for(item111 in itmes)       context -> item111
+   *   for(item21 in items)       context -> item21
+   *  for(item2 in itmes)        context -> item2
+   *  for(item3 in itmes)        context -> item3
+   * for(item in items)   (new)context -> item
+   */
+
+  // 指令属性
   if (vAttrNames.length) {
     if (hasVFor(vAttrNames)) {
       // parse v-for
       return parseVFor.call(
         this,
+        // 如果context是this.$dataProxy则需要重新创建context
         context === this.$dataProxy ? createContext.call(this) : context,
         el,
         vAttrNames,
@@ -478,7 +528,12 @@ function renderElementNode(context, el) {
     // createVNode
     VNode = createVNode(el.tagName.toLowerCase());
 
-    // parse v-bind
+    if (hasVShow(vAttrNames)) {
+      // parse v-show
+      const display = parseVShow(context, el, vAttrNames);
+      VNode.data.style.display = display ? '' : 'none';
+    }
+
     if (hasVBind(vAttrNames)) {
       // parse v-bind
       const entrys = parseVBind(context, el, vAttrNames);
@@ -495,15 +550,66 @@ function renderElementNode(context, el) {
       });
     }
 
-    // if(hasVHtml(attrNames)) {
-    //
-    // }
+    if (hasVOn(vAttrNames)) {
+      // parse v-on
+      const entrys = parseVOn(context, el, vAttrNames);
+      entrys.forEach((entry) => {
+        VNode.data.on[entry.arg] = function (e) {
+          // 表达式方式
+          // <div v-on:click="count + 1"></div>
+          // 函数名方式
+          // <div v-on:click="display"></div>
+          // 内联处理器中的方法
+          // <div v-on:click="display('hi')"></div>
+
+          // 事件修饰符
+          // .stop
+          // .prevent
+          // .capture
+          // .self
+          // .once
+          // .passive
+
+          // 阻止单击事件继续传播(阻止起泡)
+          // <a v-on:click.stop="doThis"></a>
+
+          // 提交事件不再重载页面(屏蔽缺省事件)
+          // <form v-on:submit.prevent="onSubmit"></form>
+
+          // 修饰符可以串联(阻止起泡 && 屏蔽缺省事件)
+          // <a v-on:click.stop.prevent="doThat"></a>
+
+          // 添加事件监听器时使用事件捕获模式
+          // 即内部元素触发的事件先在此处理，然后才交由内部元素进行处理
+          // <div v-on:click.capture="doThis">...</div>
+
+          // 只当在 event.target 是当前元素自身时触发处理函数
+          // 即事件不是从内部元素触发的
+          // <div v-on:click.self="doThat">...</div>
+          execExpression(context, entry.expression);
+        };
+      });
+
+      // VNode.data.on.click = function (e) {
+      //   alert(666);
+      // };
+    }
+
+    if (hasVHtml(vAttrNames)) {
+      // parse v-html
+      const htmlVNode = toVNode(createElement(parseVHtml(context, el, vAttrNames)));
+      VNode.children.push(htmlVNode);
+      // VNode.children.push(createTextVNode(htmlStr));
+      // v-html在最后解析，因为v-html的children就是一个文本节点，不需要在进行children的loop
+      return VNode;
+    }
   }
 
   if (!VNode) {
     VNode = createVNode(el.tagName.toLowerCase());
   }
 
+  // 非指令属性
   const attrNames = getAttrNames(el);
   if (attrNames.length) {
     attrNames.forEach((attrName) => {

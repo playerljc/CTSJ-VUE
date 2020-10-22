@@ -1,1 +1,13 @@
 1.在一个生命周期或事件方法中多次修改data只更新一次
+2.v-for的context值的嵌套
+
+v-show 判断display的值 ok
+v-html实现 ok
+v-on的实现
+
+在一个方法中多次修改data只render一次
+v-for的key
+v-model实现
+filter
+slot
+Component

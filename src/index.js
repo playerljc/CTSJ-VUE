@@ -13,7 +13,7 @@ window.onload = () => {
       		  name="playerljc"
       		  v-bind:data-ent-id="name"
       		>
-      			<p>我的名字叫"{{name + new Date().getTime() + [1,2,3] + Math.random() + (2 > 3 ? 'aaa' : 'bbb')}}~{{display()}}",我的性别是"{{sex}}"性,我家住在"{{address}}"地方</p>
+      			<p v-show="true">我的名字叫"{{name + new Date().getTime() + [1,2,3] + Math.random() + (2 > 3 ? 'aaa' : 'bbb')}}~{{display()}}",我的性别是"{{sex}}"性,我家住在"{{address}}"地方</p>
       			<p>display{{display()}}是display</p>
       			<p>{{items[0].name}}</p>
       			<p>{{items[0].hobby.hobby1}}</p>
@@ -23,16 +23,17 @@ window.onload = () => {
       				<li v-for="(item,index) in data">
       					<div>{{item.name}}:{{index}}</div>
       					<ul>
-      						<li v-for="item2 in item.data">
-      							<div>{{item2.name}}</div>
+      						<li v-for="(item2,index1) in item.data">
+      							<div>{{item2.name}}:{{index + index1}}</div>
       							<ul>
-      								<li v-for="item3 in item2.data" v-if="item2.data.length !== 0">{{item3.name}}</li>
+      								<li v-for="(item3,index2) in item2.data" v-if="item2.data.length !== 0">{{item3.name}}:{{index + index1 + index2}}</li>
 										</ul>
       						</li>
 								</ul>
       				</li>
       				<div>{{sex}}</div>
-						</ul>
+            </ul>
+            <div v-html="htmlStr"></div>
       		</div>
       	`,
     data: {
@@ -103,6 +104,7 @@ window.onload = () => {
           ],
         },
       ],
+      htmlStr: `<p>我是谁666</p>`
     },
     methods: {
       display() {
