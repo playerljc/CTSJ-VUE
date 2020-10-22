@@ -3,11 +3,12 @@
 
 v-show 判断display的值 ok
 v-html实现 ok
-v-on的实现
+v-on的实现 ok
 
-在一个方法中多次修改data只render一次
 v-for的key
 v-model实现
 filter
 slot
+在一个方法中多次修改data只render一次
+
 Component

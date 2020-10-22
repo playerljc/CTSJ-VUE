@@ -14,7 +14,7 @@ window.onload = () => {
       		  name="playerljc"
       		>
       			<p v-show="true" v-on:click="sum(name,sex,age,$event,'1' + '2')">我的名字叫"{{name + new Date().getTime() + [1,2,3] + Math.random() + (2 > 3 ? 'aaa' : 'bbb')}}~{{display()}}",我的性别是"{{sex}}"性,我家住在"{{address}}"地方</p>
-      			<p>display{{display()}}是display</p>
+      			<p v-on:click="sum(name,sex,age,$event,'1' + '2')">display{{display()}}是display</p>
       			<p>{{items[0].name}}</p>
       			<p>{{items[0].hobby.hobby1}}</p>
       			<p>{{'你' + '是   &nbsp;' + '谁'}}</p>
@@ -119,7 +119,7 @@ window.onload = () => {
         // alert(age);
         // alert($event);
         // alert(str);
-        alert(this.display());
+        alert(this.reversedMessage);
       },
     },
     computed: {
