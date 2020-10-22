@@ -1,4 +1,5 @@
 import _ from 'lodash';
+// import { parseScript } from 'esprima';
 import { h } from 'snabbdom/build/package/h';
 import { init } from 'snabbdom/build/package/init';
 // 1、导入模块
@@ -203,6 +204,21 @@ function parseVOn(context, el, attrNames) {
     return entry;
   });
 }
+
+// // isInlineEvent - 是否是内联处理器
+// function isInlineProcessor(expression) {
+//   const { tokens } = parseScript(expression, { tokens: true });
+//   // if (tokens.length) {
+//   //   if (
+//   //     tokens.length > 3 &&
+//   //     tokens[0].type === 'Identifier' &&
+//   //     tokens[0].value in this.$config.methods &&
+//   //     tokens[1].type === 'Punctuator' &&
+//   //     tokens[1].value === '('
+//   //   ) {
+//   //   }
+//   // }
+// }
 
 function parseVShow(context, el, attrNames) {
   const attrName = attrNames.find((n) => n.indexOf(`${DIRECT_PREFIX}show`) !== -1);
@@ -554,7 +570,7 @@ function renderElementNode(context, el) {
       // parse v-on
       const entrys = parseVOn(context, el, vAttrNames);
       entrys.forEach((entry) => {
-        VNode.data.on[entry.arg] = function (e) {
+        VNode.data.on[entry.arg] = (e) => {
           // 表达式方式
           // <div v-on:click="count + 1"></div>
           // 函数名方式
@@ -586,13 +602,29 @@ function renderElementNode(context, el) {
           // 只当在 event.target 是当前元素自身时触发处理函数
           // 即事件不是从内部元素触发的
           // <div v-on:click.self="doThat">...</div>
-          execExpression(context, entry.expression);
+
+          // 标识符
+          if (entry.modifiers) {
+            if (entry.modifiers.stop) {
+              e.stopPropagation();
+            }
+            if (entry.modifiers.prevent) {
+              e.preventDefault();
+            }
+          }
+
+          if (entry.expression in this.$config.methods) {
+            // 函数名形式
+            this[entry.expression]();
+          } else {
+            // 表达式
+            // 1 + 1
+            // item(item1,$event,3)
+            context.$event = e;
+            execExpression(context, entry.expression);
+          }
         };
       });
-
-      // VNode.data.on.click = function (e) {
-      //   alert(666);
-      // };
     }
 
     if (hasVHtml(vAttrNames)) {

@@ -7,13 +7,13 @@ window.onload = () => {
     el: document.getElementById('container2'),
     template: `
       		<div 
-      		  v-bind:id="id + '我' + [1,2,3].join(',') + reversedMessage" 
+      		  v-bind:id="id + '我' + [1,2,3].join(',') + reversedMessage"
             v-bind:class="[activeClass, errorClass]"
       		  v-bind:style="{color:activeColor,fontSize: fontSize + 'px'}"
-      		  name="playerljc"
       		  v-bind:data-ent-id="name"
+      		  name="playerljc"
       		>
-      			<p v-show="true">我的名字叫"{{name + new Date().getTime() + [1,2,3] + Math.random() + (2 > 3 ? 'aaa' : 'bbb')}}~{{display()}}",我的性别是"{{sex}}"性,我家住在"{{address}}"地方</p>
+      			<p v-show="true" v-on:click="sum(name,sex,age,$event,'1' + '2')">我的名字叫"{{name + new Date().getTime() + [1,2,3] + Math.random() + (2 > 3 ? 'aaa' : 'bbb')}}~{{display()}}",我的性别是"{{sex}}"性,我家住在"{{address}}"地方</p>
       			<p>display{{display()}}是display</p>
       			<p>{{items[0].name}}</p>
       			<p>{{items[0].hobby.hobby1}}</p>
@@ -104,11 +104,22 @@ window.onload = () => {
           ],
         },
       ],
-      htmlStr: `<p>我是谁666</p>`
+      htmlStr: `<p>我是谁666</p>`,
     },
     methods: {
       display() {
         return `${this.name}\r\n${this.sex}\r\n${this.age}\r\n${this.address}`;
+      },
+      show() {
+        alert('666');
+      },
+      sum(name, sex, age, $event, str) {
+        // alert(name);
+        // alert(sex);
+        // alert(age);
+        // alert($event);
+        // alert(str);
+        alert(this.display());
       },
     },
     computed: {
