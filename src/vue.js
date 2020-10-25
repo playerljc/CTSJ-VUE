@@ -56,9 +56,41 @@ const patch = init([
   eventListenersModule,
 ]);
 
+// 用连接符链接的字符串转换成驼峰写法
+function toCamelCase(str, toUpperCase = false) {
+  const result = str
+    .split(DIRECT_DIVIDING_SYMBOL)
+    .map((item) => {
+      return item.charAt(0).toUpperCase() + item.substring(1);
+    })
+    .join('');
+  return !toUpperCase ? `${result.charAt(0).toLowerCase()}${result.substring(1)}` : result;
+}
+
 // 判断数组
 function isArray(obj) {
   return Array.isArray(obj);
+}
+
+// 调用生命周期函数
+function triggerLifecycle(hookName) {
+  if (this.$config[hookName] && isFunction(this.$config[hookName])) {
+    this.$config[hookName].call(this.$dataProxy);
+  }
+}
+
+// 执行表达式
+function execExpression(context, expressionStr) {
+  return /* replaceWith(context, expressionStr); */ eval(`with(context){${expressionStr}}`);
+  // const fun = new Function('context','expressionStr',`return with(context){${expressionStr}}`);
+  // return fun(context, expressionStr);
+}
+
+// 重置计算属性
+function resetComputed() {
+  for (const p in this.$config.computed) {
+    this[p] = null;
+  }
 }
 
 // 判断函数
@@ -74,24 +106,6 @@ function isObject(obj) {
 // 是否是文本节点
 function isTextNode(el) {
   return el.nodeType === Node.TEXT_NODE;
-}
-
-// 用连接符链接的字符串转换成驼峰写法
-function toCamelCase(str, toUpperCase = false) {
-  const result = str
-    .split(DIRECT_DIVIDING_SYMBOL)
-    .map((item) => {
-      return item.charAt(0).toUpperCase() + item.substring(1);
-    })
-    .join('');
-  return !toUpperCase ? `${result.charAt(0).toLowerCase()}${result.substring(1)}` : result;
-}
-
-// 根据html字符串创建dom
-function createElement(htmlStr) {
-  const el = document.createElement('div');
-  el.innerHTML = htmlStr;
-  return el.firstElementChild;
 }
 
 function hasVAttr(attrNames, attrName) {
@@ -124,16 +138,6 @@ function hasVModel(attrNames) {
 
 function hasVOn(attrNames) {
   return hasVAttr(attrNames, `${DIRECT_PREFIX}on`);
-}
-
-// getVAttrNames 获取所有指令的属性名
-function getVAttrNames(el) {
-  return el.getAttributeNames().filter((attrName) => attrName.startsWith(DIRECT_PREFIX));
-}
-
-// getAttrNames 获取非指令的属性名
-function getAttrNames(el) {
-  return el.getAttributeNames().filter((attrName) => attrName.indexOf(DIRECT_PREFIX) === -1);
 }
 
 function parseVIf(context, el, attrNames) {
@@ -204,21 +208,6 @@ function parseVOn(context, el, attrNames) {
     return entry;
   });
 }
-
-// // isInlineEvent - 是否是内联处理器
-// function isInlineProcessor(expression) {
-//   const { tokens } = parseScript(expression, { tokens: true });
-//   // if (tokens.length) {
-//   //   if (
-//   //     tokens.length > 3 &&
-//   //     tokens[0].type === 'Identifier' &&
-//   //     tokens[0].value in this.$config.methods &&
-//   //     tokens[1].type === 'Punctuator' &&
-//   //     tokens[1].value === '('
-//   //   ) {
-//   //   }
-//   // }
-// }
 
 function parseVShow(context, el, attrNames) {
   const attrName = attrNames.find((n) => n.indexOf(`${DIRECT_PREFIX}show`) !== -1);
@@ -323,14 +312,6 @@ function iteratorVFor({ context, el, itItemStr, itItemObj }, index) {
   return renderElementNode.call(this, context, cloneEl);
 }
 
-function createContext() {
-  const context = {};
-  for (const p in this.$dataProxy) {
-    context[p] = this.$dataProxy[p];
-  }
-  return context;
-}
-
 // 获取指令的name
 function getDirectName(attrName) {
   let directSymbolIndex = -1;
@@ -369,11 +350,21 @@ function getDirectModifiers(attrName) {
   return modifiers;
 }
 
-// 调用生命周期函数
-function triggerLifecycle(hookName) {
-  if (this.$config[hookName] && isFunction(this.$config[hookName])) {
-    this.$config[hookName].call(this.$dataProxy);
-  }
+// getVAttrNames 获取所有指令的属性名
+function getVAttrNames(el) {
+  return el.getAttributeNames().filter((attrName) => attrName.startsWith(DIRECT_PREFIX));
+}
+
+// getAttrNames 获取非指令的属性名
+function getAttrNames(el) {
+  return el.getAttributeNames().filter((attrName) => attrName.indexOf(DIRECT_PREFIX) === -1);
+}
+
+// 根据html字符串创建dom
+function createElement(htmlStr) {
+  const el = document.createElement('div');
+  el.innerHTML = htmlStr;
+  return el.firstElementChild;
 }
 
 // 创建对象的代理(对data的响应式创建，支持Object和Array)
@@ -386,7 +377,9 @@ function createProxy(obj) {
         // 处理计算属性
         if (key in self.$config.computed) {
           // 现在只是简单的调用一下用户的计算方法，没有进行缓存的运算
-          target[key] = self.$config.computed[key].call(self.$dataProxy);
+          if (target[key] === null || target[key] === undefined) {
+            target[key] = self.$config.computed[key].call(self.$dataProxy);
+          }
         }
 
         return Reflect.get(target, key, receiver);
@@ -401,6 +394,7 @@ function createProxy(obj) {
         triggerLifecycle.call(self, LIFECYCLE_HOOKS[4]);
         const result = Reflect.set(target, key, value, receiver);
         // render.call(self);
+        resetComputed.call(self);
         render.call(self, self.$config.template, self.$config.el, false);
         // update
         triggerLifecycle.call(self, LIFECYCLE_HOOKS[5]);
@@ -421,11 +415,12 @@ function createProxy(obj) {
   return proxy;
 }
 
-// 执行表达式
-function execExpression(context, expressionStr) {
-  return /* replaceWith(context, expressionStr); */ eval(`with(context){${expressionStr}}`);
-  // const fun = new Function('context','expressionStr',`return with(context){${expressionStr}}`);
-  // return fun(context, expressionStr);
+function createContext(arg = {}) {
+  const context = { ...(arg || {}) };
+  for (const p in this.$dataProxy) {
+    context[p] = this.$dataProxy[p];
+  }
+  return context;
 }
 
 // createVNode
@@ -554,7 +549,9 @@ function renderElementNode(context, el) {
       // parse v-bind
       const entrys = parseVBind(context, el, vAttrNames);
       entrys.forEach((entry) => {
-        if (entry.arg === 'class') {
+        if (entry.arg === 'key') {
+          VNode.key = entry.value;
+        } else if (entry.arg === 'class') {
           Object.assign(VNode.data.class, entry.value);
         } else if (entry.arg === 'style') {
           Object.assign(VNode.data.style, entry.value);
@@ -567,6 +564,7 @@ function renderElementNode(context, el) {
     }
 
     if (hasVOn(vAttrNames)) {
+      const self = this;
       // parse v-on
       const entrys = parseVOn(context, el, vAttrNames);
       entrys.forEach((entry) => {
@@ -613,15 +611,18 @@ function renderElementNode(context, el) {
             }
           }
 
-          if (entry.expression in this.$config.methods) {
+          if (entry.expression in self.$config.methods) {
             // 函数名形式
             this[entry.expression]();
           } else {
             // 表达式
             // 1 + 1
             // item(item1,$event,3)
-            context.$event = e;
-            execExpression(context, entry.expression);
+            // 这个地方会创建新的context避免set陷阱函数执行
+            execExpression(
+              context === self.$dataProxy ? createContext.call(self, { $event: e }) : context,
+              entry.expression,
+            );
           }
         };
       });
@@ -645,7 +646,14 @@ function renderElementNode(context, el) {
   const attrNames = getAttrNames(el);
   if (attrNames.length) {
     attrNames.forEach((attrName) => {
-      VNode.data.attrs[attrName] = el.getAttribute(attrName);
+      const val = el.getAttribute(attrName);
+      if (attrName === 'key') {
+        VNode.key = val;
+      } else if (attrName.startsWith('data-')) {
+        VNode.data.dataset[toCamelCase(attrName.substring('data-'.length))] = val;
+      } else {
+        VNode.data.attrs[attrName] = val;
+      }
     });
   }
 

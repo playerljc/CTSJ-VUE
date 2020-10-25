@@ -6,35 +6,39 @@ window.onload = () => {
   const vm2 = new Vue({
     el: document.getElementById('container2'),
     template: `
-      		<div 
-      		  v-bind:id="id + '我' + [1,2,3].join(',') + reversedMessage"
-            v-bind:class="[activeClass, errorClass]"
-      		  v-bind:style="{color:activeColor,fontSize: fontSize + 'px'}"
-      		  v-bind:data-ent-id="name"
-      		  name="playerljc"
-      		>
-      			<p v-show="true" v-on:click="sum(name,sex,age,$event,'1' + '2')">我的名字叫"{{name + new Date().getTime() + [1,2,3] + Math.random() + (2 > 3 ? 'aaa' : 'bbb')}}~{{display()}}",我的性别是"{{sex}}"性,我家住在"{{address}}"地方</p>
-      			<p v-on:click="sum(name,sex,age,$event,'1' + '2')">display{{display()}}是display</p>
-      			<p>{{items[0].name}}</p>
-      			<p>{{items[0].hobby.hobby1}}</p>
-      			<p>{{'你' + '是   &nbsp;' + '谁'}}</p>
-      			<p>{{reversedMessage}}</p>
-      			<ul>
-      				<li v-for="(item,index) in data">
-      					<div>{{item.name}}:{{index}}</div>
-      					<ul>
-      						<li v-for="(item2,index1) in item.data">
-      							<div>{{item2.name}}:{{index + index1}}</div>
-      							<ul>
-      								<li v-for="(item3,index2) in item2.data" v-if="item2.data.length !== 0">{{item3.name}}:{{index + index1 + index2}}</li>
-										</ul>
-      						</li>
-								</ul>
-      				</li>
-      				<div>{{sex}}</div>
-            </ul>
-            <div v-html="htmlStr"></div>
-      		</div>
+<!--      		<div -->
+<!--      		  v-bind:id="id + '我' + [1,2,3].join(',') + reversedMessage"-->
+<!--            v-bind:class="[activeClass, errorClass]"-->
+<!--      		  v-bind:style="{color:activeColor,fontSize: fontSize + 'px'}"-->
+<!--      		  v-bind:data-ent-id="name"-->
+<!--      		  name="playerljc"-->
+<!--      		>-->
+<!--      			<p v-show="true" v-on:click="sum(name,sex,age,$event,'1' + '2')">我的名字叫"{{name + new Date().getTime() + [1,2,3] + Math.random() + (2 > 3 ? 'aaa' : 'bbb')}}~{{display()}}",我的性别是"{{sex}}"性,我家住在"{{address}}"地方</p>-->
+<!--      			<p v-on:click="sum(name,sex,age,$event,'1' + '2')">display{{display()}}是display</p>-->
+<!--      			<p>{{items[0].name}}</p>-->
+<!--      			<p>{{items[0].hobby.hobby1}}</p>-->
+<!--      			<p>{{'你' + '是   &nbsp;' + '谁'}}</p>-->
+<!--      			<p>{{reversedMessage}}</p>-->
+<!--      			<ul>-->
+<!--      				<li v-for="(item,index) in data">-->
+<!--      					<div>{{item.name}}:{{index}}</div>-->
+<!--      					<ul>-->
+<!--      						<li v-for="(item2,index1) in item.data">-->
+<!--      							<div>{{item2.name}}:{{index + index1}}</div>-->
+<!--      							<ul>-->
+<!--      								<li v-for="(item3,index2) in item2.data" v-if="item2.data.length !== 0">{{item3.name}}:{{index + index1 + index2}}</li>-->
+<!--										</ul>-->
+<!--      						</li>-->
+<!--								</ul>-->
+<!--      				</li>-->
+<!--      				<div>{{sex}}</div>-->
+<!--            </ul>-->
+<!--            <div v-html="htmlStr"></div>-->
+<!--      		</div>-->
+          <div>
+            <p key="1" data-a="1">{{reversedMessage}}</p>
+            <p key="2" v-bind:data-a="name">{{reversedMessage}}</p>
+          </div>
       	`,
     data: {
       name: 'playerljc',
@@ -151,6 +155,7 @@ window.onload = () => {
         // this.data.push({
         // 	name:'name4',
         // });
+        this.message = '1,2,3';
       }, 2000);
     },
     beforeUpdate() {
