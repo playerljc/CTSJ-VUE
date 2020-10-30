@@ -36,7 +36,7 @@ window.onload = () => {
 <!--            <div v-html="htmlStr"></div>-->
 <!--      		</div>-->
           <div>
-            <p key="1" data-a="1">{{reversedMessage}}</p>
+            <p key="1" data-a="1">{{a.b.c.d}}</p>
             <p key="2" v-bind:data-a="name">{{reversedMessage}}</p>
           </div>
       	`,
@@ -109,6 +109,13 @@ window.onload = () => {
         },
       ],
       htmlStr: `<p>我是谁666</p>`,
+      a: {
+        b: {
+          c: {
+            d: 100,
+          },
+        },
+      },
     },
     methods: {
       display() {
@@ -129,6 +136,17 @@ window.onload = () => {
     computed: {
       reversedMessage() {
         return this.message.split(',').reverse().join(',');
+      },
+    },
+    watch: {
+      a(oldVal, newVal) {
+        console.log(oldVal, newVal);
+      },
+      'a.b.c': function (oldVal, newVal) {
+        console.log(oldVal, newVal);
+      },
+      'a.b.c.d': function (oldVal, newVal) {
+        console.log(oldVal, newVal);
       },
     },
     beforeCreate() {
@@ -155,7 +173,33 @@ window.onload = () => {
         // this.data.push({
         // 	name:'name4',
         // });
-        this.message = '1,2,3';
+        // this.message = '1,2,3';
+        this.a = {
+          b: {
+            c: {
+              d: 6,
+            },
+          },
+        };
+        setTimeout(() => {
+          this.a.b.c.d = 8;
+
+          setTimeout(() => {
+            this.a = {
+              b: {
+                c: {
+                  d: 5,
+                },
+              },
+            };
+
+            setTimeout(() => {
+              this.a.b.c = {
+                d: 20,
+              };
+            }, 2000);
+          }, 2000);
+        }, 2000);
       }, 2000);
     },
     beforeUpdate() {

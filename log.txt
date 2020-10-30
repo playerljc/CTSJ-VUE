@@ -1,4 +1,5 @@
 1.在一个生命周期或事件方法中多次修改data只更新一次
+
 2.v-for的context值的嵌套 ok
 3.计算属性缓存 ok
 4.get监控时是否执行了render，是因为赋值$event的时候 ok
@@ -8,12 +9,16 @@ v-html实现 ok
 v-on的实现 ok
 v-for的key ok
 
-filter
+watch ok
+computed(不需要)
+ get
+ set
+filter (很难)
 自定义filter
 自定义指令
-watch
 v-model实现
-slot
+mixin
 
 在一个方法中多次修改data只render一次
 Component
+slot

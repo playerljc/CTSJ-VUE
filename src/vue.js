@@ -40,6 +40,19 @@ const DIRECT_DIVIDING_SYMBOL = '-';
 // 指令名字
 const DIRECT_TAGS = ['bind', 'on', 'show', 'if', 'else', 'else-if', 'for', 'html', 'model'];
 
+// 特殊符号
+const SPECIAL_SYMBOL = '__';
+
+// 创建代理排除的属性前缀
+const CREATE_PROXY_EXCLUDE_PREFIX = [PRIVATE_SYMBOL, SPECIAL_SYMBOL];
+// 创建代理排除的属性后缀
+const CREATE_PROXY_EXCLUDE_SUFFIX = [SPECIAL_SYMBOL];
+// 记录对象路径的变量
+const PATH_SYMBOLS = [
+  `${SPECIAL_SYMBOL}parentName${SPECIAL_SYMBOL}`,
+  `${SPECIAL_SYMBOL}parent${SPECIAL_SYMBOL}`,
+];
+
 // 正则集合
 const REGULARS = {
   // 空格分隔
@@ -65,6 +78,50 @@ function toCamelCase(str, toUpperCase = false) {
     })
     .join('');
   return !toUpperCase ? `${result.charAt(0).toLowerCase()}${result.substring(1)}` : result;
+}
+
+// merge - 会改变srcObj并返回
+function merge(srcObj, ...tarObjs) {
+  return Object.assign.apply(Object, [srcObj].concat(tarObjs));
+}
+
+// mergeData
+function mergeData() {
+  // 被代理的data对象
+  this.$srcData = _.cloneDeep(this.$config.data || {});
+  // 没有被代理的data对象
+  this.$noProxySrcData = _.cloneDeep(this.$config.data || {});
+  merge(this, this.$srcData);
+}
+
+// mergeComputed
+function mergeComputed() {
+  // 根据computed对象生成computedObj
+  const computed = this.$config.computed || {};
+  const computedObj = {};
+  for (const p in computed) {
+    computedObj[p] = null;
+  }
+  merge(this, computedObj);
+}
+
+// mergeMethods
+function mergeMethods() {
+  merge(this, this.$config.methods || {});
+}
+
+// mergeWatch
+// function mergeWatch() {
+//   merge(this, this.$config.watch || {});
+// }
+
+// isProxyProperty - 是否是创建代理的属性
+// name
+function isProxyProperty(property) {
+  return !(
+    CREATE_PROXY_EXCLUDE_PREFIX.some((t) => property.startsWith(t)) ||
+    CREATE_PROXY_EXCLUDE_SUFFIX.some((t) => property.endsWith(t))
+  );
 }
 
 // 判断数组
@@ -360,6 +417,26 @@ function getAttrNames(el) {
   return el.getAttributeNames().filter((attrName) => attrName.indexOf(DIRECT_PREFIX) === -1);
 }
 
+// getPropertyAccessStr - 获取属性访问的字符串 a.b.c.d.e.f
+function getPropertyAccessStr(target, key) {
+  const arr = [key];
+
+  if (target[PATH_SYMBOLS[0]]) {
+    arr.push(target[PATH_SYMBOLS[0]]);
+  }
+
+  let parent = target[PATH_SYMBOLS[1]];
+  while (parent) {
+    if (parent[PATH_SYMBOLS[0]]) {
+      arr.push(parent[PATH_SYMBOLS[0]]);
+    }
+    parent = parent[PATH_SYMBOLS[1]];
+  }
+
+  arr.reverse();
+  return arr.join('.');
+}
+
 // 根据html字符串创建dom
 function createElement(htmlStr) {
   const el = document.createElement('div');
@@ -368,33 +445,124 @@ function createElement(htmlStr) {
 }
 
 // 创建对象的代理(对data的响应式创建，支持Object和Array)
+// a {
+//  b: {
+//    c: {
+//      d: 123
+//    }
+//  }
+function createContext(arg = {}) {
+  const context = { ...(arg || {}) };
+  for (const p in this.$dataProxy) {
+    context[p] = this.$dataProxy[p];
+  }
+  return context;
+}
+
+// }
 function createProxy(obj) {
   const self = this;
   let proxy = null;
   if (isObject(obj) || isArray(obj)) {
     proxy = new Proxy(obj, {
+      /**
+       * get 陷阱的函数
+       * @param target
+       * @param key
+       * @param receiver
+       * @return {any}
+       */
       get(target, key, receiver) {
         // 处理计算属性
         if (key in self.$config.computed) {
-          // 现在只是简单的调用一下用户的计算方法，没有进行缓存的运算
+          // 如果这个值存在则返回，否则进行一次computed的计算
           if (target[key] === null || target[key] === undefined) {
+            // computed:{
+            //   message:function(){
+            //
+            //   },
+            //   message:{
+            //     get: function(){
+            //
+            //     },
+            //     set: function() {
+            //
+            //     }
+            //   }
+            // }
             target[key] = self.$config.computed[key].call(self.$dataProxy);
           }
         }
 
         return Reflect.get(target, key, receiver);
       },
+      /**
+       * set 陷阱的函数
+       * @param target
+       * @param key
+       * @param value
+       * @param receiver
+       * @return {boolean}
+       */
       set(target, key, value, receiver) {
-        // 如果不是私有属性且是对象或数组继续loop
-        if ((key.indexOf(PRIVATE_SYMBOL) !== 0 && isObject(value)) || isArray(value)) {
-          value = createProxy.call(self, value);
+        if (!isProxyProperty(key)) {
+          return Reflect.set(target, key, value, receiver);
         }
+        // a.b.c.d = 1
+
+        // target = c
+        // key = d
+        // value = 1
+
+        // 对data和computed的值进行了修改
+        // 1.进行watch监听
+        // 2.对代理的修改同步到noProxy对象上
+        // 3.如果修改的值是引用类型则递归的设置代理
+        // 4.重新计算所有的计算属性
+        // 5.进行render
+
+        const propertyAccessStr = getPropertyAccessStr(target, key);
+
+        let cloneValue;
+
+        // watch监听
+        if (self.$config.watch && isObject(self.$config.watch)) {
+          // 监听表达式 例如：'a.b.c.d'
+
+          const handler = self.$config.watch[propertyAccessStr];
+          if (handler) {
+            // 调用watch的监听句柄
+            // handler(oldValue,newValue)
+            // value是没有被代理的
+            // target[key]已经是被代理的对象，需要找到对应的非代理对象
+            cloneValue = _.cloneDeep(value);
+            handler.call(self, execExpression(self.$noProxySrcData, propertyAccessStr), cloneValue);
+          }
+        }
+
+        // 对代理的修改同步到noProxy对象上
+        // 例如修改的是a.b.c.d
+        // 例如修改的是a
+        // 例如修改的是a.b
+        eval(
+          `if(!cloneValue) {cloneValue = _.cloneDeep(value);} self.$noProxySrcData.${propertyAccessStr} = cloneValue`,
+        );
+
+        // 如果不是私有属性且是对象或数组继续loop
+        if (isObject(value) || isArray(value)) {
+          value = createProxy.call(self, value);
+          value[PATH_SYMBOLS[0]] = key;
+          value[PATH_SYMBOLS[1]] = target /* [key] */;
+        }
+
         // 有数据更新
         // beforeUpdate
         triggerLifecycle.call(self, LIFECYCLE_HOOKS[4]);
+        // 先进行计算
         const result = Reflect.set(target, key, value, receiver);
-        // render.call(self);
+        // 重新计算所有的计算属性
         resetComputed.call(self);
+        // 进行render
         render.call(self, self.$config.template, self.$config.el, false);
         // update
         triggerLifecycle.call(self, LIFECYCLE_HOOKS[5]);
@@ -404,8 +572,10 @@ function createProxy(obj) {
 
     for (const p in obj) {
       const objItem = obj[p];
-      if ((p.indexOf(PRIVATE_SYMBOL) !== 0 && isObject(objItem)) || isArray(objItem)) {
+      if (isProxyProperty(p) && (isObject(objItem) || isArray(objItem))) {
         obj[p] = createProxy.call(self, objItem);
+        objItem[PATH_SYMBOLS[0]] = p;
+        objItem[PATH_SYMBOLS[1]] = obj;
       }
     }
 
@@ -413,14 +583,6 @@ function createProxy(obj) {
   }
 
   return proxy;
-}
-
-function createContext(arg = {}) {
-  const context = { ...(arg || {}) };
-  for (const p in this.$dataProxy) {
-    context[p] = this.$dataProxy[p];
-  }
-  return context;
 }
 
 // createVNode
@@ -686,23 +848,24 @@ class Vue {
   constructor(config) {
     this.$config = config;
 
-    // 将data和computed混入到this中
-    // 根据computed对象生成computedObj
-    const computed = this.$config.computed || {};
-    const computedObj = Object.create(null);
-    for (const p in computed) {
-      computedObj[p] = null;
-    }
-    Object.assign(this, _.cloneDeep(this.$config.data || {}), computedObj);
+    // 将data混入到this中
+    mergeData.call(this);
+
+    // 将computed混入到this中
+    mergeComputed.call(this);
 
     // beforeCreate
     triggerLifecycle.call(this, LIFECYCLE_HOOKS[0]);
 
     // data observer - 数据响应式创建针对data的响应式
+    // 被响应式的数据有data | computed
     this.$dataProxy = createProxy.call(this, this);
 
     // 将methods混入到this中
-    Object.assign(this, this.$config.methods || {});
+    mergeMethods.call(this);
+
+    // 将watch混入到this中
+    // mergeWatch.call(this);
 
     // create
     triggerLifecycle.call(this, LIFECYCLE_HOOKS[1]);
