@@ -14,7 +14,7 @@ computed(不需要)
  get
  set
 filter (很难)
-自定义filter
+ 自定义filter
 自定义指令
 v-model实现
 mixin
@@ -22,3 +22,18 @@ mixin
 在一个方法中多次修改data只render一次
 Component
 slot
+
+
+
+
+
+
+
+
+v-model
+ 赋初始值
+ 事件监听赋值的问题
+
+
+
+

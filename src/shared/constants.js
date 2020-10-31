@@ -39,3 +39,6 @@ export const PATH_SYMBOLS = [
   `${SPECIAL_SYMBOL}parentName${SPECIAL_SYMBOL}`,
   `${SPECIAL_SYMBOL}parent${SPECIAL_SYMBOL}`,
 ];
+
+// 受v-model控制的控件名称
+export const FORM_CONTROL_BINDING_TAGNAMES = ['input', 'textarea', 'select'];

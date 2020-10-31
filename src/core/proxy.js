@@ -12,13 +12,7 @@ import {
 } from '../shared/constants';
 
 /**
- *  createContext - 创建对象的代理(对data的响应式创建，支持Object和Array)
-    a {
-      b: {
-      c: {
-        d: 123
-      }
-    }
+ *  createContext
  * @param arg
  * @return {{}}
  */
@@ -31,7 +25,13 @@ export function createContext(arg = {}) {
 }
 
 /**
- * createProxy - 对obj进行代理
+ * createProxy - 创建对象的代理(对data的响应式创建，支持Object和Array)
+ a {
+      b: {
+      c: {
+        d: 123
+      }
+    }
  * @param obj
  * @return {null|boolean|any}
  */
@@ -96,8 +96,8 @@ export function createProxy(obj) {
         // 4.重新计算所有的计算属性
         // 5.进行render
 
-        const propertyAccessStr = getPropertyAccessStr(target, key);
-
+        // 一个表达式路径
+        const propertyAccessStr = getPropertyVisitPathStr(target, key);
         let cloneValue;
 
         // watch监听
@@ -111,7 +111,13 @@ export function createProxy(obj) {
             // value是没有被代理的
             // target[key]已经是被代理的对象，需要找到对应的非代理对象
             cloneValue = _.cloneDeep(value);
-            handler.call(self, execExpression(self.$noProxySrcData, propertyAccessStr), cloneValue);
+            let newVal = cloneValue;
+            if (isArray(target) && key !== 'length') {
+              const array = _.cloneDeep(eval(`self.$noProxySrcData.${propertyAccessStr}`));
+              array[key] = cloneValue;
+              newVal = array;
+            }
+            handler.call(self, execExpression(self.$noProxySrcData, propertyAccessStr), newVal);
           }
         }
 
@@ -119,9 +125,12 @@ export function createProxy(obj) {
         // 例如修改的是a.b.c.d
         // 例如修改的是a
         // 例如修改的是a.b
-        eval(
-          `if(!cloneValue) {cloneValue = _.cloneDeep(value);} self.$noProxySrcData.${propertyAccessStr} = cloneValue`,
-        );
+        eval('if(!cloneValue) {cloneValue = _.cloneDeep(value);}');
+        if (isArray(target) && key !== 'length') {
+          eval(`self.$noProxySrcData.${propertyAccessStr}[${key}] = cloneValue`);
+        } else {
+          eval(`self.$noProxySrcData.${propertyAccessStr} = cloneValue`);
+        }
 
         // 如果不是私有属性且是对象或数组继续loop
         if (isObject(value) || isArray(value)) {
@@ -146,10 +155,12 @@ export function createProxy(obj) {
     });
 
     for (const p in obj) {
+      // obj是Array, 迭代数组
+      // p是0,1,2,3...等索引
       const objItem = obj[p];
       if (isProxyProperty(p) && (isObject(objItem) || isArray(objItem))) {
         obj[p] = createProxy.call(self, objItem);
-        objItem[PATH_SYMBOLS[0]] = p;
+        objItem[PATH_SYMBOLS[0]] = isArray(obj) ? `[${p}]` : p;
         objItem[PATH_SYMBOLS[1]] = obj;
       }
     }
@@ -161,28 +172,42 @@ export function createProxy(obj) {
 }
 
 /**
- * getPropertyAccessStr - 获取属性访问的字符串 a.b.c.d.e.f
+ * getPropertyVisitPathStr - 获取属性访问的字符串路径 a.b.c.d.e.f
  * @param target
  * @param key
  * @return {string}
  */
-export function getPropertyAccessStr(target, key) {
-  const arr = [key];
+export function getPropertyVisitPathStr(target, key) {
+  // 最终的访问路径 - 先将最后一个key放入
+  const visitPath = isArray(target) && key !== 'length' ? [] : [key];
 
   if (target[PATH_SYMBOLS[0]]) {
-    arr.push(target[PATH_SYMBOLS[0]]);
+    visitPath.push(target[PATH_SYMBOLS[0]]);
   }
 
   let parent = target[PATH_SYMBOLS[1]];
   while (parent) {
     if (parent[PATH_SYMBOLS[0]]) {
-      arr.push(parent[PATH_SYMBOLS[0]]);
+      visitPath.push(parent[PATH_SYMBOLS[0]]);
     }
     parent = parent[PATH_SYMBOLS[1]];
   }
 
-  arr.reverse();
-  return arr.join('.');
+  // [0] c b a
+  // a b c [0]
+  // a [0]
+
+  visitPath.reverse();
+  const result = [];
+  for (let i = 0; i < visitPath.length; i++) {
+    const item = visitPath[i];
+    if (item.startsWith('[') && item.endsWith(']')) {
+      result[result.length - 1] = `${result[result.length - 1]}${item}`;
+    } else {
+      result.push(item);
+    }
+  }
+  return result.join('.');
 }
 
 /**

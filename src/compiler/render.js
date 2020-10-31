@@ -7,17 +7,18 @@ import { hasVOn, parseVOn } from './directives/on';
 import { hasVBind, parseVBind } from './directives/bind';
 import { hasVShow, parseVShow } from './directives/show';
 import { hasVFor, parseVFor } from './directives/for';
+import { hasVModel, parseVModel, isFormTag, onFormTagTrigger } from './directives/model';
 import { patch, createVNode, createTextVNode, toVNode } from '../core/vdom';
-
 import {
+  noop,
   createElement,
   execExpression,
   isArray,
   isObject,
   isTextNode,
+  isElementNode,
   toCamelCase,
 } from '../shared/util';
-
 import { END_TAG, START_TAG } from '../shared/constants';
 
 /**
@@ -47,7 +48,11 @@ export function renderLoop(context, el) {
     return renderTextNode.call(this, context, el);
   }
 
-  return renderElementNode.call(this, context, el);
+  if (isElementNode(el)) {
+    return renderElementNode.call(this, context, el);
+  }
+
+  return null;
 }
 
 /**
@@ -93,6 +98,7 @@ export function renderTextNode(context, el) {
  * @return {null|[]|*}
  */
 export function renderElementNode(context, el) {
+  const self = this;
   const vAttrNames = getVAttrNames(el);
 
   let VNode;
@@ -129,8 +135,10 @@ export function renderElementNode(context, el) {
       }
     }
 
+    const tagName = el.tagName.toLowerCase();
+
     // createVNode
-    VNode = createVNode(el.tagName.toLowerCase());
+    VNode = createVNode(tagName);
 
     if (hasVShow(vAttrNames)) {
       // parse v-show
@@ -157,71 +165,125 @@ export function renderElementNode(context, el) {
     }
 
     if (hasVOn(vAttrNames)) {
-      const self = this;
       // parse v-on
       const entrys = parseVOn(context, el, vAttrNames);
-      entrys.forEach((entry) => {
-        VNode.data.on[entry.arg] = (e) => {
-          // 表达式方式
-          // <div v-on:click="count + 1"></div>
-          // 函数名方式
-          // <div v-on:click="display"></div>
-          // 内联处理器中的方法
-          // <div v-on:click="display('hi')"></div>
+      for (let i = 0; i < entrys.length; i++) {
+        // if(hasFormTag && isVModel)
+        // 是表单元素 && 是有v-model
+        // 如果tag是input 是否有.lazy
+        // 各种事件 input | change
+        const entry = entrys[i];
 
-          // 事件修饰符
-          // .stop
-          // .prevent
-          // .capture
-          // .self
-          // .once
-          // .passive
+        onFormTagTrigger({
+          tagName,
+          vAttrNames,
+          directiveEntry: entry,
+          callback1: noop,
+          callback2: noop,
+          callback3: noop,
+          callback4: () => {
+            // 是否有此事件
+            VNode.data.on[entry.arg] = (e) => {
+              // 表达式方式
+              // <div v-on:click="count + 1"></div>
+              // 函数名方式
+              // <div v-on:click="display"></div>
+              // 内联处理器中的方法
+              // <div v-on:click="display('hi')"></div>
 
-          // 阻止单击事件继续传播(阻止起泡)
-          // <a v-on:click.stop="doThis"></a>
+              // 事件修饰符
+              // .stop
+              // .prevent
+              // .capture
+              // .self
+              // .once
+              // .passive
 
-          // 提交事件不再重载页面(屏蔽缺省事件)
-          // <form v-on:submit.prevent="onSubmit"></form>
+              // 阻止单击事件继续传播(阻止起泡)
+              // <a v-on:click.stop="doThis"></a>
 
-          // 修饰符可以串联(阻止起泡 && 屏蔽缺省事件)
-          // <a v-on:click.stop.prevent="doThat"></a>
+              // 提交事件不再重载页面(屏蔽缺省事件)
+              // <form v-on:submit.prevent="onSubmit"></form>
 
-          // 添加事件监听器时使用事件捕获模式
-          // 即内部元素触发的事件先在此处理，然后才交由内部元素进行处理
-          // <div v-on:click.capture="doThis">...</div>
+              // 修饰符可以串联(阻止起泡 && 屏蔽缺省事件)
+              // <a v-on:click.stop.prevent="doThat"></a>
 
-          // 只当在 event.target 是当前元素自身时触发处理函数
-          // 即事件不是从内部元素触发的
-          // <div v-on:click.self="doThat">...</div>
+              // 添加事件监听器时使用事件捕获模式
+              // 即内部元素触发的事件先在此处理，然后才交由内部元素进行处理
+              // <div v-on:click.capture="doThis">...</div>
 
-          // 标识符
-          if (entry.modifiers) {
-            if (entry.modifiers.stop) {
-              e.stopPropagation();
-            }
-            if (entry.modifiers.prevent) {
-              e.preventDefault();
-            }
-          }
+              // 只当在 event.target 是当前元素自身时触发处理函数
+              // 即事件不是从内部元素触发的
+              // <div v-on:click.self="doThat">...</div>
 
-          if (entry.expression in self.$config.methods) {
-            // 函数名形式
-            this[entry.expression]();
-          } else {
-            // 表达式
-            // 1 + 1
-            // item(item1,$event,3)
-            // 这个地方会创建新的context避免set陷阱函数执行
-            execExpression(
-              context === self.$dataProxy ? createContext.call(self, { $event: e }) : context,
-              entry.expression,
-            );
-          }
-        };
-      });
+              // 标识符
+              if (entry.modifiers) {
+                if (entry.modifiers.stop) {
+                  e.stopPropagation();
+                }
+                if (entry.modifiers.prevent) {
+                  e.preventDefault();
+                }
+              }
+
+              if (entry.expression in self.$config.methods) {
+                // 函数名形式
+                this[entry.expression]();
+              } else {
+                // 表达式
+                // 1 + 1
+                // item(item1,$event,3)
+                // 这个地方会创建新的context避免set陷阱函数执行
+                execExpression(
+                  context === self.$dataProxy ? createContext.call(self, { $event: e }) : context,
+                  entry.expression,
+                );
+              }
+
+              // <input v-model="a" />
+            };
+          },
+        });
+      }
     }
 
-    if (hasVHtml(vAttrNames)) {
+    if (hasVModel(vAttrNames)) {
+      const entry = parseVModel(el, vAttrNames);
+      if (entry) {
+        onFormTagTrigger({
+          tagName,
+          vAttrNames,
+          directiveEntry: entry,
+          callback1: () => {
+            VNode.data.on.input = (e) => {
+              // input | textarea 的input
+              console.log(e.target.value);
+              self.$dataProxy[entry.expression] = e.target.value;
+            };
+          },
+          callback2: () => {
+            VNode.data.on.change = (e) => {
+              // select 的change
+              console.log(e.target.value);
+              self.$dataProxy[entry.expression] = e.target.value;
+            };
+          },
+          callback3: () => {
+            VNode.data.on.change = (e) => {
+              // input | textarea 的change
+              console.log(e.target.value);
+              self.$dataProxy[entry.expression] = e.target.value;
+            };
+          },
+          callback4: noop,
+        });
+      }
+    }
+
+    // 非表单标签的时候
+    // 是否是表单控件元素
+    const isFormTagVal = isFormTag(tagName);
+    if (!isFormTagVal && hasVHtml(vAttrNames)) {
       // parse v-html
       const htmlVNode = toVNode(createElement(parseVHtml(context, el, vAttrNames)));
       VNode.children.push(htmlVNode);
@@ -253,6 +315,8 @@ export function renderElementNode(context, el) {
   // loop children
   for (let i = 0; i < el.childNodes.length; i++) {
     const VNodes = renderLoop.call(this, context, el.childNodes[i]);
+    if (!VNodes) continue;
+
     if (isArray(VNodes)) {
       VNodes.filter((n) => n).forEach((n) => {
         VNode.children.push(n);

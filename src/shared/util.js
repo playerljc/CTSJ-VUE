@@ -61,6 +61,15 @@ export function isTextNode(el) {
 }
 
 /**
+ * isElementNode - 是否是元素节点
+ * @param el
+ * @return {boolean}
+ */
+export function isElementNode(el) {
+  return el.nodeType === Node.ELEMENT_NODE;
+}
+
+/**
  * createElement - 根据html字符串创建dom
  * @param htmlStr
  * @return {Element}
@@ -83,3 +92,8 @@ export function execExpression(context, expressionStr) {
   // const fun = new Function('context','expressionStr',`return with(context){${expressionStr}}`);
   // return fun(context, expressionStr);
 }
+
+/**
+ * noop - 空函数
+ */
+export function noop() {}

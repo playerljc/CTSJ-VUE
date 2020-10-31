@@ -36,8 +36,11 @@ window.onload = () => {
 <!--            <div v-html="htmlStr"></div>-->
 <!--      		</div>-->
           <div>
+            <p>{{name}}</p>
             <p key="1" data-a="1">{{a.b.c.d}}</p>
             <p key="2" v-bind:data-a="name">{{reversedMessage}}</p>
+            <p>{{name}}</p>
+            <input v-model="name" />
           </div>
       	`,
     data: {
@@ -144,8 +147,12 @@ window.onload = () => {
       },
       'a.b.c': function (oldVal, newVal) {
         console.log(oldVal, newVal);
+        this.name = 'playerljc6';
       },
       'a.b.c.d': function (oldVal, newVal) {
+        console.log(oldVal, newVal);
+      },
+      items(oldVal, newVal) {
         console.log(oldVal, newVal);
       },
     },
@@ -174,32 +181,40 @@ window.onload = () => {
         // 	name:'name4',
         // });
         // this.message = '1,2,3';
-        this.a = {
-          b: {
-            c: {
-              d: 6,
-            },
-          },
-        };
-        setTimeout(() => {
-          this.a.b.c.d = 8;
-
-          setTimeout(() => {
-            this.a = {
-              b: {
-                c: {
-                  d: 5,
-                },
-              },
-            };
-
-            setTimeout(() => {
-              this.a.b.c = {
-                d: 20,
-              };
-            }, 2000);
-          }, 2000);
-        }, 2000);
+        // this.items.push({
+        //   name: 'sdasdasdasdasd1',
+        // });
+        // this.items[0] = {
+        //   name: '111111',
+        // };
+        // this.items.pop();
+        // this.items[0].name = '111';
+        // this.a = {
+        //   b: {
+        //     c: {
+        //       d: 6,
+        //     },
+        //   },
+        // };
+        // setTimeout(() => {
+        //   this.a.b.c.d = 8;
+        //
+        //   setTimeout(() => {
+        //     this.a = {
+        //       b: {
+        //         c: {
+        //           d: 5,
+        //         },
+        //       },
+        //     };
+        //
+        //     setTimeout(() => {
+        //       this.a.b.c = {
+        //         d: 20,
+        //       };
+        //     }, 2000);
+        //   }, 2000);
+        // }, 2000);
       }, 2000);
     },
     beforeUpdate() {

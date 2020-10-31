@@ -21,7 +21,11 @@ export const patch = init([
   eventListenersModule,
 ]);
 
-// createVNode
+/**
+ * createVNode
+ * @param tagName
+ * @return {*}
+ */
 export function createVNode(tagName) {
   return h(
     tagName,
@@ -32,12 +36,35 @@ export function createVNode(tagName) {
       dataset: {},
       style: {},
       on: {},
+      hook: {
+        init: (vnode) => {
+          console.log('init:', vnode.sel);
+          // if (vnode.sel === 'input') {
+          //   vnode.data.on.input = (val) => {
+          //     console.log(val);
+          //   };
+          // }
+        },
+        create: (emptyVnode, vnode) => {
+          console.log('create:', vnode.sel);
+          // 创建了dom
+          // vnode.sel 标签名
+          //
+        },
+        insert: (vnode) => {
+          console.log('insert:', vnode.sel);
+        },
+      },
     },
     [],
   );
 }
 
-// createTextVNode
+/**
+ * createTextVNode
+ * @param value
+ * @return {{text: *}}
+ */
 export function createTextVNode(value) {
   return {
     text: value,
