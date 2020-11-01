@@ -15,11 +15,14 @@ export function hasVShow(attrNames) {
  * parseVShow
  * @param context
  * @param el
- * @param attrNames
+ * @param vAttrNames
+ * @param VNode
  * @return {*}
  */
-export function parseVShow(context, el, attrNames) {
-  const attrName = attrNames.find((n) => n.indexOf(`${DIRECT_PREFIX}show`) !== -1);
+export function parseVShow({ context, el, vAttrNames, VNode }) {
+  const attrName = vAttrNames.find((n) => n.indexOf(`${DIRECT_PREFIX}show`) !== -1);
   const value = el.getAttribute(attrName);
-  return execExpression(context, value);
+  const display = execExpression(context, value);
+  VNode.data.style.display = display ? '' : 'none';
+  return display;
 }

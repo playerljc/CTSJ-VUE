@@ -7,10 +7,9 @@ import { hasVOn, parseVOn } from './directives/on';
 import { hasVBind, parseVBind } from './directives/bind';
 import { hasVShow, parseVShow } from './directives/show';
 import { hasVFor, parseVFor } from './directives/for';
-import { hasVModel, parseVModel, isFormTag, onFormTagTrigger } from './directives/model';
-import { patch, createVNode, createTextVNode, toVNode } from '../core/vdom';
+import { hasVModel, parseVModel, isFormTag } from './directives/model';
+import { patch, createVNode, createTextVNode } from '../core/vdom';
 import {
-  noop,
   createElement,
   execExpression,
   isArray,
@@ -19,7 +18,7 @@ import {
   isElementNode,
   toCamelCase,
 } from '../shared/util';
-import { END_TAG, START_TAG } from '../shared/constants';
+import { END_TAG, START_TAG, FORM_CONTROL_BINDING_TAGNAMES } from '../shared/constants';
 
 /**
  * render - 进行模板的渲染
@@ -92,17 +91,12 @@ export function renderTextNode(context, el) {
 }
 
 /**
- * renderElementNode - 渲染元素节点
- * @param context
+ * renderVAttr - 解析指令属性
  * @param el
- * @return {null|[]|*}
+ * @param context
+ * @return {null|*[]|*}
  */
-export function renderElementNode(context, el) {
-  const self = this;
-  const vAttrNames = getVAttrNames(el);
-
-  let VNode;
-
+function renderVAttr({ el, context }) {
   /**
    * for(item in items)   (new)context -> item
    *  for(item1 in items)        context -> item1
@@ -114,190 +108,83 @@ export function renderElementNode(context, el) {
    * for(item in items)   (new)context -> item
    */
 
+  const self = this;
+
   // 指令属性
-  if (vAttrNames.length) {
-    if (hasVFor(vAttrNames)) {
-      // parse v-for
-      return parseVFor.call(
-        this,
-        // 如果context是this.$dataProxy则需要重新创建context
-        context === this.$dataProxy ? createContext.call(this) : context,
+  const vAttrNames = getVAttrNames(el);
+  if (!vAttrNames.length) return null;
+
+  if (hasVFor(vAttrNames)) {
+    // parse v-for
+    return parseVFor.call(
+      this,
+      // 如果context是this.$dataProxy则需要重新创建context
+      {
+        context: context === this.$dataProxy ? createContext.call(this) : context,
         el,
         vAttrNames,
-      );
-    }
+      },
+    );
+  }
 
-    if (hasVIf(vAttrNames)) {
-      // parse v-if
-      const display = parseVIf(context, el, vAttrNames);
-      if (!display) {
-        return null;
-      }
-    }
-
-    const tagName = el.tagName.toLowerCase();
-
-    // createVNode
-    VNode = createVNode(tagName);
-
-    if (hasVShow(vAttrNames)) {
-      // parse v-show
-      const display = parseVShow(context, el, vAttrNames);
-      VNode.data.style.display = display ? '' : 'none';
-    }
-
-    if (hasVBind(vAttrNames)) {
-      // parse v-bind
-      const entrys = parseVBind(context, el, vAttrNames);
-      entrys.forEach((entry) => {
-        if (entry.arg === 'key') {
-          VNode.key = entry.value;
-        } else if (entry.arg === 'class') {
-          Object.assign(VNode.data.class, entry.value);
-        } else if (entry.arg === 'style') {
-          Object.assign(VNode.data.style, entry.value);
-        } else if (entry.arg.startsWith('data-')) {
-          VNode.data.dataset[toCamelCase(entry.arg.substring('data-'.length))] = entry.value;
-        } else {
-          VNode.data.props[entry.arg] = entry.value;
-        }
-      });
-    }
-
-    if (hasVOn(vAttrNames)) {
-      // parse v-on
-      const entrys = parseVOn(context, el, vAttrNames);
-      for (let i = 0; i < entrys.length; i++) {
-        // if(hasFormTag && isVModel)
-        // 是表单元素 && 是有v-model
-        // 如果tag是input 是否有.lazy
-        // 各种事件 input | change
-        const entry = entrys[i];
-
-        onFormTagTrigger({
-          tagName,
-          vAttrNames,
-          directiveEntry: entry,
-          callback1: noop,
-          callback2: noop,
-          callback3: noop,
-          callback4: () => {
-            // 是否有此事件
-            VNode.data.on[entry.arg] = (e) => {
-              // 表达式方式
-              // <div v-on:click="count + 1"></div>
-              // 函数名方式
-              // <div v-on:click="display"></div>
-              // 内联处理器中的方法
-              // <div v-on:click="display('hi')"></div>
-
-              // 事件修饰符
-              // .stop
-              // .prevent
-              // .capture
-              // .self
-              // .once
-              // .passive
-
-              // 阻止单击事件继续传播(阻止起泡)
-              // <a v-on:click.stop="doThis"></a>
-
-              // 提交事件不再重载页面(屏蔽缺省事件)
-              // <form v-on:submit.prevent="onSubmit"></form>
-
-              // 修饰符可以串联(阻止起泡 && 屏蔽缺省事件)
-              // <a v-on:click.stop.prevent="doThat"></a>
-
-              // 添加事件监听器时使用事件捕获模式
-              // 即内部元素触发的事件先在此处理，然后才交由内部元素进行处理
-              // <div v-on:click.capture="doThis">...</div>
-
-              // 只当在 event.target 是当前元素自身时触发处理函数
-              // 即事件不是从内部元素触发的
-              // <div v-on:click.self="doThat">...</div>
-
-              // 标识符
-              if (entry.modifiers) {
-                if (entry.modifiers.stop) {
-                  e.stopPropagation();
-                }
-                if (entry.modifiers.prevent) {
-                  e.preventDefault();
-                }
-              }
-
-              if (entry.expression in self.$config.methods) {
-                // 函数名形式
-                this[entry.expression]();
-              } else {
-                // 表达式
-                // 1 + 1
-                // item(item1,$event,3)
-                // 这个地方会创建新的context避免set陷阱函数执行
-                execExpression(
-                  context === self.$dataProxy ? createContext.call(self, { $event: e }) : context,
-                  entry.expression,
-                );
-              }
-
-              // <input v-model="a" />
-            };
-          },
-        });
-      }
-    }
-
-    if (hasVModel(vAttrNames)) {
-      const entry = parseVModel(el, vAttrNames);
-      if (entry) {
-        onFormTagTrigger({
-          tagName,
-          vAttrNames,
-          directiveEntry: entry,
-          callback1: () => {
-            VNode.data.on.input = (e) => {
-              // input | textarea 的input
-              console.log(e.target.value);
-              self.$dataProxy[entry.expression] = e.target.value;
-            };
-          },
-          callback2: () => {
-            VNode.data.on.change = (e) => {
-              // select 的change
-              console.log(e.target.value);
-              self.$dataProxy[entry.expression] = e.target.value;
-            };
-          },
-          callback3: () => {
-            VNode.data.on.change = (e) => {
-              // input | textarea 的change
-              console.log(e.target.value);
-              self.$dataProxy[entry.expression] = e.target.value;
-            };
-          },
-          callback4: noop,
-        });
-      }
-    }
-
-    // 非表单标签的时候
-    // 是否是表单控件元素
-    const isFormTagVal = isFormTag(tagName);
-    if (!isFormTagVal && hasVHtml(vAttrNames)) {
-      // parse v-html
-      const htmlVNode = toVNode(createElement(parseVHtml(context, el, vAttrNames)));
-      VNode.children.push(htmlVNode);
-      // VNode.children.push(createTextVNode(htmlStr));
-      // v-html在最后解析，因为v-html的children就是一个文本节点，不需要在进行children的loop
-      return VNode;
+  if (hasVIf(vAttrNames)) {
+    // parse v-if
+    const display = parseVIf({ context, el, vAttrNames });
+    if (!display) {
+      return null;
     }
   }
 
-  if (!VNode) {
-    VNode = createVNode(el.tagName.toLowerCase());
+  const tagName = el.tagName.toLowerCase();
+  // createVNode
+  const VNode = createVNode(tagName);
+
+  if (hasVShow(vAttrNames)) {
+    // parse v-show
+    parseVShow({ context, el, vAttrNames, VNode });
   }
 
-  // 非指令属性
+  if (hasVBind(vAttrNames)) {
+    // parse v-bind
+    parseVBind({ context, el, vAttrNames, VNode });
+  }
+
+  // v-model
+  // input | textarea | select
+  if (FORM_CONTROL_BINDING_TAGNAMES.includes(tagName) && hasVModel(vAttrNames)) {
+    parseVModel.call(self, {
+      context,
+      tagName,
+      vProps: VNode.data.props,
+      el,
+      vAttrNames,
+      VNode,
+    });
+  }
+
+  if (hasVOn(vAttrNames)) {
+    // parse v-on
+    parseVOn.call(self, { context, el, tagName, vAttrNames, VNode });
+  }
+
+  // 非表单标签的时候
+  // 是否是表单控件元素
+  if (!isFormTag(tagName) && hasVHtml(vAttrNames)) {
+    // parse v-html
+    parseVHtml({ context, el, vAttrNames, VNode });
+    // v-html在最后解析，因为v-html的children就是一个文本节点，不需要在进行children的loop
+    // return VNode;
+  }
+
+  return VNode;
+}
+
+/**
+ * renderAttr - 非指令属性
+ * @param el
+ * @param VNode
+ */
+function renderAttr({ el, VNode }) {
   const attrNames = getAttrNames(el);
   if (attrNames.length) {
     attrNames.forEach((attrName) => {
@@ -311,6 +198,26 @@ export function renderElementNode(context, el) {
       }
     });
   }
+}
+
+/**
+ * renderElementNode - 渲染元素节点
+ * @param context
+ * @param el
+ * @return {null|[]|*}
+ */
+export function renderElementNode(context, el) {
+  let VNode;
+
+  // 解析指令属性
+  VNode = renderVAttr.call(this, { el, context });
+
+  if (!VNode) {
+    VNode = createVNode(el.tagName.toLowerCase());
+  }
+
+  // 非指令属性
+  renderAttr.call(this, { el, VNode });
 
   // loop children
   for (let i = 0; i < el.childNodes.length; i++) {

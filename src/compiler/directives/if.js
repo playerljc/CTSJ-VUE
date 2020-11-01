@@ -15,11 +15,12 @@ export function hasVIf(attrNames) {
  * parseVIf
  * @param context
  * @param el
- * @param attrNames
+ * @param vAttrNames
  * @return {*}
  */
-export function parseVIf(context, el, attrNames) {
-  const attrName = attrNames.find((n) => n.indexOf(`${DIRECT_PREFIX}if`) !== -1);
-  const value = el.getAttribute(attrName);
-  return execExpression(context, value);
+export function parseVIf({ context, el, vAttrNames }) {
+  return execExpression(
+    context,
+    el.getAttribute(vAttrNames.find((n) => n.indexOf(`${DIRECT_PREFIX}if`) !== -1)),
+  );
 }

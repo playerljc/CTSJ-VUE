@@ -17,11 +17,11 @@ export function hasVFor(attrNames) {
  * parseVFor
  * @param context
  * @param el
- * @param attrNames
+ * @param vAttrNames
  * @return {null|[]}
  */
-export function parseVFor(context, el, attrNames) {
-  const attrName = attrNames.find((n) => n.indexOf(`${DIRECT_PREFIX}for`) !== -1);
+export function parseVFor({ context, el, vAttrNames }) {
+  const attrName = vAttrNames.find((n) => n.indexOf(`${DIRECT_PREFIX}for`) !== -1);
   //  <li v-for="item in items"></li>
   //  <li v-for="(item,index) in items">
   //    <div>{{item,index}}</div>

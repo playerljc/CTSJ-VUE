@@ -1,6 +1,6 @@
 import { hasVAttr, getDirectiveEntry } from './util';
 import { DIRECT_PREFIX } from '../../shared/constants';
-import { execExpression, isArray } from '../../shared/util';
+import { execExpression, isArray, toCamelCase } from '../../shared/util';
 
 /**
  * hasVBind
@@ -15,12 +15,13 @@ export function hasVBind(attrNames) {
  * parseVBind
  * @param context
  * @param el
- * @param attrNames
+ * @param vAttrNames
+ * @param VNode
  * @return {*}
  */
-export function parseVBind(context, el, attrNames) {
-  const bindAttrs = attrNames.filter((n) => n.indexOf(`${DIRECT_PREFIX}bind`) !== -1);
-  return bindAttrs.map((attrName) => {
+export function parseVBind({ context, el, vAttrNames, VNode }) {
+  const bindAttrs = vAttrNames.filter((n) => n.indexOf(`${DIRECT_PREFIX}bind`) !== -1);
+  const entrys = bindAttrs.map((attrName) => {
     const entry = getDirectiveEntry(el, attrName);
 
     if (entry.arg === 'class' || entry.arg === 'style') {
@@ -55,4 +56,18 @@ export function parseVBind(context, el, attrNames) {
 
     return entry;
   });
+  entrys.forEach((entry) => {
+    if (entry.arg === 'key') {
+      VNode.key = entry.value;
+    } else if (entry.arg === 'class') {
+      Object.assign(VNode.data.class, entry.value);
+    } else if (entry.arg === 'style') {
+      Object.assign(VNode.data.style, entry.value);
+    } else if (entry.arg.startsWith('data-')) {
+      VNode.data.dataset[toCamelCase(entry.arg.substring('data-'.length))] = entry.value;
+    } else {
+      VNode.data.props[entry.arg] = entry.value;
+    }
+  });
+  return entrys;
 }

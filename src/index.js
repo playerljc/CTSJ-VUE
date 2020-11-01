@@ -40,10 +40,13 @@ window.onload = () => {
             <p key="1" data-a="1">{{a.b.c.d}}</p>
             <p key="2" v-bind:data-a="name">{{reversedMessage}}</p>
             <p>{{name}}</p>
-            <input v-model="name" />
+            
+            <p>{{checkbox}}</p>
+            <textarea v-model="name"></textarea>
           </div>
       	`,
     data: {
+      checkbox: true,
       name: 'playerljc',
       sex: '女',
       age: '666',

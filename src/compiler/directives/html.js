@@ -1,6 +1,7 @@
+import { toVNode } from '../../core/vdom';
 import { hasVAttr } from './util';
 import { DIRECT_PREFIX } from '../../shared/constants';
-import { execExpression } from '../../shared/util';
+import { createElement, execExpression } from '../../shared/util';
 
 /**
  * hasVHtml
@@ -15,13 +16,17 @@ export function hasVHtml(attrNames) {
  * parseVHtml
  * @param context
  * @param el
- * @param attrNames
- * @return {*}
+ * @param vAttrNames
+ * @param VNode
+ * @return {String}
  */
-export function parseVHtml(context, el, attrNames) {
-  const attrName = attrNames.find((n) => n.indexOf(`${DIRECT_PREFIX}html`) !== -1);
+export function parseVHtml({ context, el, vAttrNames, VNode }) {
+  const attrName = vAttrNames.find((n) => n.indexOf(`${DIRECT_PREFIX}html`) !== -1);
   const value = el.getAttribute(attrName);
   // 在此处需要进行实体字符的替换
   // <div>111</div>
-  return execExpression(context, value);
+  const html = execExpression(context, value);
+  const htmlVNode = toVNode(createElement(html));
+  VNode.children.push(htmlVNode);
+  return html;
 }
