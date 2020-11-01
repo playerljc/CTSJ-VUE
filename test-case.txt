@@ -1,0 +1,18 @@
+1.input v-model='input'
+2.textarea v-model='input'
+3.input v-model.lzay
+4.textarea v-model.lzay
+
+5.input radio v-model='sex'男
+  input radio v-model='sex'女
+
+6.input radio value="1" v-model='sex'男
+  input radio value="2" v-model='sex'女
+
+7.input checkbox v-model="check1" check1
+
+8.input checkbox value="java" v-model="books" java
+  input checkbox value="javascript" v-model="books" javascript
+  input checkbox value="c++" v-model="books" c++
+
+9.input textarea

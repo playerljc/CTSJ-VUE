@@ -42,13 +42,18 @@ window.onload = () => {
             <p>{{name}}</p>
             
             <p>{{checkbox}}</p>
-            <textarea v-model="name"></textarea>
+            
+            <input type="checkbox" v-on:change="onInput($event)"/>
+            <div>{{input}}</div>
           </div>
       	`,
     data: {
+      books: ['java'],
+      input: '',
+
       checkbox: true,
       name: 'playerljc',
-      sex: '女',
+      // sex: '女',
       age: '666',
       address: '不知道',
 
@@ -124,6 +129,9 @@ window.onload = () => {
       },
     },
     methods: {
+      onInput(e) {
+        console.log(e.target.checked);
+      },
       display() {
         return `${this.name}\r\n${this.sex}\r\n${this.age}\r\n${this.address}`;
       },

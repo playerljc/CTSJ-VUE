@@ -94,7 +94,7 @@ export function parseVModel({ context, el, vAttrNames, tagName, VNode }) {
         //  <input type="radio" value="1" v-model="sex" />男
         //  <input type="radio" value="2" v-model="sex" />女
         if (inputType === 'radio') {
-          VNode.data.props.checked = value == inputType;
+          VNode.data.props.checked = value == inputValue;
         }
         // checkbox
         //  <input type="checkbox" value="1" v-model="data" />java
@@ -102,9 +102,9 @@ export function parseVModel({ context, el, vAttrNames, tagName, VNode }) {
         //  <input type="checkbox" value="3" v-model="data" />javascript
         else if (inputType === 'checkbox') {
           if (isArray(value)) {
-            VNode.data.props.checked = value.includes(inputType);
+            VNode.data.props.checked = value.includes(inputValue);
           } else {
-            VNode.data.props.checked = value == inputType;
+            VNode.data.props.checked = value == inputValue;
           }
         }
       }
@@ -157,7 +157,7 @@ export function parseVModel({ context, el, vAttrNames, tagName, VNode }) {
               } else {
                 const deleteIndex = self.$dataProxy[entry.expression].indexOf(inputValue);
                 if (deleteIndex !== -1) {
-                  self.$dataProxy[entry.expression].slice(deleteIndex, 1);
+                  self.$dataProxy[entry.expression].splice(deleteIndex, 1);
                 }
               }
             };
