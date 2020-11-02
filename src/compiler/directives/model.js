@@ -56,6 +56,23 @@ function getInputProp({ context, el, propName }) {
 }
 
 /**
+ * hasProp - 是否存在指定的属性
+ * @param el
+ * @param prop
+ * @return {boolean}
+ */
+function hasProp({ el, prop }) {
+  const attrNames = el.getAttributeNames();
+  let exists = attrNames.includes(prop);
+
+  if (!exists) {
+    exists = attrNames.includes(`${DIRECT_PREFIX}bind:${prop}`);
+  }
+
+  return exists;
+}
+
+/**
  * parseVModel
  * @param context
  * @param el
@@ -118,9 +135,35 @@ export function parseVModel({ context, el, vAttrNames, tagName, VNode }) {
       VNode.data.props.value = value;
     }
   }
-  // textarea | select
-  else {
+  // textarea
+  else if (tagName === 'textarea') {
     VNode.data.props.value = value;
+  }
+  // select
+  else if (tagName === 'select') {
+    //  <select>
+    //    <option>java</option>
+    //    <option>c++</option>
+    //    <option>javascript</option>
+    //  </select>
+
+    // 获取select下所有的option
+    const optionEls = Array.from(el.querySelectorAll('option'));
+    optionEls.forEach((optionEl) => {
+      // 获取option的value value表示的是text或value
+      const val = optionEl.value.trim();
+
+      // model的值是数组
+      if (isArray(value)) {
+        if (value.includes(val)) {
+          optionEl.setAttribute('selected', 'selected');
+        }
+      }
+      // model的值不是数组
+      else if (val == value) {
+        optionEl.setAttribute('selected', 'selected');
+      }
+    });
   }
 
   const { lazy } = entry.modifiers;
@@ -129,8 +172,25 @@ export function parseVModel({ context, el, vAttrNames, tagName, VNode }) {
   // select标签
   if (tagName === 'select') {
     VNode.data.on.change = (e) => {
-      // select 的change
-      self.$dataProxy[entry.expression] = filterChain(e.target.value, entry);
+      const { selectedOptions } = e.target;
+
+      // 多选的模式
+      if (hasProp({ el, prop: 'multiple' })) {
+        // model的值是数组
+        if (isArray(value)) {
+          self.$dataProxy[entry.expression] = Array.from(selectedOptions).map((selectedOption) =>
+            filterChain(selectedOption.value, entry),
+          );
+        }
+        // 不是数组不处理
+      }
+      // 非多选的模式
+      else {
+        // 不是数组才处理
+        if (!isArray(value)) {
+          self.$dataProxy[entry.expression] = filterChain(selectedOptions[0].value, entry);
+        }
+      }
     };
   }
   // input标签

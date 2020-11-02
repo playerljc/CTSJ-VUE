@@ -43,12 +43,21 @@ window.onload = () => {
             
             <p>{{checkbox}}</p>
             
-            <input type="checkbox" v-on:change="onInput($event)"/>
-            <div>{{input}}</div>
+            <select multiple v-model="select" >
+              <option value="java">java</option>
+              <option value="c++">c++</option>
+              <option value="javascript">javascript</option>
+            </select>
+            <div>{{select}}</div>
+            
+<!--            <input v-bind:type="type" v-model="input">-->
+<!--            <div>{{input}}</div>-->
           </div>
       	`,
     data: {
+      select: ['javascript', 'java'],
       books: ['java'],
+      type: 'text',
       input: '',
 
       checkbox: true,
