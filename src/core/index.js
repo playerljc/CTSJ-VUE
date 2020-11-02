@@ -1,7 +1,7 @@
 import { render } from '../compiler/render';
 import { LIFECYCLE_HOOKS } from '../shared/constants';
 import { mergeData, mergeComputed, mergeMethods } from './merge';
-import { triggerLifecycle } from './util';
+import { triggerLifecycle, getEl } from './util';
 import { createProxy } from './proxy';
 
 /**
@@ -17,6 +17,10 @@ import { createProxy } from './proxy';
 class Vue {
   constructor(config) {
     this.$config = config;
+
+    // getEl
+    debugger;
+    this.$config.el = getEl(this.$config.el);
 
     // 将data混入到this中
     mergeData.call(this);

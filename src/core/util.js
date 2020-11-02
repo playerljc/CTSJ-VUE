@@ -18,3 +18,20 @@ export function triggerLifecycle(hookName) {
     this.$config[hookName].call(this.$dataProxy);
   }
 }
+
+/**
+ * getEl
+ * @param elConfig
+ * @return HTMLElement
+ */
+export function getEl(elConfig) {
+  if (elConfig instanceof HTMLElement) {
+    return elConfig;
+  }
+
+  if (typeof elConfig === 'string') {
+    return document.querySelector(elConfig);
+  }
+
+  return null;
+}

@@ -4,7 +4,7 @@ import Vue from './core';
 window.onload = () => {
   // v-bind:class="{active: isActive, 'text-danger': hasError}"
   const vm2 = new Vue({
-    el: document.getElementById('container2'),
+    el: '#container2', // document.getElementById('container2'),
     template: `
 <!--      		<div -->
 <!--      		  v-bind:id="id + '我' + [1,2,3].join(',') + reversedMessage"-->
