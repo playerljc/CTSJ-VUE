@@ -70,13 +70,8 @@ export function renderTextNode(context, el) {
     if (startIndex !== -1) {
       const endIndex = expression.indexOf(END_TAG, startIndex + START_TAG.length);
       if (endIndex !== -1) {
-        value +=
-          expression.substring(index, startIndex) +
-          execExpression.call(
-            this,
-            context,
-            expression.substring(startIndex + START_TAG.length, endIndex),
-          );
+        const dfs = expression.substring(startIndex + START_TAG.length, endIndex);
+        value += expression.substring(index, startIndex) + execExpression.call(this, context, dfs);
         index = endIndex + END_TAG.length;
       } else {
         value += expression.substring(index);
@@ -112,26 +107,36 @@ function renderVAttr({ el, context }) {
 
   // 指令属性
   const vAttrNames = getVAttrNames(el);
-  if (!vAttrNames.length) return null;
+  if (!vAttrNames.length)
+    return {
+      Continue: true,
+      VNode: null,
+    };
 
   if (hasVFor(vAttrNames)) {
     // parse v-for
-    return parseVFor.call(
-      this,
-      // 如果context是this.$dataProxy则需要重新创建context
-      {
-        context: context === this.$dataProxy ? createContext.call(this) : context,
-        el,
-        vAttrNames,
-      },
-    );
+    return {
+      Continue: false,
+      VNode: parseVFor.call(
+        this,
+        // 如果context是this.$dataProxy则需要重新创建context
+        {
+          context: context === this.$dataProxy ? createContext.call(this) : context,
+          el,
+          vAttrNames,
+        },
+      ),
+    };
   }
 
   if (hasVIf(vAttrNames)) {
     // parse v-if
     const display = parseVIf({ context, el, vAttrNames });
     if (!display) {
-      return null;
+      return {
+        Continue: false,
+        VNode: null,
+      };
     }
   }
 
@@ -176,7 +181,10 @@ function renderVAttr({ el, context }) {
     // return VNode;
   }
 
-  return VNode;
+  return {
+    Continue: true,
+    VNode,
+  };
 }
 
 /**
@@ -207,10 +215,9 @@ function renderAttr({ el, VNode }) {
  * @return {null|[]|*}
  */
 export function renderElementNode(context, el) {
-  let VNode;
-
   // 解析指令属性
-  VNode = renderVAttr.call(this, { el, context });
+  let { Continue, VNode } = renderVAttr.call(this, { el, context });
+  if (!Continue) return VNode;
 
   if (!VNode) {
     VNode = createVNode(el.tagName.toLowerCase());

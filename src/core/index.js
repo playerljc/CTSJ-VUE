@@ -19,7 +19,6 @@ class Vue {
     this.$config = config;
 
     // getEl
-    debugger;
     this.$config.el = getEl(this.$config.el);
 
     // 将data混入到this中
@@ -28,7 +27,7 @@ class Vue {
     // 将computed混入到this中
     mergeComputed.call(this);
 
-    // beforeCreate
+    // ------ beforeCreate
     triggerLifecycle.call(this, LIFECYCLE_HOOKS[0]);
 
     // data observer - 数据响应式创建针对data的响应式
@@ -41,20 +40,20 @@ class Vue {
     // 将watch混入到this中
     // mergeWatch.call(this);
 
-    // create
+    // ------ create
     triggerLifecycle.call(this, LIFECYCLE_HOOKS[1]);
 
     // 渲染
     render.call(this, this.$config.template, this.$config.el, true);
 
-    // beforeMount
+    // ------ beforeMount
     triggerLifecycle.call(this, LIFECYCLE_HOOKS[2]);
 
     // 插入dom到el(挂载)
     // this.$config.el.innerHTML = '';
     // this.$config.el.appendChild(this.$el);
 
-    // mount
+    // ------ mount
     triggerLifecycle.call(this, LIFECYCLE_HOOKS[3]);
   }
 }

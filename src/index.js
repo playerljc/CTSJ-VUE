@@ -36,31 +36,35 @@ window.onload = () => {
 <!--            <div v-html="htmlStr"></div>-->
 <!--      		</div>-->
           <div>
-            <p>{{name}}</p>
-            <p key="1" data-a="1">{{a.b.c.d}}</p>
-            <p key="2" v-bind:data-a="name">{{reversedMessage}}</p>
-            <p>{{name}}</p>
+            <p v-if="checkbox">{{name}}</p>
+<!--            <p key="1" data-a="1">{{a.b.c.d}}</p>-->
+<!--            <p key="2" v-bind:data-a="name">{{reversedMessage}}</p>-->
+<!--            <p>{{name}}</p>-->
+<!--            <p>{{checkbox}}</p>-->
             
-            <p>{{checkbox}}</p>
-            
-            <select multiple v-model="select" >
-              <option value="java">java</option>
-              <option value="c++">c++</option>
-              <option value="javascript">javascript</option>
+            <select v-model="selected">
+              <option v-for="option in options" v-bind:key="option.value" v-bind:value="option.value">
+                {{ option.text }}
+              </option>
             </select>
-            <div>{{select}}</div>
-            
+            <span>Selected: {{ selected }}</span>
 <!--            <input v-bind:type="type" v-model="input">-->
 <!--            <div>{{input}}</div>-->
           </div>
       	`,
     data: {
-      select: ['javascript', 'java'],
+      selected: 'A',
+      options: [
+        { text: 'One', value: 'A' },
+        { text: 'Two', value: 'B' },
+        { text: 'Three', value: 'C' },
+      ],
+
       books: ['java'],
       type: 'text',
       input: '',
 
-      checkbox: true,
+      checkbox: false,
       name: 'playerljc',
       // sex: '女',
       age: '666',
