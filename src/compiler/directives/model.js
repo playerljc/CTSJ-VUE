@@ -72,6 +72,18 @@ function hasProp({ el, prop }) {
   return exists;
 }
 
+export function getVModelEntrys({ el, vAttrNames }) {
+  const attrs = vAttrNames.filter((n) => n.indexOf(`${DIRECT_PREFIX}model`) !== -1);
+
+  if (!attrs.length) return null;
+
+  // 取出最后一个attr
+  const attrName = attrs[attrs.length - 1];
+
+  // 获取v-model="xxx" 的 xxx
+  return getDirectiveEntry(el, attrName);
+}
+
 /**
  * parseVModel
  * @param context
@@ -84,15 +96,16 @@ function hasProp({ el, prop }) {
 export function parseVModel({ context, el, vAttrNames, tagName, VNode }) {
   const self = this;
 
-  const attrs = vAttrNames.filter((n) => n.indexOf(`${DIRECT_PREFIX}model`) !== -1);
-
-  if (!attrs.length) return null;
-
-  // 取出最后一个attr
-  const attrName = attrs[attrs.length - 1];
+  // const attrs = vAttrNames.filter((n) => n.indexOf(`${DIRECT_PREFIX}model`) !== -1);
+  //
+  // if (!attrs.length) return null;
+  //
+  // // 取出最后一个attr
+  // const attrName = attrs[attrs.length - 1];
 
   // 获取v-model="xxx" 的 xxx
-  const entry = getDirectiveEntry(el, attrName);
+  // const entry = getDirectiveEntry(el, attrName);
+  const entry = getVModelEntrys({ el, vAttrNames });
 
   if (!entry) return null;
 

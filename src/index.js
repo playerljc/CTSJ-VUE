@@ -41,7 +41,7 @@ window.onload = () => {
 <!--            <p key="2" v-bind:data-a="name">{{reversedMessage}}</p>-->
 <!--            <p>{{name}}</p>-->
 <!--            <p>{{checkbox}}</p>-->
-            
+            <my-component></my-component>
             <select v-model="selected">
               <option v-for="option in options" v-bind:key="option.value" v-bind:value="option.value">
                 {{ option.text }}

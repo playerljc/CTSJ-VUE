@@ -12,16 +12,15 @@ export function hasVBind(attrNames) {
 }
 
 /**
- * parseVBind
+ * getVBindEntrys
  * @param context
  * @param el
  * @param vAttrNames
- * @param VNode
- * @return {*}
+ * @return Array
  */
-export function parseVBind({ context, el, vAttrNames, VNode }) {
+export function getVBindEntrys({ context, el, vAttrNames }) {
   const bindAttrs = vAttrNames.filter((n) => n.indexOf(`${DIRECT_PREFIX}bind`) !== -1);
-  const entrys = bindAttrs.map((attrName) => {
+  return bindAttrs.map((attrName) => {
     const entry = getDirectiveEntry(el, attrName);
 
     if (entry.arg === 'class' || entry.arg === 'style') {
@@ -56,6 +55,19 @@ export function parseVBind({ context, el, vAttrNames, VNode }) {
 
     return entry;
   });
+}
+
+/**
+ * parseVBind
+ * @param context
+ * @param el
+ * @param vAttrNames
+ * @param VNode
+ * @return {*}
+ */
+export function parseVBind({ context, el, vAttrNames, VNode }) {
+  const entrys = getVBindEntrys.call(this, { context, el, vAttrNames });
+
   entrys.forEach((entry) => {
     if (entry.arg === 'key') {
       VNode.key = entry.value;

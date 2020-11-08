@@ -1,7 +1,7 @@
+import uuid from '../../shared/uuid';
 import { hasVAttr } from './util';
-import { renderElementNode } from '../render';
 import { EMPTY_SPLIT } from '../../shared/regexp';
-import { DIRECT_PREFIX } from '../../shared/constants';
+import { DIRECT_PREFIX, GROUP_KEY_NAME } from '../../shared/constants';
 import { execExpression, isObject, isArray } from '../../shared/util';
 
 /**
@@ -18,9 +18,17 @@ export function hasVFor(attrNames) {
  * @param context
  * @param el
  * @param vAttrNames
+ * @param renderFun - render函数
  * @return {null|[]}
  */
-export function parseVFor({ context, el, vAttrNames }) {
+export function parseVFor({ context, el, vAttrNames, renderFun }) {
+  // 如果没有group属性则创建一个
+  let groupName = el.getAttribute(GROUP_KEY_NAME);
+  if (!el.hasAttribute(GROUP_KEY_NAME) || !groupName) {
+    groupName = uuid();
+    el.setAttribute(GROUP_KEY_NAME, groupName);
+  }
+
   const attrName = vAttrNames.find((n) => n.indexOf(`${DIRECT_PREFIX}for`) !== -1);
   //  <li v-for="item in items"></li>
   //  <li v-for="(item,index) in items">
@@ -40,8 +48,8 @@ export function parseVFor({ context, el, vAttrNames }) {
   // 获取迭代的对象
   const itObj = execExpression(context, itObjStr); // eval(`with(context){${itObjStr}}`); /* context[itObjStr] */
 
+  // 对象迭代
   if (isObject(itObj)) {
-    // 对象迭代
     let index = 0;
     for (const p in itObj) {
       const itemVNodes = iteratorVFor.call(
@@ -51,6 +59,7 @@ export function parseVFor({ context, el, vAttrNames }) {
           el,
           itItemStr,
           itItemObj: itObj[p],
+          renderFun,
         },
         index++,
       );
@@ -61,8 +70,9 @@ export function parseVFor({ context, el, vAttrNames }) {
         VNodes.push(itemVNodes);
       }
     }
-  } else if (isArray(itObj)) {
-    // 数组迭代
+  }
+  // 数组迭代
+  else if (isArray(itObj)) {
     for (let i = 0; i < itObj.length; i++) {
       const itemVNodes = iteratorVFor.call(
         this,
@@ -71,6 +81,7 @@ export function parseVFor({ context, el, vAttrNames }) {
           el,
           itItemStr,
           itItemObj: itObj[i],
+          renderFun,
         },
         i,
       );
@@ -83,6 +94,16 @@ export function parseVFor({ context, el, vAttrNames }) {
     }
   }
 
+  // 比较删除componentsMap中没有的组件引用
+  const componentKeys = this.componentsMap.keys();
+  while (componentKeys.length) {
+    const currentKey = componentKeys.pop();
+    const has = VNodes.some((VNode) => VNode.key === currentKey);
+    if (!has) {
+      this.componentsMap.delete(currentKey);
+    }
+  }
+
   return VNodes;
 }
 
@@ -92,11 +113,29 @@ export function parseVFor({ context, el, vAttrNames }) {
  * @param el
  * @param itItemStr
  * @param itItemObj
+ * @param renderFun
  * @param index
  * @return {null|*[]|*}
  */
-export function iteratorVFor({ context, el, itItemStr, itItemObj }, index) {
+export function iteratorVFor({ context, el, itItemStr, itItemObj, renderFun }, index) {
   const cloneEl = el.cloneNode(true);
+
+  // 处理cloneEl的key 需要加入group的值
+  const groupName = el.getAttribute(GROUP_KEY_NAME);
+  const attrNames = el.getAttributeNames();
+  // 元素有key属性
+  if (attrNames.indexOf(`${DIRECT_PREFIX}bind:key`) !== -1) {
+    const key = `${DIRECT_PREFIX}bind:key`;
+    const value = el.getAttribute(key);
+    // 给key加入groupName前缀使之全局唯一
+    el.setAttribute(key, `${groupName}(${value})`);
+  } else if (attrNames.indexOf('key')) {
+    const key = 'key';
+    const value = el.getAttribute(key);
+    // 给key加入groupName前缀使之全局唯一
+    el.setAttribute(key, `${groupName}(${value})`);
+  }
+
   // 删除v-for属性
   cloneEl.removeAttribute(`${DIRECT_PREFIX}for`);
 
@@ -114,5 +153,5 @@ export function iteratorVFor({ context, el, itItemStr, itItemObj }, index) {
     context[itItemStr] = itItemObj;
   }
 
-  return renderElementNode.call(this, context, cloneEl);
+  return renderFun.call(this, context, cloneEl);
 }

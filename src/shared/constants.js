@@ -40,6 +40,9 @@ export const PATH_SYMBOLS = [
   `${SPECIAL_SYMBOL}parent${SPECIAL_SYMBOL}`,
 ];
 
+// 组的key名称
+export const GROUP_KEY_NAME = '_group';
+
 // 表单的触发控件
 export const FORM_CONTROL_CHECKED_TAGNAMES = ['radio', 'checkbox'];
 // 表单的输入控件

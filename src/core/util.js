@@ -1,4 +1,5 @@
-import { isFunction } from '../shared/util';
+import { isFunction, isObject } from '../shared/util';
+import Vue from './index';
 
 /**
  * resetComputed - 重置计算属性
@@ -34,4 +35,12 @@ export function getEl(elConfig) {
   }
 
   return null;
+}
+
+/**
+ * isVueInstance - ins是否是一个Vue实例
+ * @param ins - 一个实例对象
+ */
+export function isVueInstance(ins) {
+  return isObject(ins) && ins instanceof Vue;
 }

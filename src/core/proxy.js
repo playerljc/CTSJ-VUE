@@ -147,7 +147,7 @@ export function createProxy(obj) {
         // 重新计算所有的计算属性
         resetComputed.call(self);
         // 进行render
-        render.call(self, self.$config.template, self.$config.el, false);
+        render.call(self, self.$config.el, false);
         // update
         triggerLifecycle.call(self, LIFECYCLE_HOOKS[5]);
         return result;

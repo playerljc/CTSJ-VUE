@@ -14,6 +14,20 @@ export function hasVOn(attrNames) {
 }
 
 /**
+ * getVOnEntrys
+ * @param el
+ * @param vAttrNames
+ * @return {*}
+ */
+export function getVOnEntrys({ el, vAttrNames }) {
+  const onAttrs = vAttrNames.filter((n) => n.indexOf(`${DIRECT_PREFIX}on`) !== -1);
+  return onAttrs.map((attrName) => {
+    // entry.value = execExpression(context, entry.expression);
+    return getDirectiveEntry(el, attrName);
+  });
+}
+
+/**
  * parseVOn
  * @param context
  * @param el
@@ -27,11 +41,13 @@ export function parseVOn({ context, el, tagName, vAttrNames, VNode }) {
   // <div v-on:click="count + 1" v-on:blur="" v-on:change="" v-on:input=""></div>
   const self = this;
 
-  const onAttrs = vAttrNames.filter((n) => n.indexOf(`${DIRECT_PREFIX}on`) !== -1);
-  const entrys = onAttrs.map((attrName) => {
-    // entry.value = execExpression(context, entry.expression);
-    return getDirectiveEntry(el, attrName);
-  });
+  // const onAttrs = vAttrNames.filter((n) => n.indexOf(`${DIRECT_PREFIX}on`) !== -1);
+  // const entrys = onAttrs.map((attrName) => {
+  //   // entry.value = execExpression(context, entry.expression);
+  //   return getDirectiveEntry(el, attrName);
+  // });
+
+  const entrys = getVOnEntrys({ el, vAttrNames });
 
   for (let i = 0; i < entrys.length; i++) {
     // if(hasFormTag && isVModel)
@@ -87,6 +103,7 @@ export function parseVOn({ context, el, tagName, vAttrNames, VNode }) {
         }
       }
 
+      // a + 1 display display(a + $event)
       if (entry.expression in self.$config.methods) {
         // 函数名形式
         this[entry.expression]();

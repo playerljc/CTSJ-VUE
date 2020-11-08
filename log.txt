@@ -10,6 +10,9 @@ v-html实现 ok
 v-on的实现 ok
 v-for的key ok
 v-model实现 ok
+template标签
+component标签
+keep-alive标签
 
 computed(不需要)
  get
@@ -24,3 +27,21 @@ slot
 在一个方法中多次修改data只render一次
 
 
+// components集合的键应该用元素的key
+// 每一个组件元素没有key都要随机生成一个key
+// v-if 和 v-for的时候需要根据条件删除components集合中的component
+// components应该是按组来划分的
+// parentEl [key1,key2]
+
+<div>
+   <component-1 key=1 />
+   <component-1 key=2 />
+   <component-1 key=3 />
+
+   <component-1 v-if="true" key=4 />
+
+   <div>
+     <component-1 v-for="true" key=4 />
+   </div>
+
+</div>

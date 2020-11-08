@@ -1,8 +1,10 @@
+import { register } from './component/register';
 import { render } from '../compiler/render';
 import { LIFECYCLE_HOOKS } from '../shared/constants';
 import { mergeData, mergeComputed, mergeMethods } from './merge';
 import { triggerLifecycle, getEl } from './util';
 import { createProxy } from './proxy';
+import { createElement } from '../shared/util';
 
 /**
  * Vue
@@ -15,6 +17,17 @@ import { createProxy } from './proxy';
  * @constructor
  */
 class Vue {
+  /**
+   * component - 全局注册组件(在任何地方都可以使用)
+   */
+  static component(componentName, config) {
+    register(componentName, config);
+  }
+
+  /**
+   * constructor
+   * @param config
+   */
   constructor(config) {
     this.$config = config;
 
@@ -37,6 +50,12 @@ class Vue {
     // 将methods混入到this中
     mergeMethods.call(this);
 
+    // 创建template的el对象
+    this.templateEl = createElement(this.$config.template);
+
+    // 存放组件实例的Map
+    this.componentsMap = new Map();
+
     // 将watch混入到this中
     // mergeWatch.call(this);
 
@@ -44,7 +63,7 @@ class Vue {
     triggerLifecycle.call(this, LIFECYCLE_HOOKS[1]);
 
     // 渲染
-    render.call(this, this.$config.template, this.$config.el, true);
+    render.call(this, this.$config.el, true);
 
     // ------ beforeMount
     triggerLifecycle.call(this, LIFECYCLE_HOOKS[2]);

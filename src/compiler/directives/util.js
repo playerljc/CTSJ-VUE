@@ -1,3 +1,4 @@
+import { execExpression } from 'src/shared/util';
 import { DIRECT_SYMBOLS, DIRECT_PREFIX } from '../../shared/constants';
 
 /**
@@ -91,4 +92,42 @@ export function getDirectiveEntry(el, attrName) {
     arg: getDirectArg(attrName), // 传给指令的参数，可选。例如 v-my-directive:foo 中，参数为 "foo"。
     modifiers: getDirectModifiers(attrName), // 一个包含修饰符的对象。例如：v-my-directive.foo.bar 中，修饰符对象为 { foo: true, bar: true }。
   };
+}
+
+/**
+ * getAttrEntrys
+ * @param {*} el
+ * @return Array
+ */
+export function getAttrEntrys(el) {
+  const attrNames = getAttrNames(el);
+  if (attrNames.length) {
+    return attrNames.map((attrName) => ({
+      name: attrName,
+      value: el.getAttribute(attrName),
+    }));
+  }
+
+  return [];
+}
+
+/**
+ * getKey
+ * @param context
+ * @param el
+ * @return string
+ */
+export function getKey({ context, el }) {
+  //  <component1 v-bind:key=""
+  const attrNames = el.getAttributeNames();
+  // 元素有key属性
+  if (attrNames.indexOf(`${DIRECT_PREFIX}bind:key`) !== -1) {
+    return execExpression(context, el.getAttribute(`${DIRECT_PREFIX}bind:key`));
+  }
+
+  if (el.getAttribute('key')) {
+    return el.getAttribute('key').trim();
+  }
+
+  return null;
 }
