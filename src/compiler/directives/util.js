@@ -1,5 +1,5 @@
-import { execExpression } from 'src/shared/util';
-import { DIRECT_SYMBOLS, DIRECT_PREFIX } from '../../shared/constants';
+import { execExpression } from '../../shared/util';
+import { DIRECT_SYMBOLS, DIRECT_PREFIX, GROUP_KEY_NAME } from '../../shared/constants';
 
 /**
  * hasVAttr
@@ -76,7 +76,9 @@ export function getVAttrNames(el) {
  * @return {T[]}
  */
 export function getAttrNames(el) {
-  return el.getAttributeNames().filter((attrName) => attrName.indexOf(DIRECT_PREFIX) === -1);
+  return el
+    .getAttributeNames()
+    .filter((attrName) => attrName.indexOf(DIRECT_PREFIX) === -1 && attrName !== GROUP_KEY_NAME);
 }
 
 /**

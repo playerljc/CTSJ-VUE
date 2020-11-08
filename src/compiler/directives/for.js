@@ -128,12 +128,15 @@ export function iteratorVFor({ context, el, itItemStr, itItemObj, renderFun }, i
     const key = `${DIRECT_PREFIX}bind:key`;
     const value = el.getAttribute(key);
     // 给key加入groupName前缀使之全局唯一
-    el.setAttribute(key, `${groupName}(${value})`);
+    el.setAttribute(key, `'${groupName}' + (${value})`);
   } else if (attrNames.indexOf('key')) {
     const key = 'key';
     const value = el.getAttribute(key);
     // 给key加入groupName前缀使之全局唯一
     el.setAttribute(key, `${groupName}(${value})`);
+  } else {
+    // 如果v-for没写key则用索引作为key
+    el.setAttribute('key', `${groupName}${index}`);
   }
 
   // 删除v-for属性

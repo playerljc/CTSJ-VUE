@@ -52,7 +52,7 @@ window.onload = () => {
 <!--            <div>{{input}}</div>-->
           </div>
       	`,
-    data: {
+    data: () => ({
       selected: 'A',
       options: [
         { text: 'One', value: 'A' },
@@ -140,7 +140,7 @@ window.onload = () => {
           },
         },
       },
-    },
+    }),
     methods: {
       onInput(e) {
         console.log(e.target.checked);
@@ -239,6 +239,11 @@ window.onload = () => {
         //     }, 2000);
         //   }, 2000);
         // }, 2000);
+        this.options = [
+          { text: 'One1', value: 'A1' },
+          { text: 'Two1', value: 'B1' },
+          { text: 'Three1', value: 'C1' },
+        ];
       }, 2000);
     },
     beforeUpdate() {

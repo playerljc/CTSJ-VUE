@@ -36,11 +36,22 @@ import { END_TAG, START_TAG, FORM_CONTROL_BINDING_TAGNAMES } from '../shared/con
 export function render(el, isMount) {
   const vnode = renderLoop.call(this, this.$dataProxy, this.templateEl);
   if (isMount) {
-    patch(el, vnode);
+    this.$preVNode = patch(el, vnode);
   } else {
-    patch(this.$preVNode, vnode);
+    this.$preVNode = patch(this.$preVNode, vnode);
+    // setTimeout(() => {
+    //   const cloneNode = _.cloneDeep(this.$preVNode);
+    //   cloneNode.data.props.id = '666';
+    //   patch(this.$preVNode, cloneNode);
+    // }, 2000);
   }
-  this.$preVNode = vnode;
+}
+
+/**
+ * renderComponent
+ */
+export function renderComponent() {
+  return renderLoop.call(this, this.$dataProxy, this.templateEl);
 }
 
 /**
@@ -402,14 +413,21 @@ export function renderComponentNode(context, el) {
   // 没有创建组件
   if (!component) {
     // 用key创建组件
-    component = createComponent({ attrs, events, parent: self, el });
+    component = createComponent({
+      attrs,
+      events,
+      parent: self,
+      top: isVueInstance(self) ? self : self.$top,
+      el,
+      key,
+    });
     self.componentsMap.set(key, component);
-  }
-  // 不是第一次而是更新
-  else {
-    component.setParams({ attrs, events }, el, self);
+    // 调用组件的render方法返回VNode
+    return component.render();
   }
 
-  // 调用组件的render方法返回VNode
-  return component.render();
+  // 不是第一次而是更新
+  component.setParams({ attrs, events });
+  // 调用组件的update方法返回VNode
+  return component.update();
 }

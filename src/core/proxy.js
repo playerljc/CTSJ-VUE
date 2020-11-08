@@ -2,7 +2,7 @@ import _ from 'lodash';
 
 import { execExpression, isArray, isObject } from '../shared/util';
 import { triggerLifecycle, resetComputed } from './util';
-import { render } from '../compiler/render';
+import { render, renderComponent } from '../compiler/render';
 
 import {
   CREATE_PROXY_EXCLUDE_PREFIX,
@@ -33,9 +33,10 @@ export function createContext(arg = {}) {
       }
     }
  * @param obj
+ * @param renderHandler
  * @return {null|boolean|any}
  */
-export function createProxy(obj) {
+function createProxy(obj, renderHandler) {
   const self = this;
   let proxy = null;
   if (isObject(obj) || isArray(obj)) {
@@ -147,7 +148,9 @@ export function createProxy(obj) {
         // 重新计算所有的计算属性
         resetComputed.call(self);
         // 进行render
-        render.call(self, self.$config.el, false);
+        if (renderHandler) {
+          renderHandler.call(self);
+        }
         // update
         triggerLifecycle.call(self, LIFECYCLE_HOOKS[5]);
         return result;
@@ -169,6 +172,20 @@ export function createProxy(obj) {
   }
 
   return proxy;
+}
+
+export function createComponentProxy(obj) {
+  return createProxy.call(this, obj, function () {
+    const VNode = renderComponent.call(this);
+    VNode.key = this.$key;
+    this.$top.refresh(VNode);
+  });
+}
+
+export function createVueProxy(obj) {
+  return createProxy.call(this, obj, function () {
+    render.call(this, this.$config.el, false);
+  });
 }
 
 /**

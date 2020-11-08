@@ -58,8 +58,8 @@ export function pascalCaseToKebabCase(name) {
  * createComponent - 创建一个组件
  * @param config
  */
-export function createComponent({ attrs, events, parent, el }) {
-  return new Component({ attrs, events }, el, parent);
+export function createComponent({ attrs, events, parent, top, el, key }) {
+  return new Component({ attrs, events }, { key, el, top, parent });
 }
 
 /**

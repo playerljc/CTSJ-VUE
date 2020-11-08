@@ -1,10 +1,31 @@
+import _ from 'lodash';
+import { patch } from './vdom';
 import { register } from './component/register';
 import { render } from '../compiler/render';
 import { LIFECYCLE_HOOKS } from '../shared/constants';
 import { mergeData, mergeComputed, mergeMethods } from './merge';
 import { triggerLifecycle, getEl } from './util';
-import { createProxy } from './proxy';
+import { createVueProxy } from './proxy';
 import { createElement } from '../shared/util';
+
+function findVNodeParentByKey(VNode, key) {
+  if (VNode.key === key) {
+    return null;
+  }
+
+  let parent = null;
+  for (let i = 0; i < VNode.children.length; i++) {
+    const curNode = VNode.children[i];
+    if (curNode.key === key) {
+      parent = VNode;
+      break;
+    } else {
+      parent = findVNodeParentByKey.call(this, curNode, key);
+    }
+  }
+
+  return parent;
+}
 
 /**
  * Vue
@@ -45,7 +66,7 @@ class Vue {
 
     // data observer - 数据响应式创建针对data的响应式
     // 被响应式的数据有data | computed
-    this.$dataProxy = createProxy.call(this, this);
+    this.$dataProxy = createVueProxy.call(this, this);
 
     // 将methods混入到this中
     mergeMethods.call(this);
@@ -62,11 +83,11 @@ class Vue {
     // ------ create
     triggerLifecycle.call(this, LIFECYCLE_HOOKS[1]);
 
-    // 渲染
-    render.call(this, this.$config.el, true);
-
     // ------ beforeMount
     triggerLifecycle.call(this, LIFECYCLE_HOOKS[2]);
+
+    // 渲染
+    render.call(this, this.$config.el, true);
 
     // 插入dom到el(挂载)
     // this.$config.el.innerHTML = '';
@@ -74,6 +95,23 @@ class Vue {
 
     // ------ mount
     triggerLifecycle.call(this, LIFECYCLE_HOOKS[3]);
+  }
+
+  /**
+   * refresh - 指定VNode刷新
+   * @param VNode
+   */
+  refresh(VNode) {
+    // this.$preVNode
+    const cloneNode = _.cloneDeep(this.$preVNode);
+    const parent = findVNodeParentByKey.call(this, cloneNode, VNode.key);
+    if (parent) {
+      const index = parent.children.findIndex((node) => node.key === VNode.key);
+      if (index !== -1) {
+        parent.children[index] = VNode;
+        this.$preVNode = patch(this.$preVNode, cloneNode);
+      }
+    }
   }
 }
 
