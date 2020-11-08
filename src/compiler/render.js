@@ -322,9 +322,6 @@ export function renderComponentNode(context, el) {
 
   // 获取指令属性
   const vAttrNames = getVAttrNames(el);
-  if (!vAttrNames.length) {
-    return null;
-  }
 
   if (hasVFor(vAttrNames)) {
     // parse v-for

@@ -16,10 +16,10 @@ function assignPropsOrAttrs() {
   this.attrs = {};
 
   if (isObject(props)) {
-    props = props.keys();
+    props = Object.keys(props);
   }
 
-  $attrs.keys().forEach((key) => {
+  Object.keys($attrs).forEach((key) => {
     if (props.indexOf(key) !== -1) {
       this.props[key] = $attrs[key];
     } else {
@@ -122,7 +122,7 @@ class Component {
    * 获取组件配置
    */
   getConfig() {
-    return getComponentConfig(this, this.$el.tagName);
+    return getComponentConfig(this.$parent, this.$el.tagName.toLowerCase());
   }
 
   /**

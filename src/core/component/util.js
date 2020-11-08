@@ -13,7 +13,7 @@ export function isComponentNodeByVue(el) {
   if (!isElement) return false;
 
   const { tagName } = el;
-  return existsComponentByGlobal(tagName);
+  return existsComponentByGlobal(tagName.toLowerCase());
 }
 
 /**
@@ -26,7 +26,7 @@ export function isComponentNodeByComponent(el, components) {
   if (!isElement) return false;
 
   const { tagName } = el;
-  return existsComponentByComponent(tagName, components);
+  return existsComponentByComponent(tagName.toLowerCase(), components);
 }
 
 /**

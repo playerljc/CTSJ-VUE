@@ -16,3 +16,12 @@
   input checkbox value="c++" v-model="books" c++
 
 9.input textarea
+
+
+
+
+
+
+
+
+

@@ -1,8 +1,13 @@
 import Vue from './core';
 
+import MyComponent from './components/myComponent';
+
+Vue.component('my-component', MyComponent);
+
 // v-bind 指令名称 v-bind:id id是指令的参数 v-bind:id="123" 123是指令的值  v-bind.a.b:id="" .a.b是指令的modifiers
 window.onload = () => {
   // v-bind:class="{active: isActive, 'text-danger': hasError}"
+
   const vm2 = new Vue({
     el: '#container2', // document.getElementById('container2'),
     template: `
