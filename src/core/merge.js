@@ -5,12 +5,22 @@ import { isFunction, merge } from '../shared/util';
 /**
  * mergeProps - 混入props到this中
  */
-export function mergeProps() {
-  // 被代理的props对象
-  this.$srcProps = _.cloneDeep(isFunction(this.$config.props) ? this.$config.props : {});
-  // 没有被代理的props对象
-  this.$noProxySrcProps = _.cloneDeep(isFunction(this.$config.props) ? this.$config.props : {});
-  merge(this, this.$srcProps);
+export function mergeProps(props) {
+  // props是不能修改的
+  const properties = {};
+  Object.keys(props).forEach((key) => {
+    properties[key] = {
+      value: props[key],
+      // 不能对props的属性进行赋值
+      writable: false,
+      // 可以删除
+      configurable: true,
+      // 可以枚举
+      enumerable: true,
+    };
+  });
+
+  Object.defineProperties(this, properties);
 }
 
 /**
@@ -18,10 +28,7 @@ export function mergeProps() {
  */
 export function mergeData() {
   // 被代理的data对象
-  this.$srcData = _.cloneDeep(isFunction(this.$config.data) ? this.$config.data() : {});
-  // 没有被代理的data对象
-  this.$noProxySrcData = _.cloneDeep(isFunction(this.$config.data) ? this.$config.data() : {});
-  merge(this, this.$srcData);
+  merge(this, _.cloneDeep(isFunction(this.$config.data) ? this.$config.data() : {}));
 }
 
 /**

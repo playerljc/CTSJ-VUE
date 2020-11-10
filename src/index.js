@@ -41,23 +41,64 @@ window.onload = () => {
 <!--            <div v-html="htmlStr"></div>-->
 <!--      		</div>-->
           <div>
-            <p v-if="checkbox">{{name}}</p>
+          
+          
+<!--            <p v-if="checkbox">{{name}}</p>-->
+            
+            
+            
 <!--            <p key="1" data-a="1">{{a.b.c.d}}</p>-->
 <!--            <p key="2" v-bind:data-a="name">{{reversedMessage}}</p>-->
 <!--            <p>{{name}}</p>-->
 <!--            <p>{{checkbox}}</p>-->
-            <my-component></my-component>
-            <select v-model="selected">
-              <option v-for="option in options" v-bind:key="option.value" v-bind:value="option.value">
-                {{ option.text }}
-              </option>
-            </select>
-            <span>Selected: {{ selected }}</span>
+
+
+
+            <my-component 
+              v-bind:list="list" 
+              v-bind:class="[activeClass, errorClass]"
+      		    v-bind:style="{color:activeColor,fontSize: fontSize + 'px'}"
+      		    name="myComponent" 
+             ></my-component>
+            
+            
+<!--            <select v-model="selected">-->
+<!--              <option v-for="option in options" v-bind:key="option.value" v-bind:value="option.value">-->
+<!--                {{ option.text }}-->
+<!--              </option>-->
+<!--            </select>-->
+<!--            <span>Selected: {{ selected }}</span>-->
+            
+            
+            
 <!--            <input v-bind:type="type" v-model="input">-->
 <!--            <div>{{input}}</div>-->
           </div>
       	`,
     data: () => ({
+      list: [
+        {
+          name: '张三',
+          age: 20,
+          height: 1.8,
+          hometown: '沈阳',
+          city: '沈阳',
+        },
+        {
+          name: '李四',
+          age: 20,
+          height: 1.8,
+          hometown: '沈阳',
+          city: '沈阳',
+        },
+        {
+          name: '王五',
+          age: 20,
+          height: 1.8,
+          hometown: '沈阳',
+          city: '沈阳',
+        },
+      ],
       selected: 'A',
       options: [
         { text: 'One', value: 'A' },
@@ -186,16 +227,16 @@ window.onload = () => {
       },
     },
     beforeCreate() {
-      // console.log('beforeCreate');
+      console.log('Vue', 'beforeCreate');
     },
     created() {
-      // console.log('created');
+      console.log('Vue', 'created');
     },
     beforeMount() {
-      // console.log('beforeMount');
+      console.log('Vue', 'beforeMount');
     },
     mounted() {
-      // console.log('mounted');
+      console.log('Vue', 'mounted');
       setTimeout(() => {
         // this.name = 'playerljc';
         // this.items[0].name = 'name2';
@@ -244,24 +285,55 @@ window.onload = () => {
         //     }, 2000);
         //   }, 2000);
         // }, 2000);
-        this.options = [
-          { text: 'One1', value: 'A1' },
-          { text: 'Two1', value: 'B1' },
-          { text: 'Three1', value: 'C1' },
+        // this.options = [
+        //   { text: 'One1', value: 'A1' },
+        //   { text: 'Two1', value: 'B1' },
+        //   { text: 'Three1', value: 'C1' },
+        // ];
+
+        this.list = [
+          {
+            name: '赵六',
+            age: 20,
+            height: 1.8,
+            hometown: '沈阳',
+            city: '沈阳',
+          },
+          {
+            name: '王七',
+            age: 20,
+            height: 1.8,
+            hometown: '沈阳',
+            city: '沈阳',
+          },
+          {
+            name: '刘八',
+            age: 20,
+            height: 1.8,
+            hometown: '沈阳',
+            city: '沈阳',
+          },
+          {
+            name: '赵九',
+            age: 20,
+            height: 1.8,
+            hometown: '沈阳',
+            city: '沈阳',
+          },
         ];
       }, 2000);
     },
     beforeUpdate() {
-      // console.log('beforeUpdate');
+      console.log('Vue', 'beforeUpdate');
     },
     updated() {
-      // console.log('updated');
+      console.log('Vue', 'updated');
     },
     beforeDestroy() {
-      // console.log('beforeDestroy');
+      console.log('Vue', 'beforeDestroy');
     },
     destroyed() {
-      // console.log('destroyed');
+      console.log('Vue', 'destroyed');
     },
   });
 };

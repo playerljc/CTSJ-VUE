@@ -14,6 +14,7 @@ template标签
 component标签
 keep-alive标签
 v-bind="xxx"这种形式的
+component的$emit
 
 computed(不需要)
  get

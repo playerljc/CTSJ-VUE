@@ -6,7 +6,7 @@ import { LIFECYCLE_HOOKS } from '../shared/constants';
 import { mergeData, mergeComputed, mergeMethods } from './merge';
 import { triggerLifecycle, getEl } from './util';
 import { createVueProxy } from './proxy';
-import { createElement } from '../shared/util';
+import { createElement, isFunction } from '../shared/util';
 
 function findVNodeParentByKey(VNode, key) {
   if (VNode.key === key) {
@@ -14,6 +14,7 @@ function findVNodeParentByKey(VNode, key) {
   }
 
   let parent = null;
+  if (!VNode.children) return null;
   for (let i = 0; i < VNode.children.length; i++) {
     const curNode = VNode.children[i];
     if (curNode.key === key) {
@@ -55,6 +56,8 @@ class Vue {
     // getEl
     this.$config.el = getEl(this.$config.el);
 
+    // 没有被代理的data对象
+    this.$noProxySrcData = _.cloneDeep(isFunction(this.$config.data) ? this.$config.data() : {});
     // 将data混入到this中
     mergeData.call(this);
 

@@ -40,10 +40,10 @@ export function parseVFor({ context, el, vAttrNames, renderFun }) {
   // (item) in items
   const value = el.getAttribute(attrName);
   const grammar = value.split(EMPTY_SPLIT);
-  if (grammar.length !== 3 || grammar[1] !== 'in') return null;
+  if (grammar.length !== 2) return null;
 
-  const itItemStr = grammar[0];
-  const itObjStr = grammar[2];
+  const itItemStr = grammar[0].trim();
+  const itObjStr = grammar[1].trim();
   let VNodes = [];
   // 获取迭代的对象
   const itObj = execExpression(context, itObjStr); // eval(`with(context){${itObjStr}}`); /* context[itObjStr] */

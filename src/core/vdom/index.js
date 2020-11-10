@@ -38,7 +38,7 @@ export function createVNode(tagName) {
       on: {},
       hook: {
         init: (vnode) => {
-          console.log('init:', vnode.sel);
+          // console.log('init:', vnode.sel);
           // if (vnode.sel === 'input') {
           //   vnode.data.on.input = (val) => {
           //     console.log(val);
@@ -46,13 +46,13 @@ export function createVNode(tagName) {
           // }
         },
         create: (emptyVnode, vnode) => {
-          console.log('create:', vnode.sel);
+          // console.log('create:', vnode.sel);
           // 创建了dom
           // vnode.sel 标签名
           //
         },
         insert: (vnode) => {
-          console.log('insert:', vnode.sel);
+          // console.log('insert:', vnode.sel);
         },
       },
     },

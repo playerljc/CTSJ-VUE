@@ -20,6 +20,15 @@
 
 
 
+.component的测试
+1.全局注册了一个my-component的组件，并且什么props,data都没有
+2.my-component放入props和data
+3.放入非props的attrs数据
+4.父亲更新props
+5.组件自身更新
+6.父亲更新class和style数据
+7.computed的method实验
+8.watch
 
 
 
