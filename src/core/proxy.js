@@ -219,6 +219,43 @@ export function createVueProxy(obj) {
 }
 
 /**
+ * createPropsProxy
+ * @param props
+ * @return Proxy
+ */
+export function createPropsProxy(props) {
+  const self = this;
+  return new Proxy(props, {
+    set(target, key, value, receiver) {
+      // watch监听
+      if (self.$config.watch && isObject(self.$config.watch)) {
+        const handler = self.$config.watch[key];
+        if (handler) {
+          // 调用watch的监听句柄
+          // handler(oldValue,newValue)
+          // value是没有被代理的
+          // target[key]已经是被代理的对象，需要找到对应的非代理对象
+          // clone的目的是不让用户修改这个值
+          const cloneValue = _.cloneDeep(value);
+          let newVal = cloneValue;
+          // 是数组且不是length监听
+          if (isArray(target) && key !== 'length') {
+            // 取出array的值，clone的目的防止用户修改
+            const array = _.cloneDeep(eval(`self.$noProxySrcData.${key}`));
+            // key是数组的索引，为key索引赋值新值
+            array[key] = cloneValue;
+            newVal = array;
+          }
+          // 调用watch的相关句柄
+          handler.call(self, execExpression(self.$noProxySrcData, key), newVal);
+        }
+      }
+      return Reflect.set(target, key, value, receiver);
+    },
+  });
+}
+
+/**
  * getPropertyVisitPathStr - 获取属性访问的字符串路径 a.b.c.d.e.f
  * @param target
  * @param key

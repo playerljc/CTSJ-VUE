@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import { renderComponent } from '../../compiler/render';
-import { createComponentProxy } from '../proxy';
+import { createComponentProxy, createPropsProxy } from '../proxy';
 import { createElement, isFunction, isObject } from '../../shared/util';
 import { getComponentConfig } from './util';
 import { mergeComputed, mergeData, mergeMethods, mergeProps } from '../merge';
@@ -57,9 +57,13 @@ class Component {
     this.$config = this.getConfig();
     this.$argConfig = config;
 
+    // 获取父亲传递过来的props和attrs
     const { props, attrs } = getPropsAndAttrs.call(this);
     this.$attes = attrs;
     this.$props = _.cloneDeep(props);
+
+    // 创建props的代理
+    this.$propsProxy = createPropsProxy.call(this, this.$props);
 
     // 没有被代理的props + data的合体
     this.$noProxySrcData = {
@@ -179,15 +183,29 @@ class Component {
     const { props, attrs } = getPropsAndAttrs.call(this);
     this.$attes = attrs;
 
-    const preProps = this.$props;
+    // 之前props的keys
+    const prePropsKeys = Object.keys(this.$props);
+
+    // 新的props
     this.$props = _.cloneDeep(props);
-    Object.keys(preProps).forEach((key) => {
-      delete this.$noProxySrcData[key];
-      delete this[key];
+
+    // 先触发watch
+    Object.assign(this.$propsProxy, this.$props);
+
+    // 之前props的keys
+    prePropsKeys.forEach((key) => {
+      if (key in this.$noProxySrcData) {
+        delete this.$noProxySrcData[key];
+      }
+
+      if (key in this) {
+        delete this[key];
+      }
     });
 
     Object.assign(this.$noProxySrcData, this.$props);
     mergeProps.call(this, this.$props);
+    this.$propsProxy = createPropsProxy.call(this, this.$props);
 
     // 在这个地方进行watch操作
     // 修改被代理对象的props，而不是修改$dataProxy对象，这样不会触发set
