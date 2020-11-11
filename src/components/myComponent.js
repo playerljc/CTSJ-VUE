@@ -25,6 +25,23 @@ export default {
           cd: 'China',
         },
       ],
+      listInner: [
+        {
+          title: '拜登称特朗普拒认败选很尴尬',
+          info: '拜登称特朗普拒认败选很尴尬',
+          time: '2020-10-20',
+        },
+        {
+          title: '拜登称特朗普拒认败选很尴尬',
+          info: '拜登称特朗普拒认败选很尴尬',
+          time: '2020-10-20',
+        },
+        {
+          title: '拜登称特朗普拒认败选很尴尬',
+          info: '拜登称特朗普拒认败选很尴尬',
+          time: '2020-10-20',
+        },
+      ],
     };
   },
   template: `
@@ -65,6 +82,10 @@ export default {
       
       <div>{{displayCardList()}}</div>
       <div>{{displayAll}}</div>
+      
+      <div>
+        <my-component-inner v-bind:list-inner="listInner"></my-component-inner>
+      </div>
     </div>
   `,
   methods: {
@@ -125,6 +146,24 @@ export default {
           xh: '1.0',
           lx: 'MPV',
           cd: '上汽',
+        },
+      ];
+
+      this.listInner = [
+        {
+          title: 'playerljc特朗普拒认败选很尴尬',
+          info: 'playerljc特朗普拒认败选很尴尬',
+          time: '2020-10-20',
+        },
+        {
+          title: 'playerljc特朗普拒认败选很尴尬',
+          info: 'playerljc特朗普拒认败选很尴尬',
+          time: '2020-10-20',
+        },
+        {
+          title: 'playerljc特朗普拒认败选很尴尬',
+          info: 'playerljc特朗普拒认败选很尴尬',
+          time: '2020-10-20',
         },
       ];
     }, 6000);

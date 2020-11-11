@@ -11,7 +11,9 @@ import { LIFECYCLE_HOOKS } from '../../shared/constants';
  * 混入props到this中
  */
 function getPropsAndAttrs() {
+  // 传递进来的
   const { attrs } = this.$argConfig;
+  // 配置定义的 props现在只处理的数组，对象的形式还没有处理
   let { props = [] } = this.$config;
   const prop = {};
   const attr = {};
@@ -20,9 +22,12 @@ function getPropsAndAttrs() {
     props = Object.keys(props);
   }
 
+  // 迭代传递进来的
   Object.keys(attrs).forEach((key) => {
-    if (props.indexOf(key) !== -1) {
-      prop[key] = attrs[key];
+    // key是传递进来的
+    const index = props.findIndex((prop) => pascalCaseToKebabCase(prop) === key);
+    if (index !== -1) {
+      prop[props[index]] = attrs[key];
     } else {
       attr[key] = attrs[key];
     }
@@ -50,6 +55,7 @@ class Component {
    * @param parent - 父对象(可能是Vue实例，也肯能是Component实例)
    */
   constructor(config, { key, el, top, parent }) {
+    debugger;
     this.$el = el;
     this.$top = top;
     this.$parent = parent;
@@ -147,7 +153,7 @@ class Component {
   /**
    * 获取组件components的配置
    */
-  getComponentConfigs() {
+  getComponentsConfig() {
     const config = this.getConfig();
     if (!config || !('components' in config) || !config.components) return {};
     const components = {};

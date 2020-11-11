@@ -29,7 +29,8 @@
 6.父亲更新class和style数据
 7.computed的method实验
 8.watch
-9.组件中还有组件
+9.组件使用xxx-xxx-xxx和AbcDef形式分别注册
+10.组件中还有组件
 
 
 

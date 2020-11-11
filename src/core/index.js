@@ -23,6 +23,7 @@ function findVNodeParentByKey(VNode, key) {
       break;
     } else {
       parent = findVNodeParentByKey.call(this, curNode, key);
+      if (parent) break;
     }
   }
 

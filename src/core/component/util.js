@@ -26,7 +26,12 @@ export function isComponentNodeByComponent(el, components) {
   if (!isElement) return false;
 
   const { tagName } = el;
-  return existsComponentByComponent(tagName.toLowerCase(), components);
+  let exists = existsComponentByComponent(tagName.toLowerCase(), components);
+  if (!exists) {
+    exists = existsComponentByGlobal(tagName.toLowerCase());
+  }
+
+  return exists;
 }
 
 /**
@@ -46,15 +51,13 @@ export function isPascalCase(name) {
 }
 
 /**
- * pascalCaseToKebabCase
+ * pascalCaseToKebabCase 驼峰转xxx-xxx-xxx
  * @param name
  * @return {string}
  */
 export function pascalCaseToKebabCase(name) {
-  return name
-    .replace(/([a-z0-9]|(?=[A-Z]))([A-Z])/g, '$1-$2')
-    .substring(1)
-    .toLowerCase();
+  const result = name.replace(/([a-z0-9]|(?=[A-Z]))([A-Z])/g, '$1-$2');
+  return (result.startsWith('-') ? result.substring(1) : result).toLowerCase();
 }
 
 /**
@@ -72,21 +75,24 @@ export function createComponent({ attrs, events, parent, top, el, key }) {
  */
 // xxx-xxx-xxx 获取
 // AbcDef 尝试AbcDef和abc-def获取
+
 export function getComponentConfig(ins, componentName) {
   if (isVueInstance(ins)) {
     return getConfig(componentName);
   }
+
   if (isComponentInstance(ins)) {
-    const { components = {} } = ins.getConfig();
+    const components = ins.getComponentsConfig();
 
     if (components[componentName]) {
       return components[componentName];
     }
+    return getConfig(componentName);
 
     // AbcDefGhi
-    if (isPascalCase(componentName)) {
-      return components[isPascalCase(componentName)];
-    }
+    // if (isPascalCase(componentName)) {
+    //   return components[isPascalCase(componentName)];
+    // }
   }
 
   return null;

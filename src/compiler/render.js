@@ -77,7 +77,7 @@ export function renderLoop(context, el) {
     const isComponentIns = isComponentInstance(this);
     if (isComponentIns) {
       // 在component实例下判断是否是组件节点
-      isComponent = isComponentNodeByComponent(el, this.getComponentConfigs());
+      isComponent = isComponentNodeByComponent(el, this.getComponentsConfig());
     } else {
       return null;
     }
@@ -318,6 +318,7 @@ export function renderComponentNode(context, el) {
   // 6.v-on 自定义事件 组件需要进行存储
   // 解析非指令属性
   // VNode赋值attr
+  debugger;
   const self = this;
 
   // 获取指令属性

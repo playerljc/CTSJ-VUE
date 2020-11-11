@@ -1,144 +1,76 @@
 export default {
-  props: ['list'],
+  props: ['listInner'],
   data() {
     return {
-      carList: [
+      list: [
         {
-          name: '哈弗',
-          pp: '长城',
-          xh: 'h6',
-          lx: 'SUV',
-          cd: 'China',
-        },
-        {
-          name: '卡罗拉',
-          pp: '丰田',
-          xh: 'es',
-          lx: '轿车',
-          cd: 'China Japen',
-        },
-        {
-          name: '宝骏',
-          pp: '上汽',
-          xh: '560',
-          lx: 'SUV',
-          cd: 'China',
+          title: '111',
+          info: '222',
+          time: '2020-10-20',
         },
       ],
     };
   },
   template: `
-    <div>
-      <table>
-        <tr>
-           <th>姓名</th>
-           <th>年龄</th>
-           <th>身高</th>
-           <th>籍贯</th>
-           <th>所在城市</th>
-        </tr>
-        <tr v-for="(item, index) in list" v-bind:key="index">
-          <td>{{item.name}}</td>
-          <td>{{item.age}}</td>
-          <td>{{item.height}}</td>
-          <td>{{item.hometown}}</td>
-          <td>{{item.city}}</td>
-        </tr>
-      </table>
-      
-      <table>
-        <tr>
-           <th>车辆名称</th>
-           <th>品牌</th>
-           <th>型号</th>
-           <th>类型</th>
-           <th>产地</th>
-        </tr>
-        <tr v-for="(item, index) in carList" v-bind:key="index">
-          <td>{{item.name}}</td>
-          <td>{{item.pp}}</td>
-          <td>{{item.xh}}</td>
-          <td>{{item.lx}}</td>
-          <td>{{item.cd}}</td>
-        </tr>
-      </table>
-      
-      <div>{{displayCardList()}}</div>
-      <div>{{displayAll}}</div>
+    <div style="margin-top: 50px;">
+      <div>我是myComponent的子组件</div>
+      <div>
+        <div>这个是Props的数据展示</div>
+        <ul>
+          <li v-for="(item,index) in listInner" v-bind:key="index">
+            <div>{{item.title}}</div>
+            <div>{{item.info}}</div>
+            <div>{{item.time}}</div>
+          </li>
+        </ul>
+      </div>
+      <div>
+        <div>这个是Data的数据</div>
+        <ul>
+          <li v-for="(item,index) in list" v-bind:key="index">
+            <div>{{item.title}}</div>
+            <div>{{item.info}}</div>
+            <div>{{item.time}}</div>
+          </li>
+        </ul>
+      </div>
     </div>
   `,
-  methods: {
-    displayCardList() {
-      return this.carList.map((item) => item.name).join(',');
-    },
-  },
-  computed: {
-    displayAll() {
-      return `${this.list.map((item) => item.name).join(',')}\r\n${this.displayCardList()}`;
-    },
-  },
-  watch: {
-    list(oldVal, newVal) {
-      console.log('list', 'change', oldVal, newVal);
-    },
-    carList(oldVal, newVal) {
-      console.log('carList', 'change', oldVal, newVal);
-    },
-  },
+  methods: {},
+  computed: {},
+  watch: {},
   beforeCreate() {
-    console.log('myComponent', 'beforeCreate');
+    console.log('myComponentInner', 'beforeCreate');
   },
   created() {
-    console.log('myComponent', 'created');
+    console.log('myComponentInner', 'created');
   },
   beforeMount() {
-    console.log('myComponent', 'beforeMount');
+    console.log('myComponentInner', 'beforeMount');
   },
   mounted() {
-    console.log('myComponent', 'mounted');
+    console.log('myComponentInner', 'mounted');
     setTimeout(() => {
-      this.carList = [
+      debugger;
+      this.list = [
         {
-          name: '迈锐宝',
-          pp: '选弗兰',
-          xh: 'EX',
-          lx: '轿车',
-          cd: 'USA',
-        },
-        {
-          name: '昂卡拉',
-          pp: '雪佛兰',
-          xh: 'EX',
-          lx: 'SUV',
-          cd: 'USA',
-        },
-        {
-          name: '亚洲龙',
-          pp: '本田',
-          xh: 'EX',
-          lx: '轿车',
-          cd: '合资',
-        },
-        {
-          name: '五菱之光',
-          pp: '上汽',
-          xh: '1.0',
-          lx: 'MPV',
-          cd: '上汽',
+          title: '333',
+          info: '666',
+          time: '2020-10-20',
         },
       ];
-    }, 6000);
+    }, 8000);
   },
   beforeUpdate() {
-    console.log('myComponent', 'beforeUpdate');
+    console.log('myComponentInner', 'beforeUpdate');
   },
   updated() {
-    console.log('myComponent', 'updated');
+    console.log('myComponentInner', 'updated');
   },
   beforeDestroy() {
-    console.log('myComponent', 'beforeDestroy');
+    console.log('myComponentInner', 'beforeDestroy');
   },
   destroyed() {
-    console.log('myComponent', 'destroyed');
+    console.log('myComponentInner', 'destroyed');
   },
 };

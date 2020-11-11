@@ -1,4 +1,4 @@
-import { isKebabCase, isPascalCase, pascalCaseToKebabCase } from './util';
+import { isPascalCase, pascalCaseToKebabCase } from './util';
 
 // 全局组件的map
 const globalComponentsMap = new Map();
@@ -20,23 +20,7 @@ export function register(componentName, config) {
 export function existsComponentByGlobal(componentName) {
   // Vue.component('MyComponent');
   // componentName my-component <mycomponent />
-  // xxx-xxx-xxx
-  // if (isKebabCase(componentName)) {
   return globalComponentsMap.has(componentName);
-  // }
-
-  // AbcDefGhi
-  // if (isPascalCase(componentName)) {
-  // 不存在
-  // if (!globalComponentsMap.has(componentName)) {
-  // 转换成xxx-xxx-xxx
-  // return globalComponentsMap.has(pascalCaseToKebabCase(componentName));
-  // }
-
-  // return true;
-  // }
-
-  // return false;
 }
 
 /**
@@ -48,16 +32,6 @@ export function existsComponentByGlobal(componentName) {
 export function existsComponentByComponent(componentName, components) {
   const keys = Object.keys(components);
   return keys.some((key) => key.toLowerCase() === componentName);
-  // if (componentName in components) {
-  //   return true;
-  // }
-
-  // AbcDefGhi
-  // if (isPascalCase(componentName)) {
-  //   return pascalCaseToKebabCase(componentName) in components;
-  // }
-
-  // return false;
 }
 
 /**
@@ -66,14 +40,12 @@ export function existsComponentByComponent(componentName, components) {
  * @return {Object}
  */
 export function getConfig(componentName) {
-  const config = globalComponentsMap.get(componentName);
-
-  if (!config) {
-    // AbcDefGhi
-    if (isPascalCase(componentName)) {
-      return globalComponentsMap.get(pascalCaseToKebabCase(componentName));
-    }
-  }
-
-  return config;
+  return globalComponentsMap.get(componentName);
+  // if (!config) {
+  //   // AbcDefGhi
+  //   if (isPascalCase(componentName)) {
+  //     return globalComponentsMap.get(pascalCaseToKebabCase(componentName));
+  //   }
+  // }
+  // return config;
 }
