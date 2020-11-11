@@ -2,6 +2,7 @@ import Vue from './core';
 
 import MyComponent from './components/myComponent';
 
+// 注册的componentName是 MyComponent my-component
 Vue.component('my-component', MyComponent);
 
 // v-bind 指令名称 v-bind:id id是指令的参数 v-bind:id="123" 123是指令的值  v-bind.a.b:id="" .a.b是指令的modifiers
@@ -53,8 +54,7 @@ window.onload = () => {
 <!--            <p>{{checkbox}}</p>-->
 
 
-
-            <my-component 
+            <my-component
               v-bind:list="list" 
               v-bind:class="[activeClass, errorClass]"
       		    v-bind:style="{color:activeColor,fontSize: fontSize + 'px'}"

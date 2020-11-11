@@ -77,7 +77,7 @@ export function renderLoop(context, el) {
     const isComponentIns = isComponentInstance(this);
     if (isComponentIns) {
       // 在component实例下判断是否是组件节点
-      isComponent = isComponentNodeByComponent(el, this.getConfig().components || []);
+      isComponent = isComponentNodeByComponent(el, this.getComponentConfigs());
     } else {
       return null;
     }

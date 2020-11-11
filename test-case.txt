@@ -29,6 +29,7 @@
 6.父亲更新class和style数据
 7.computed的method实验
 8.watch
+9.组件中还有组件
 
 
 

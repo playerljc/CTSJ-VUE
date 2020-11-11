@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import { isKebabCase, isPascalCase, pascalCaseToKebabCase } from './component/util';
 import { patch } from './vdom';
 import { register } from './component/register';
 import { render } from '../compiler/render';
@@ -41,9 +42,19 @@ function findVNodeParentByKey(VNode, key) {
 class Vue {
   /**
    * component - 全局注册组件(在任何地方都可以使用)
+   * @param componentName - string 注册的组件名称
+   * @param config - config 组件的配置
    */
   static component(componentName, config) {
-    register(componentName, config);
+    // xxx-xxx-xxx
+    if (isKebabCase(componentName)) {
+      register(componentName.toLowerCase(), config);
+    }
+    // AbcDefGhi
+    else if (isPascalCase(componentName)) {
+      register(componentName.toLowerCase(), config);
+      register(pascalCaseToKebabCase(componentName), config);
+    }
   }
 
   /**

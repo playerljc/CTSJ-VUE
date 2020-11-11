@@ -51,7 +51,10 @@ export function isPascalCase(name) {
  * @return {string}
  */
 export function pascalCaseToKebabCase(name) {
-  return name.replace(/([a-z0-9]|(?=[A-Z]))([A-Z])/g, '$1-$2').toLowerCase();
+  return name
+    .replace(/([a-z0-9]|(?=[A-Z]))([A-Z])/g, '$1-$2')
+    .substring(1)
+    .toLowerCase();
 }
 
 /**

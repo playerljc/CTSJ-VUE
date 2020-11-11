@@ -14,45 +14,50 @@ export function register(componentName, config) {
 
 /**
  * existsComponentByGlobal - 是否存在指定名称的组件在全局下
- * @param componentName
+ * @param componentName - 这个componentName是tagName.toLowerCase() 小写
  * 可能是kebab-case(xxx-xxx-xxx) | pascal-case(AbcDefGhi) 两种形式
  */
 export function existsComponentByGlobal(componentName) {
+  // Vue.component('MyComponent');
+  // componentName my-component <mycomponent />
   // xxx-xxx-xxx
-  if (isKebabCase(componentName)) {
-    return globalComponentsMap.has(componentName);
-  }
+  // if (isKebabCase(componentName)) {
+  return globalComponentsMap.has(componentName);
+  // }
 
   // AbcDefGhi
-  if (isPascalCase(componentName)) {
-    // 不存在
-    if (!globalComponentsMap.has(componentName)) {
-      // 转换成xxx-xxx-xxx
-      return globalComponentsMap.has(pascalCaseToKebabCase(componentName));
-    }
+  // if (isPascalCase(componentName)) {
+  // 不存在
+  // if (!globalComponentsMap.has(componentName)) {
+  // 转换成xxx-xxx-xxx
+  // return globalComponentsMap.has(pascalCaseToKebabCase(componentName));
+  // }
 
-    return true;
-  }
+  // return true;
+  // }
 
-  return false;
+  // return false;
 }
 
 /**
  * existsComponentByComponent - 是否存在指定名称的组件在组件下
- * @param componentName
+ * @param componentName - 这个componentName是tagName.toLowerCase() 小写
+ * @param components
  * 可能是kebab-case(xxx-xxx-xxx) | pascal-case(AbcDefGhi) 两种形式
  */
 export function existsComponentByComponent(componentName, components) {
-  if (componentName in components) {
-    return true;
-  }
+  const keys = Object.keys(components);
+  return keys.some((key) => key.toLowerCase() === componentName);
+  // if (componentName in components) {
+  //   return true;
+  // }
 
   // AbcDefGhi
-  if (isPascalCase(componentName)) {
-    return pascalCaseToKebabCase(componentName) in components;
-  }
+  // if (isPascalCase(componentName)) {
+  //   return pascalCaseToKebabCase(componentName) in components;
+  // }
 
-  return false;
+  // return false;
 }
 
 /**

@@ -2,7 +2,7 @@ import _ from 'lodash';
 import { renderComponent } from '../../compiler/render';
 import { createComponentProxy, createPropsProxy } from '../proxy';
 import { createElement, isFunction, isObject } from '../../shared/util';
-import { getComponentConfig } from './util';
+import { getComponentConfig, isKebabCase, isPascalCase, pascalCaseToKebabCase } from './util';
 import { mergeComputed, mergeData, mergeMethods, mergeProps } from '../merge';
 import { triggerLifecycle } from '../util';
 import { LIFECYCLE_HOOKS } from '../../shared/constants';
@@ -142,6 +142,27 @@ class Component {
    */
   getConfig() {
     return getComponentConfig(this.$parent, this.$el.tagName.toLowerCase());
+  }
+
+  /**
+   * 获取组件components的配置
+   */
+  getComponentConfigs() {
+    const config = this.getConfig();
+    if (!config || !('components' in config) || !config.components) return {};
+    const components = {};
+    Object.keys(config.components).forEach((key) => {
+      // xxx-xxx-xxx
+      if (isKebabCase(key)) {
+        components[key.toLowerCase()] = config.components[key];
+      }
+      // AbcDefGhi
+      else if (isPascalCase(key)) {
+        components[key.toLowerCase()] = config.components[key];
+        components[pascalCaseToKebabCase(key)] = config.components[key];
+      }
+    });
+    return components;
   }
 
   /**
