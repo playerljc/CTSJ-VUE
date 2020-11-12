@@ -1,8 +1,8 @@
 import { execExpression, isArray } from '../../shared/util';
 import { getDirectiveEntry, hasVAttr } from './util';
 import {
-  FORM_CONTROL_BINDING_TAGNAMES,
-  FORM_CONTROL_CHECKED_TAGNAMES,
+  FORM_CONTROL_BINDING_TAG_NAMES,
+  FORM_CONTROL_CHECKED_TAG_NAMES,
   DIRECT_PREFIX,
 } from '../../shared/constants';
 
@@ -118,7 +118,7 @@ export function parseVModel({ context, el, vAttrNames, tagName, VNode }) {
   // 1.赋值
   if (tagName === 'input') {
     // radio | checkbox
-    if (FORM_CONTROL_CHECKED_TAGNAMES.includes(inputType)) {
+    if (FORM_CONTROL_CHECKED_TAG_NAMES.includes(inputType)) {
       // value属性
       if (inputValue) {
         //  <input type="radio" value="1" v-model="sex" />男
@@ -209,7 +209,7 @@ export function parseVModel({ context, el, vAttrNames, tagName, VNode }) {
   // input标签
   else if (tagName === 'input') {
     // radio | checkbox
-    if (FORM_CONTROL_CHECKED_TAGNAMES.includes(inputType)) {
+    if (FORM_CONTROL_CHECKED_TAG_NAMES.includes(inputType)) {
       // 有value属性
       if (inputValue) {
         //  <input type="radio" value="1" v-model="sex" />男
@@ -285,7 +285,7 @@ export function parseVModel({ context, el, vAttrNames, tagName, VNode }) {
  * @return {boolean}
  */
 export function isFormTag(tagName) {
-  return FORM_CONTROL_BINDING_TAGNAMES.includes(tagName);
+  return FORM_CONTROL_BINDING_TAG_NAMES.includes(tagName);
 }
 
 /**

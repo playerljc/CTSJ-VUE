@@ -4,9 +4,9 @@ import { DIRECT_PREFIX } from '../../shared/constants';
 import { createElement, execExpression } from '../../shared/util';
 
 /**
- * hasVHtml
- * @param attrNames
- * @return {*}
+ * hasVHtml - 是否存在v-html属性
+ * @param attrNames - Array 所有的指令属性集合
+ * @return {boolean}
  */
 export function hasVHtml(attrNames) {
   return hasVAttr(attrNames, `${DIRECT_PREFIX}html`);

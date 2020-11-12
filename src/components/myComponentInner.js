@@ -38,7 +38,14 @@ export default {
   `,
   methods: {},
   computed: {},
-  watch: {},
+  watch: {
+    list(oldVal, newVal) {
+      console.log('list', oldVal, newVal);
+    },
+    listInner(oldVal, newVal) {
+      console.log('listInner', oldVal, newVal);
+    },
+  },
   beforeCreate() {
     console.log('myComponentInner', 'beforeCreate');
   },
@@ -51,7 +58,6 @@ export default {
   mounted() {
     console.log('myComponentInner', 'mounted');
     setTimeout(() => {
-      debugger;
       this.list = [
         {
           title: '333',

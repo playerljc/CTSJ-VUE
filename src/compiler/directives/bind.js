@@ -3,23 +3,24 @@ import { DIRECT_PREFIX } from '../../shared/constants';
 import { execExpression, isArray, toCamelCase } from '../../shared/util';
 
 /**
- * hasVBind
- * @param attrNames
- * @return {*}
+ * hasVBind - 是否存在v-bind属性
+ * @param attrNames - Array 所有的指令属性
+ * @return {boolean}
  */
 export function hasVBind(attrNames) {
   return hasVAttr(attrNames, `${DIRECT_PREFIX}bind`);
 }
 
 /**
- * getVBindEntrys
- * @param context
- * @param el
- * @param vAttrNames
+ * getVBindEntrys - 获取所有v-bind属性的实体集合
+ * @param context - Object 上下文对象
+ * @param el - HtmlElement
+ * @param vAttrNames - Array 所有指令属性的集合
  * @return Array
  */
 export function getVBindEntrys({ context, el, vAttrNames }) {
   const bindAttrs = vAttrNames.filter((n) => n.indexOf(`${DIRECT_PREFIX}bind`) !== -1);
+
   return bindAttrs.map((attrName) => {
     const entry = getDirectiveEntry(el, attrName);
 
@@ -40,6 +41,7 @@ export function getVBindEntrys({ context, el, vAttrNames }) {
           });
         }
       }
+
       if (entry.arg === 'style') {
         if (
           entry.expression.indexOf('{') === 0 &&
@@ -58,12 +60,12 @@ export function getVBindEntrys({ context, el, vAttrNames }) {
 }
 
 /**
- * parseVBind
- * @param context
- * @param el
- * @param vAttrNames
- * @param VNode
- * @return {*}
+ * parseVBind - 解析v-bind
+ * @param context - Object 上下文对象
+ * @param el - HtmlElement
+ * @param vAttrNames - Array 所有指令的集合
+ * @param VNode - VNode 当前的VNode节点
+ * @return {Object}
  */
 export function parseVBind({ context, el, vAttrNames, VNode }) {
   const entrys = getVBindEntrys.call(this, { context, el, vAttrNames });
@@ -81,5 +83,6 @@ export function parseVBind({ context, el, vAttrNames, VNode }) {
       VNode.data.props[entry.arg] = entry.value;
     }
   });
+
   return entrys;
 }

@@ -9,20 +9,29 @@ import { triggerLifecycle, getEl } from './util';
 import { createVueProxy } from './proxy';
 import { createElement, isFunction } from '../shared/util';
 
+/**
+ * findVNodeParentByKey - 查询key的Parent
+ * @param VNode - 当前节点
+ * @param key - 查询的key
+ * @return {VNode}
+ */
 function findVNodeParentByKey(VNode, key) {
   if (VNode.key === key) {
     return null;
   }
 
   let parent = null;
-  if (!VNode.children) return null;
+
+  if (!('children' in VNode) || !VNode.children) return null;
+
   for (let i = 0; i < VNode.children.length; i++) {
-    const curNode = VNode.children[i];
-    if (curNode.key === key) {
+    const curVNode = VNode.children[i];
+
+    if (curVNode.key === key) {
       parent = VNode;
       break;
-    } else {
-      parent = findVNodeParentByKey.call(this, curNode, key);
+    } else if ('children' in curVNode && curVNode.children) {
+      parent = findVNodeParentByKey.call(this, curVNode, key);
       if (parent) break;
     }
   }
@@ -32,44 +41,52 @@ function findVNodeParentByKey(VNode, key) {
 
 /**
  * Vue
- * @param config {
- *   el:
- *   template:
- *   data:
- *   methods:
- * }
- * @constructor
+ * @class Vue
+ * @classdesc Vue实例
  */
 class Vue {
   /**
    * component - 全局注册组件(在任何地方都可以使用)
    * @param componentName - string 注册的组件名称
-   * @param config - config 组件的配置
+   *          分为 kebab-case(xxx-xxx-xxx) PascalCase(AbcDef) 两种的形式
+   *          如果使用kebab-case进行的注册 则只能使用kebab-case进行使用
+   *          如果使用PascalCase进行的注册 则使用kebab-case和PascalCase都可以
+   *          例：
+   *          注册：Vue.component('my-component',{});
+   *          使用：<my-component>
+   *
+   *          注册 Vue.component('MyComponent',{});
+   *          使用 <my-component> 或 <MyComponent>
+   * @param config - Object 组件的配置
    */
   static component(componentName, config) {
-    // xxx-xxx-xxx
+    // 使用kebab-case进行注册(xxx-xxx-xxx) componentName需要转换成小写 xxx-xxx-xxx不变
     if (isKebabCase(componentName)) {
       register(componentName.toLowerCase(), config);
     }
-    // AbcDefGhi
+    // 使用PascalCase进行注册(AbcDef) componentName需要转换成小写 XxxXxx转换成xxxxxx
     else if (isPascalCase(componentName)) {
+      // 使用xxx-xxx-xxx进行注册
       register(componentName.toLowerCase(), config);
+      // 使用XxxXxx进行注册
       register(pascalCaseToKebabCase(componentName), config);
     }
   }
 
   /**
    * constructor
-   * @param config
+   * @param config - Object
    */
   constructor(config) {
+    // $config - Vue的配置对象
     this.$config = config;
 
-    // getEl
+    // 获取Vue配置中的el实际对象，el可以是HtmlElement或String
     this.$config.el = getEl(this.$config.el);
 
-    // 没有被代理的data对象
+    // 纯净的data数据，没有进行代理的
     this.$noProxySrcData = _.cloneDeep(isFunction(this.$config.data) ? this.$config.data() : {});
+
     // 将data混入到this中
     mergeData.call(this);
 
@@ -79,23 +96,21 @@ class Vue {
     // ------ beforeCreate
     triggerLifecycle.call(this, LIFECYCLE_HOOKS[0]);
 
-    // data observer - 数据响应式创建针对data的响应式
+    // data observer - 数据响应式创建针对data和computed的响应式
     // 被响应式的数据有data | computed
     this.$dataProxy = createVueProxy.call(this, this);
 
     // 将methods混入到this中
     mergeMethods.call(this);
 
-    // 创建template的el对象
+    // 创建template(模板)的el对象templateEl，一个Vue实例只建立一次
     this.templateEl = createElement(this.$config.template);
 
     // 存放组件实例的Map
     this.componentsMap = new Map();
 
-    // 将watch混入到this中
-    // mergeWatch.call(this);
-
     // ------ create
+    // 数据观测 (data observer) 已完成
     triggerLifecycle.call(this, LIFECYCLE_HOOKS[1]);
 
     // ------ beforeMount

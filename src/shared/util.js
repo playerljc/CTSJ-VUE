@@ -2,9 +2,10 @@ import { DIRECT_DIVIDING_SYMBOL } from './constants';
 
 /**
  * toCamelCase - 用连接符链接的字符串转换成驼峰写法
- * @param str
- * @param toUpperCase
- * @return {*}
+ * 例：abc-def AbcDef
+ * @param str - string 用连接符节点的字符串
+ * @param toUpperCase - boolean 是否转换成大写
+ * @return {String}
  */
 export function toCamelCase(str, toUpperCase = false) {
   const result = str
@@ -16,9 +17,9 @@ export function toCamelCase(str, toUpperCase = false) {
 
 /**
  * merge - 会改变srcObj并返回
- * @param srcObj
- * @param tarObjs
- * @return {(T & U) | (T & U & V) | (T & U & V & W) | any}
+ * @param srcObj - {Object} 混入的对象
+ * @param tarObjs - {Array<Object>} - 要混入的值
+ * @return {Object}
  */
 export function merge(srcObj, ...tarObjs) {
   return Object.assign.apply(Object, [srcObj].concat(tarObjs));
@@ -27,7 +28,7 @@ export function merge(srcObj, ...tarObjs) {
 /**
  * isArray - 判断数组
  * @param obj
- * @return {arg is any[]}
+ * @return {boolean}
  */
 export function isArray(obj) {
   return Array.isArray(obj);
@@ -53,7 +54,7 @@ export function isObject(obj) {
 
 /**
  * isTextNode - 是否是文本节点
- * @param el
+ * @param el - Node
  * @return {boolean}
  */
 export function isTextNode(el) {
@@ -62,7 +63,7 @@ export function isTextNode(el) {
 
 /**
  * isElementNode - 是否是元素节点
- * @param el
+ * @param el - Element
  * @return {boolean}
  */
 export function isElementNode(el) {
@@ -71,7 +72,7 @@ export function isElementNode(el) {
 
 /**
  * createElement - 根据html字符串创建dom
- * @param htmlStr
+ * @param htmlStr - string
  * @return {Element}
  */
 export function createElement(htmlStr) {
@@ -82,8 +83,8 @@ export function createElement(htmlStr) {
 
 /**
  * execExpression - 执行表达式
- * @param context
- * @param expressionStr
+ * @param context - {Object} 执行的上下文
+ * @param expressionStr - {String} 表达式
  * @return {any}
  */
 export function execExpression(context, expressionStr) {

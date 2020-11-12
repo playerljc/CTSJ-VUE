@@ -1,13 +1,14 @@
-// mergeData
 import _ from 'lodash';
 import { isFunction, merge } from '../shared/util';
 
 /**
  * mergeProps - 混入props到this中
+ * @param props - Object 需要混入到this中的props对象
  */
 export function mergeProps(props) {
-  // props是不能修改的
   const properties = {};
+
+  // 迭代props对象
   Object.keys(props).forEach((key) => {
     properties[key] = {
       value: props[key],
@@ -20,6 +21,7 @@ export function mergeProps(props) {
     };
   });
 
+  // 混入就是为this定义props属性
   Object.defineProperties(this, properties);
 }
 
@@ -27,7 +29,6 @@ export function mergeProps(props) {
  * mergeData - 混入data到this中
  */
 export function mergeData() {
-  // 被代理的data对象
   merge(this, _.cloneDeep(isFunction(this.$config.data) ? this.$config.data() : {}));
 }
 
@@ -37,10 +38,14 @@ export function mergeData() {
 export function mergeComputed() {
   // 根据computed对象生成computedObj
   const computed = this.$config.computed || {};
+
   const computedObj = {};
+
+  // 只需要混入computed的key就可以，值暂为null，根据proxy的get生成值
   for (const p in computed) {
     computedObj[p] = null;
   }
+
   merge(this, computedObj);
 }
 

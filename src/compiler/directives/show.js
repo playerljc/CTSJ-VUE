@@ -3,9 +3,9 @@ import { DIRECT_PREFIX } from '../../shared/constants';
 import { execExpression } from '../../shared/util';
 
 /**
- * hasVShow
- * @param attrNames
- * @return {*}
+ * hasVShow - 是否有v-show属性
+ * @param attrNames - Array 所有的指令属性集合
+ * @return {boolean}
  */
 export function hasVShow(attrNames) {
   return hasVAttr(attrNames, `${DIRECT_PREFIX}show`);

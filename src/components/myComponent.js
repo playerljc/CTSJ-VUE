@@ -84,7 +84,7 @@ export default {
       <div>{{displayAll}}</div>
       
       <div>
-        <my-component-inner v-bind:list-inner="listInner"></my-component-inner>
+        <MyComponentInner v-bind:list-inner="listInner"></MyComponentInner>
       </div>
     </div>
   `,
@@ -155,11 +155,11 @@ export default {
           info: 'playerljc特朗普拒认败选很尴尬',
           time: '2020-10-20',
         },
-        {
-          title: 'playerljc特朗普拒认败选很尴尬',
-          info: 'playerljc特朗普拒认败选很尴尬',
-          time: '2020-10-20',
-        },
+        // {
+        //   title: 'playerljc特朗普拒认败选很尴尬',
+        //   info: 'playerljc特朗普拒认败选很尴尬',
+        //   time: '2020-10-20',
+        // },
         {
           title: 'playerljc特朗普拒认败选很尴尬',
           info: 'playerljc特朗普拒认败选很尴尬',

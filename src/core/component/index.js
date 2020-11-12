@@ -1,30 +1,38 @@
 import _ from 'lodash';
 import { renderComponent } from '../../compiler/render';
 import { createComponentProxy, createPropsProxy } from '../proxy';
-import { createElement, isFunction, isObject } from '../../shared/util';
+import { createElement, isArray, isFunction, isObject } from '../../shared/util';
 import { getComponentConfig, isKebabCase, isPascalCase, pascalCaseToKebabCase } from './util';
 import { mergeComputed, mergeData, mergeMethods, mergeProps } from '../merge';
 import { triggerLifecycle } from '../util';
 import { LIFECYCLE_HOOKS } from '../../shared/constants';
 
 /**
- * 混入props到this中
+ * getPropsAndAttrs - 获取argConfig中的props和attrs
+ * @return Object
  */
 function getPropsAndAttrs() {
-  // 传递进来的
+  // 传递进来的 attrs是k/v形式
   const { attrs } = this.$argConfig;
-  // 配置定义的 props现在只处理的数组，对象的形式还没有处理
+
+  // 配置定义的
   let { props = [] } = this.$config;
+
   const prop = {};
   const attr = {};
 
-  if (isObject(props)) {
-    props = Object.keys(props);
+  // props必须是object或者array
+  if (isObject(props) || isArray(props)) {
+    // 如果props是对象则props是keys的集合
+    if (isObject(props)) {
+      props = Object.keys(props);
+    }
   }
 
-  // 迭代传递进来的
+  // 迭代传递进来的attrs
   Object.keys(attrs).forEach((key) => {
-    // key是传递进来的
+    // 在props中寻找key是否存在
+    // 因为在props中定义的是驼峰形式，而在组件标签中定义的是xxx-xxx-xxx形式，所以prop要转换成驼峰形式
     const index = props.findIndex((prop) => pascalCaseToKebabCase(prop) === key);
     if (index !== -1) {
       prop[props[index]] = attrs[key];
@@ -41,6 +49,8 @@ function getPropsAndAttrs() {
 
 /**
  * Component
+ * @class Component
+ * @classdesc 组件
  */
 class Component {
   /**
@@ -55,7 +65,6 @@ class Component {
    * @param parent - 父对象(可能是Vue实例，也肯能是Component实例)
    */
   constructor(config, { key, el, top, parent }) {
-    debugger;
     this.$el = el;
     this.$top = top;
     this.$parent = parent;
@@ -145,6 +154,7 @@ class Component {
 
   /**
    * 获取组件配置
+   * @return Object
    */
   getConfig() {
     return getComponentConfig(this.$parent, this.$el.tagName.toLowerCase());
@@ -152,12 +162,18 @@ class Component {
 
   /**
    * 获取组件components的配置
+   * @return Object
    */
   getComponentsConfig() {
     const config = this.getConfig();
+
     if (!config || !('components' in config) || !config.components) return {};
+
     const components = {};
+
     Object.keys(config.components).forEach((key) => {
+      // 这块和Vue.register一样
+
       // xxx-xxx-xxx
       if (isKebabCase(key)) {
         components[key.toLowerCase()] = config.components[key];
@@ -168,6 +184,7 @@ class Component {
         components[pascalCaseToKebabCase(key)] = config.components[key];
       }
     });
+
     return components;
   }
 
@@ -186,8 +203,10 @@ class Component {
 
     // 渲染
     const VNode = renderComponent.call(this);
+
     // class和style的处理
     this.assignClassAndStyle(VNode);
+
     VNode.key = this.$key;
 
     // ------ mount
@@ -245,8 +264,10 @@ class Component {
     triggerLifecycle.call(this, LIFECYCLE_HOOKS[4]);
 
     const VNode = renderComponent.call(this);
+
     // class和style的处理
     this.assignClassAndStyle(VNode);
+
     VNode.key = this.$key;
 
     // update

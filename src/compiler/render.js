@@ -26,15 +26,17 @@ import {
   isElementNode,
   toCamelCase,
 } from '../shared/util';
-import { END_TAG, START_TAG, FORM_CONTROL_BINDING_TAGNAMES } from '../shared/constants';
+import { END_TAG, START_TAG, FORM_CONTROL_BINDING_TAG_NAMES } from '../shared/constants';
 
 /**
- * render - 进行模板的渲染
- * @param el
- * @param isMount
+ * render - Vue实例的渲染
+ * @param el - HtmlElement
+ * @param isMount - boolean 是否是挂载阶段
  */
 export function render(el, isMount) {
+  // 进行loopRender
   const vnode = renderLoop.call(this, this.$dataProxy, this.templateEl);
+
   if (isMount) {
     this.$preVNode = patch(el, vnode);
   } else {
@@ -48,26 +50,30 @@ export function render(el, isMount) {
 }
 
 /**
- * renderComponent
+ * renderComponent - 组件实例的渲染
+ * @return VNode | Array<VNode>
  */
 export function renderComponent() {
   return renderLoop.call(this, this.$dataProxy, this.templateEl);
 }
 
 /**
- * renderLoop - 参数都是多个值
- * @param context
- * @param el
- * @return {{text: *}|null}
+ * renderLoop - 进行递归的渲染
+ * @param context - 上下文对象
+ * @param el - HtmlElement 当前节点的el
+ * @return {VNode | Array<VNode>}
  */
 export function renderLoop(context, el) {
+  // 文本节点
   if (isTextNode(el)) {
-    // 文本节点
+    // 文本节点的渲染
     return renderTextNode.call(this, context, el);
   }
 
   let isComponent = false;
+
   const isVueIns = isVueInstance(this);
+
   // this是否是vue实例
   if (isVueIns) {
     // 在vue实例下判断是否是组件节点
@@ -75,6 +81,7 @@ export function renderLoop(context, el) {
   } else {
     // this是否是component实例
     const isComponentIns = isComponentInstance(this);
+
     if (isComponentIns) {
       // 在component实例下判断是否是组件节点
       isComponent = isComponentNodeByComponent(el, this.getComponentsConfig());
@@ -104,9 +111,9 @@ export function renderLoop(context, el) {
 
 /**
  * renderTextNode - 渲染文本节点
- * @param context
- * @param el
- * @return {{text: *}}
+ * @param context - 上下文对象
+ * @param el - HtmlElement
+ * @return {TextVNode}
  */
 export function renderTextNode(context, el) {
   // 表达式
@@ -135,10 +142,10 @@ export function renderTextNode(context, el) {
 
 /**
  * renderVAttr - 解析指令属性
- * @param el
- * @param context
- * @param renderFun
- * @return {null|*[]|*}
+ * @param el - HtmlElement 元素的el
+ * @param context - Object 上下文对象
+ * @param renderFun - Function 渲染函数
+ * @return {VNode | Array<VNode>}
  */
 function renderVAttr({ el, context, renderFun }) {
   /**
@@ -154,7 +161,7 @@ function renderVAttr({ el, context, renderFun }) {
 
   const self = this;
 
-  // 指令属性
+  // 获取所有指令属性
   const vAttrNames = getVAttrNames(el);
   if (!vAttrNames.length) {
     return {
@@ -163,13 +170,14 @@ function renderVAttr({ el, context, renderFun }) {
     };
   }
 
+  // 解析el的v-for标签
   if (hasVFor(vAttrNames)) {
     // parse v-for
     return {
       Continue: false,
       VNode: parseVFor.call(
         this,
-        // 如果context是this.$dataProxy则需要重新创建context
+        // 如果context是this.$dataProxy则需要重新创建新的context(上下文)，因为一个v-for就是一个新的上下文环境，因为v-for会有新的变量放入到this中
         {
           context: context === this.$dataProxy ? createContext.call(this) : context,
           el,
@@ -180,9 +188,11 @@ function renderVAttr({ el, context, renderFun }) {
     };
   }
 
+  // 解析v-if
   if (hasVIf(vAttrNames)) {
     // parse v-if
     const display = parseVIf({ context, el, vAttrNames });
+    // 如果不显示则返回null
     if (!display) {
       return {
         Continue: false,
@@ -191,23 +201,27 @@ function renderVAttr({ el, context, renderFun }) {
     }
   }
 
+  // 获取标签名称
   const tagName = el.tagName.toLowerCase();
+
   // createVNode
   const VNode = createVNode(tagName);
 
+  // 解析v-show
   if (hasVShow(vAttrNames)) {
     // parse v-show
     parseVShow({ context, el, vAttrNames, VNode });
   }
 
+  // 解析v-bind
   if (hasVBind(vAttrNames)) {
     // parse v-bind
     parseVBind({ context, el, vAttrNames, VNode });
   }
 
-  // v-model
-  // input | textarea | select
-  if (FORM_CONTROL_BINDING_TAGNAMES.includes(tagName) && hasVModel(vAttrNames)) {
+  // 解析v-model
+  // 只有input | textarea | select才进行解析
+  if (FORM_CONTROL_BINDING_TAG_NAMES.includes(tagName) && hasVModel(vAttrNames)) {
     parseVModel.call(self, {
       context,
       tagName,
@@ -218,13 +232,14 @@ function renderVAttr({ el, context, renderFun }) {
     });
   }
 
+  // 解析v-for
   if (hasVOn(vAttrNames)) {
     // parse v-on
     parseVOn.call(self, { context, el, tagName, vAttrNames, VNode });
   }
 
-  // 非表单标签的时候
-  // 是否是表单控件元素
+  // 解析v-html
+  // 非表单标签的时候 && 是否是表单控件元素
   if (!isFormTag(tagName) && hasVHtml(vAttrNames)) {
     // parse v-html
     parseVHtml({ context, el, vAttrNames, VNode });
@@ -239,15 +254,17 @@ function renderVAttr({ el, context, renderFun }) {
 }
 
 /**
- * renderAttr - 非指令属性
- * @param el
- * @param VNode
+ * renderAttr - 渲染非指令属性
+ * @param el - HtmlElement 元素的el
+ * @param VNode - VNode
  */
 function renderAttr({ el, VNode }) {
   const attrNames = getAttrNames(el);
+
   if (attrNames.length) {
     attrNames.forEach((attrName) => {
       const val = el.getAttribute(attrName);
+
       if (attrName === 'key') {
         VNode.key = val;
       } else if (attrName.startsWith('data-')) {
@@ -261,20 +278,21 @@ function renderAttr({ el, VNode }) {
 
 /**
  * renderElementNode - 渲染元素节点
- * @param context
- * @param el
- * @return {null|[]|*}
+ * @param context - Object 上下文对象
+ * @param el - HtmlElement el元素
+ * @return {VNode | Array<VNode>}
  */
 export function renderElementNode(context, el) {
   // 解析指令属性
   let { Continue, VNode } = renderVAttr.call(this, { el, context, renderFun: renderElementNode });
   if (!Continue) return VNode;
 
+  // 如果没有VNode，创建一个
   if (!VNode) {
     VNode = createVNode(el.tagName.toLowerCase());
   }
 
-  // 非指令属性
+  // 解析非指令属性
   renderAttr.call(this, { el, VNode });
 
   // loop children
@@ -282,6 +300,7 @@ export function renderElementNode(context, el) {
     const VNodes = renderLoop.call(this, context, el.childNodes[i]);
     if (!VNodes) continue;
 
+    // v-for返回的
     if (isArray(VNodes)) {
       VNodes.filter((n) => n).forEach((n) => {
         VNode.children.push(n);
@@ -296,8 +315,9 @@ export function renderElementNode(context, el) {
 
 /**
  * renderComponentNode - 渲染组件节点
- * @param context
- * @param el
+ * @param context - Object 上下文对象
+ * @param el - HtmlElement el元素
+ * @return VNode | Array<VNode>
  */
 export function renderComponentNode(context, el) {
   // <my-component v-bind:id="id" v-if="" v-show="" v-on:aaa="person + 1" v-on:bbb="display()" v-for="">
@@ -318,12 +338,12 @@ export function renderComponentNode(context, el) {
   // 6.v-on 自定义事件 组件需要进行存储
   // 解析非指令属性
   // VNode赋值attr
-  debugger;
   const self = this;
 
   // 获取指令属性
   const vAttrNames = getVAttrNames(el);
 
+  // 解析v-for
   if (hasVFor(vAttrNames)) {
     // parse v-for
     return parseVFor.call(this, {
@@ -335,8 +355,10 @@ export function renderComponentNode(context, el) {
   }
 
   // 获取el元素key属性的值
+  // 这个key属性可能是v-bind:key=，也可能是key=
   let key = getKey({ context, el });
 
+  // 解析v-if
   if (hasVIf(vAttrNames)) {
     // parse v-if
     const display = parseVIf({ context, el, vAttrNames });
@@ -361,6 +383,7 @@ export function renderComponentNode(context, el) {
   const attrs = {};
   const events = {};
 
+  // 解析v-bind
   if (hasVBind(vAttrNames)) {
     // parse v-bind 都是属性
     const entrys = getVBindEntrys({ context, el, vAttrNames });
@@ -382,6 +405,7 @@ export function renderComponentNode(context, el) {
     attrs.value = execExpression(context, entry.expression);
   }
 
+  // 解析v-on
   if (hasVOn(vAttrNames)) {
     // parse v-on
     const entrys = getVOnEntrys.call(self, { el, vAttrNames });
@@ -401,13 +425,14 @@ export function renderComponentNode(context, el) {
 
   if (!key) {
     // el没有key属性
-    // 创建一个key属性
+    // 创建一个key属性并设置到el中
     key = uuid();
     el.setAttribute('key', key);
   }
 
   // 根据key获取组件实例
   let component = self.componentsMap.get(key);
+
   // 没有创建组件
   if (!component) {
     // 用key创建组件
@@ -426,6 +451,7 @@ export function renderComponentNode(context, el) {
 
   // 不是第一次而是更新
   component.setParams({ attrs, events });
+
   // 调用组件的update方法返回VNode
   return component.update();
 }

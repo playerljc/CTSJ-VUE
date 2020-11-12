@@ -5,9 +5,9 @@ import { hasVAttr, getDirectiveEntry } from './util';
 import { DIRECT_PREFIX } from '../../shared/constants';
 
 /**
- * hasVOn
- * @param attrNames
- * @return {*}
+ * hasVOn - 是否有v-on属性
+ * @param attrNames - 所有的指令属性集合
+ * @return {boolean}
  */
 export function hasVOn(attrNames) {
   return hasVAttr(attrNames, `${DIRECT_PREFIX}on`);
@@ -34,7 +34,7 @@ export function getVOnEntrys({ el, vAttrNames }) {
  * @param vAttrNames
  * @param tagName
  * @param VNode
- * @return {*}
+ * @return {Array}
  */
 export function parseVOn({ context, el, tagName, vAttrNames, VNode }) {
   // 可以有多个v-on
@@ -47,8 +47,10 @@ export function parseVOn({ context, el, tagName, vAttrNames, VNode }) {
   //   return getDirectiveEntry(el, attrName);
   // });
 
+  // 获取所有v-on实体
   const entrys = getVOnEntrys({ el, vAttrNames });
 
+  // for entrys
   for (let i = 0; i < entrys.length; i++) {
     // if(hasFormTag && isVModel)
     // 是表单元素 && 是有v-model
@@ -57,6 +59,7 @@ export function parseVOn({ context, el, tagName, vAttrNames, VNode }) {
     const entry = entrys[i];
 
     // 过滤掉input | textarea | select 且有v-model
+    // 因为这些标签标签已经被v-model管理事件
     if (isFormTag(tagName) && entry.name === `${DIRECT_PREFIX}model`) continue;
 
     // 是否有此事件
@@ -105,7 +108,7 @@ export function parseVOn({ context, el, tagName, vAttrNames, VNode }) {
 
       // a + 1 display display(a + $event)
       if (entry.expression in self.$config.methods) {
-        // 函数名形式
+        // 函数名形式 直接调用
         this[entry.expression]();
       } else {
         // 表达式

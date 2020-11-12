@@ -2,18 +2,19 @@ import { execExpression } from '../../shared/util';
 import { DIRECT_SYMBOLS, DIRECT_PREFIX, GROUP_KEY_NAME } from '../../shared/constants';
 
 /**
- * hasVAttr
- * @param attrNames
- * @param attrName
- * @return {*}
+ * hasVAttr - 查看attrName是否是指令属性
+ * @param attrNames Array<string> 所有属性的集合
+ * @param attrName string 属性的名称
+ * @return {boolean}
  */
 export function hasVAttr(attrNames, attrName) {
   return attrNames.some((itemAttrName) => itemAttrName.startsWith(attrName));
 }
 
 /**
- * getDirectName - 获取指令的name
- * @param attrName
+ * getDirectName - 在指令属性中获取指令的名称
+ * 例如：v-bind:id 获取的是bind
+ * @param attrName - string 指令属性名称
  * @return {string}
  */
 export function getDirectName(attrName) {
@@ -31,8 +32,9 @@ export function getDirectName(attrName) {
 }
 
 /**
- * getDirectArg - 获取指令的arg
- * @param attrName
+ * getDirectArg - 获取指令属性中的arg
+ * 例如：v-bind:id="" 获取的是id
+ * @param attrName - string 指令属性
  * @return {string}
  */
 export function getDirectArg(attrName) {
@@ -44,9 +46,10 @@ export function getDirectArg(attrName) {
 }
 
 /**
- * getDirectModifiers - 获取指令的modifiers
- * @param attrName
- * @return {{}}
+ * getDirectModifiers - 获取指令属性中的modifiers
+ * 例如 v-on:click.stop 获取的是{stop:true}
+ * @param attrName - string 指令属性
+ * @return {Object}
  */
 export function getDirectModifiers(attrName) {
   const index = attrName.indexOf(DIRECT_SYMBOLS[1]);
@@ -63,8 +66,8 @@ export function getDirectModifiers(attrName) {
 
 /**
  * getVAttrNames 获取所有指令的属性名
- * @param el
- * @return {T[]}
+ * @param el - HtmlElement 元素
+ * @return {NamedNodeMap}
  */
 export function getVAttrNames(el) {
   return el.getAttributeNames().filter((attrName) => attrName.startsWith(DIRECT_PREFIX));
@@ -72,8 +75,8 @@ export function getVAttrNames(el) {
 
 /**
  * getAttrNames 获取非指令的属性名
- * @param el
- * @return {T[]}
+ * @param el - HtmlElement 元素
+ * @return {NamedNodeMap}
  */
 export function getAttrNames(el) {
   return el
@@ -82,9 +85,10 @@ export function getAttrNames(el) {
 }
 
 /**
- * getDirectiveEntry 根据vAttrName获取指令实体
- * @param el
- * @param attrName
+ * getDirectiveEntry - 根据vAttrName获取指令实体
+ * @param el - HtmlElement
+ * @param attrName - string 指令名称 如：v-on:click.stop.prev
+ * @return {Object}
  */
 export function getDirectiveEntry(el, attrName) {
   return {
@@ -97,8 +101,8 @@ export function getDirectiveEntry(el, attrName) {
 }
 
 /**
- * getAttrEntrys
- * @param {*} el
+ * getAttrEntrys - 获取非指令属性的属性集合
+ * @param el - HtmlElement
  * @return Array
  */
 export function getAttrEntrys(el) {
@@ -114,9 +118,9 @@ export function getAttrEntrys(el) {
 }
 
 /**
- * getKey
- * @param context
- * @param el
+ * getKey - 获取el的key属性
+ * @param context - Object 上下文对象
+ * @param el - HtmlElement
  * @return string
  */
 export function getKey({ context, el }) {

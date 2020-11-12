@@ -63,7 +63,7 @@ export function createVNode(tagName) {
 /**
  * createTextVNode
  * @param value
- * @return {{text: *}}
+ * @return Object
  */
 export function createTextVNode(value) {
   return {
