@@ -333,8 +333,8 @@ export function renderElementNode(context, el) {
  * 4.<template v-slot:default></template> -> 有v-slot
  */
 export function renderTemplateNode(context, el) {
-  debugger;
   const vAttrNames = getVAttrNames(el);
+
   if (vAttrNames.length) {
     // 解析el的v-for标签
     if (hasVFor(vAttrNames)) {
