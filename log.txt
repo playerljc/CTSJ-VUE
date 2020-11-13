@@ -10,8 +10,8 @@
 .component的kebab-case | PascalCase ok
 .v-bind="xxx"这种形式的 ok
 .component的$emit ok
+.template标签 ok
 
-.template标签
 .slot
 
 .自定义指令

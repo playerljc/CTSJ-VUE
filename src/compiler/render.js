@@ -24,6 +24,7 @@ import {
   isObject,
   isTextNode,
   isElementNode,
+  isTemplateNode,
   toCamelCase,
 } from '../shared/util';
 import { END_TAG, START_TAG, FORM_CONTROL_BINDING_TAG_NAMES } from '../shared/constants';
@@ -91,6 +92,11 @@ export function renderLoop(context, el) {
   }
 
   if (!isComponent) {
+    // 如果是template元素
+    if (isTemplateNode(el)) {
+      return renderTemplateNode.call(this, context, el);
+    }
+
     // 是元素不是组件节点
     if (isElementNode(el)) {
       return renderElementNode.call(this, context, el);
@@ -314,6 +320,63 @@ export function renderElementNode(context, el) {
   }
 
   return VNode;
+}
+
+/**
+ * renderTemplateNode - 渲染template元素
+ * @param context - Object 上下文对象
+ * @param el - HtmlElement el元素
+ *
+ * 1.<template></template> -> 什么都没有
+ * 2.<template v-if="xxx"></template> -> 有v-if
+ * 3.<template v-for="item in list|obj"></template> -> 有v-for
+ * 4.<template v-slot:default></template> -> 有v-slot
+ */
+export function renderTemplateNode(context, el) {
+  debugger;
+  const vAttrNames = getVAttrNames(el);
+  if (vAttrNames.length) {
+    // 解析el的v-for标签
+    if (hasVFor(vAttrNames)) {
+      // parse v-for
+      return parseVFor.call(
+        this,
+        // 如果context是this.$dataProxy则需要重新创建新的context(上下文)，因为一个v-for就是一个新的上下文环境，因为v-for会有新的变量放入到this中
+        {
+          context: context === this.$dataProxy ? createContext.call(this) : context,
+          el,
+          vAttrNames,
+          renderFun: renderTemplateNode,
+        },
+      );
+    }
+
+    // 解析v-if
+    if (hasVIf(vAttrNames)) {
+      // parse v-if
+      const display = parseVIf({ context, el, vAttrNames });
+      // 如果不显示则返回null
+      if (!display) {
+        return null;
+      }
+    }
+  }
+
+  // loop template的children
+  let result = [];
+  for (let i = 0; i < el.content.childNodes.length; i++) {
+    const VNodes = renderLoop.call(this, context, el.content.childNodes[i]);
+    if (!VNodes) continue;
+
+    // v-for返回的
+    if (isArray(VNodes)) {
+      result = result.concat(VNodes);
+    } else if (isObject(VNodes)) {
+      result.push(VNodes);
+    }
+  }
+
+  return result;
 }
 
 /**

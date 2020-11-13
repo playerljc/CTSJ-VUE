@@ -2,10 +2,12 @@ import Vue from './core';
 
 import MyComponent from './components/myComponent';
 import MyComponentInner from './components/myComponentInner';
+import ForComponent from './components/forComponent';
 
 // 注册的componentName是 MyComponent my-component
 Vue.component('my-component', MyComponent);
 Vue.component('MyComponentInner', MyComponentInner);
+Vue.component('for-component', ForComponent);
 
 // v-bind 指令名称 v-bind:id id是指令的参数 v-bind:id="123" 123是指令的值  v-bind.a.b:id="" .a.b是指令的modifiers
 window.onload = () => {
@@ -56,7 +58,7 @@ window.onload = () => {
 <!--            <p>{{checkbox}}</p>-->
 
 
-            <my-component
+            <!--<my-component
               v-on:onChange="onChange"
               v-model="selected"
               v-bind="obj"
@@ -64,7 +66,10 @@ window.onload = () => {
               v-bind:class="[activeClass, errorClass]"
       		    v-bind:style="{color:activeColor,fontSize: fontSize + 'px'}"
       		    name="myComponent" 
-             ></my-component>
+             ></my-component>-->
+             
+             
+<!--             <for-component v-for="(item,index) in list" v-bind:key="index" v-bind:list="[item.name]"></for-component>-->
             
             
 <!--            <select v-model="selected">-->
@@ -78,6 +83,19 @@ window.onload = () => {
             
 <!--            <input v-bind:type="type" v-model="input">-->
 <!--            <div>{{input}}</div>-->
+
+              <template v-for="(item,index) in list">
+                <div>111</div>
+                <my-component
+              v-on:onChange="onChange"
+              v-model="selected"
+              v-bind="obj"
+              v-bind:list="list" 
+              v-bind:class="[activeClass, errorClass]"
+      		    v-bind:style="{color:activeColor,fontSize: fontSize + 'px'}"
+      		    name="myComponent" 
+             ></my-component>
+              </template>
           </div>
       	`,
     data: () => ({
@@ -303,37 +321,36 @@ window.onload = () => {
         //   { text: 'Two1', value: 'B1' },
         //   { text: 'Three1', value: 'C1' },
         // ];
-
-        this.list = [
-          {
-            name: '赵六',
-            age: 20,
-            height: 1.8,
-            hometown: '沈阳',
-            city: '沈阳',
-          },
-          {
-            name: '王七',
-            age: 20,
-            height: 1.8,
-            hometown: '沈阳',
-            city: '沈阳',
-          },
-          {
-            name: '刘八',
-            age: 20,
-            height: 1.8,
-            hometown: '沈阳',
-            city: '沈阳',
-          },
-          {
-            name: '赵九',
-            age: 20,
-            height: 1.8,
-            hometown: '沈阳',
-            city: '沈阳',
-          },
-        ];
+        // this.list = [
+        //   {
+        //     name: '赵六',
+        //     age: 20,
+        //     height: 1.8,
+        //     hometown: '沈阳',
+        //     city: '沈阳',
+        //   },
+        //   {
+        //     name: '王七',
+        //     age: 20,
+        //     height: 1.8,
+        //     hometown: '沈阳',
+        //     city: '沈阳',
+        //   },
+        //   {
+        //     name: '刘八',
+        //     age: 20,
+        //     height: 1.8,
+        //     hometown: '沈阳',
+        //     city: '沈阳',
+        //   },
+        //   {
+        //     name: '赵九',
+        //     age: 20,
+        //     height: 1.8,
+        //     hometown: '沈阳',
+        //     city: '沈阳',
+        //   },
+        // ];
       }, 2000);
     },
     beforeUpdate() {

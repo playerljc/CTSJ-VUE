@@ -71,6 +71,15 @@ export function isElementNode(el) {
 }
 
 /**
+ * isTemplateNode - 是否是template元素
+ * @param el - Element
+ * @return {boolean}
+ */
+export function isTemplateNode(el) {
+  return el.nodeName.toLowerCase() === 'template';
+}
+
+/**
  * createElement - 根据html字符串创建dom
  * @param htmlStr - string
  * @return {Element}

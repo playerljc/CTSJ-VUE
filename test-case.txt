@@ -32,6 +32,13 @@
 9.组件使用xxx-xxx-xxx和AbcDef形式分别注册
 10.组件中还有组件
 
+.template的测试
+1.简单的template
+2.带有组件的template
+3.带有v-if的template
+4.template的嵌套
+5.template带有v-for
+
 
 
 
