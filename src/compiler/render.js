@@ -440,6 +440,26 @@ export function renderComponentNode(context, el) {
   // 根据key获取组件实例
   let component = self.componentsMap.get(key);
 
+  /**
+   * wrap
+   * 元素如果是这样定义的
+   * <my-component>
+   *   <template v-slot:head></template>
+   *   <template v-slot:footer></template>
+   *   <template v-slot:default></template>
+   * </my-component>
+   *
+   * inner
+   * 比如VNode的结构是
+   * <div>
+   *   <div></div>
+   *   <div></div>
+   *   <slot></slot>
+   *   <slot name="head"></slot>
+   *   <slot name="footer"></slot>
+   * </div>
+   */
+
   // 没有创建组件
   if (!component) {
     // 用key创建组件

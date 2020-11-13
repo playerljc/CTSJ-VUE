@@ -17,7 +17,7 @@ export function hasVOn(attrNames) {
  * getVOnEntrys
  * @param el
  * @param vAttrNames
- * @return {*}
+ * @return {Array}
  */
 export function getVOnEntrys({ el, vAttrNames }) {
   const onAttrs = vAttrNames.filter((n) => n.indexOf(`${DIRECT_PREFIX}on`) !== -1);

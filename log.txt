@@ -11,9 +11,11 @@
 .v-bind="xxx"这种形式的 ok
 .component的$emit ok
 
-.mixin
-.slot
 .template标签
+.slot
+
+.自定义指令
+.mixin
 .component标签
 .keep-alive标签
 .computed(不需要)
@@ -21,7 +23,6 @@
  set
 .filter (很难)
  自定义filter
-.自定义指令
 .在一个方法中多次修改data只render一次
 
 // components集合的键应该用元素的key
