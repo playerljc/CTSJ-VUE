@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import { executeVOn } from '../../compiler/directives/on';
 import { renderComponent } from '../../compiler/render';
 import { createComponentProxy, createPropsProxy } from '../proxy';
 import { createElement, isArray, isFunction, isObject } from '../../shared/util';
@@ -16,8 +17,7 @@ function getPropsAndAttrs() {
   const { attrs } = this.$argConfig;
 
   // 配置定义的
-  let { props = [] } = this.$config;
-
+  let props = _.cloneDeep(this.$config.props);
   const prop = {};
   const attr = {};
 
@@ -26,6 +26,18 @@ function getPropsAndAttrs() {
     // 如果props是对象则props是keys的集合
     if (isObject(props)) {
       props = Object.keys(props);
+    }
+
+    const { model } = this.$config;
+    // 如果用户设置了model选项，且组件设置了v-model
+    if (model && 'value' in attrs) {
+      if (!props.includes(model.prop)) {
+        props.push(model.prop);
+        attrs[model.prop] = attrs.value;
+        delete attrs.value;
+      }
+    } else if ('value' in attrs && !props.includes('value')) {
+      props.push('value');
     }
   }
 
@@ -44,6 +56,36 @@ function getPropsAndAttrs() {
   return {
     props: prop,
     attrs: attr,
+  };
+}
+
+/**
+ * createEmit - 创建$emit对象
+ * @return Function
+ */
+function createEmit() {
+  const self = this;
+  // <my-component v-on:abc="xxxxxx"></my-component>
+
+  /**
+   * $emit执行
+   * @param eventName string - 事件名称
+   * @param argv Array - 事件的参数
+   */
+  return function (eventName, ...argv) {
+    const { events } = self.$argConfig;
+
+    const eventNameFormat = eventName.toLowerCase();
+
+    if (!(eventNameFormat in events)) return false;
+
+    executeVOn.call(self.$parent, {
+      context: self.$parent.$dataProxy,
+      entry: {
+        expression: events[eventNameFormat],
+      },
+      argv,
+    });
   };
 }
 
@@ -71,6 +113,8 @@ class Component {
     this.$key = key;
     this.$config = this.getConfig();
     this.$argConfig = config;
+    // 创建组件的$emit实例
+    this.$emit = createEmit.call(this);
 
     // 获取父亲传递过来的props和attrs
     const { props, attrs } = getPropsAndAttrs.call(this);

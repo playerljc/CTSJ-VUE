@@ -1,5 +1,8 @@
 export default {
-  props: ['list'],
+  props: ['list', 'cloneNode', 'textNode', 'nodeValue'],
+  model: {
+    prop: 'checked',
+  },
   data() {
     return {
       carList: [
@@ -46,6 +49,10 @@ export default {
   },
   template: `
     <div>
+      <div>{{checked}}</div>
+      
+      <div>{{cloneNode}}-{{textNode}}-{{nodeValue}}</div>
+      
       <table>
         <tr>
            <th>姓名</th>
@@ -117,6 +124,7 @@ export default {
   },
   mounted() {
     console.log('myComponent', 'mounted');
+    this.$emit('onChange', 1, 2, 3, 4);
     setTimeout(() => {
       this.carList = [
         {

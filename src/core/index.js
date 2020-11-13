@@ -66,9 +66,9 @@ class Vue {
     }
     // 使用PascalCase进行注册(AbcDef) componentName需要转换成小写 XxxXxx转换成xxxxxx
     else if (isPascalCase(componentName)) {
-      // 使用xxx-xxx-xxx进行注册
+      // 使用xxxxxx进行注册
       register(componentName.toLowerCase(), config);
-      // 使用XxxXxx进行注册
+      // 使用xxx-xxx-xxx进行注册
       register(pascalCaseToKebabCase(componentName), config);
     }
   }

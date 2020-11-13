@@ -117,7 +117,7 @@ export function renderLoop(context, el) {
  */
 export function renderTextNode(context, el) {
   // 表达式
-  const expression = el.textContent;
+  const expression = el.textContent.trim();
   let index = 0;
   let value = '';
   while (index < expression.length) {
@@ -283,6 +283,9 @@ function renderAttr({ el, VNode }) {
  * @return {VNode | Array<VNode>}
  */
 export function renderElementNode(context, el) {
+  // 合并多个文本节点为一个文本节点
+  el.normalize();
+
   // 解析指令属性
   let { Continue, VNode } = renderVAttr.call(this, { el, context, renderFun: renderElementNode });
   if (!Continue) return VNode;
@@ -320,6 +323,9 @@ export function renderElementNode(context, el) {
  * @return VNode | Array<VNode>
  */
 export function renderComponentNode(context, el) {
+  // 合并多个文本节点为一个文本节点
+  el.normalize();
+
   // <my-component v-bind:id="id" v-if="" v-show="" v-on:aaa="person + 1" v-on:bbb="display()" v-for="">
   //  <div>
   //    <div></div>
@@ -402,6 +408,7 @@ export function renderComponentNode(context, el) {
   // v-bind:value v-on:input
   if (hasVModel(vAttrNames)) {
     const entry = getVModelEntrys({ el, vAttrNames });
+    // 这个地方需要获取组件的配置对象，看是否配置了model选项
     attrs.value = execExpression(context, entry.expression);
   }
 
@@ -415,8 +422,8 @@ export function renderComponentNode(context, el) {
   }
 
   // <com1 key=1/>
-  //  <com1 key=1 />
-  //  <com1 key=2 />
+  // <com1 key=1 />
+  // <com1 key=2 />
   //  <com1 key=3 />
 
   //  <com1 key=1 />

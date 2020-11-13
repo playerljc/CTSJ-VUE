@@ -1,6 +1,8 @@
+import { isProxyProperty } from '../../core/proxy';
+import { pascalCaseToKebabCase } from '../../core/component/util';
 import { hasVAttr, getDirectiveEntry } from './util';
 import { DIRECT_PREFIX } from '../../shared/constants';
-import { execExpression, isArray, toCamelCase } from '../../shared/util';
+import { execExpression, isArray, isObject, toCamelCase } from '../../shared/util';
 
 /**
  * hasVBind - 是否存在v-bind属性
@@ -19,12 +21,43 @@ export function hasVBind(attrNames) {
  * @return Array
  */
 export function getVBindEntrys({ context, el, vAttrNames }) {
+  // 获取所有v-bind标签
   const bindAttrs = vAttrNames.filter((n) => n.indexOf(`${DIRECT_PREFIX}bind`) !== -1);
 
-  return bindAttrs.map((attrName) => {
-    const entry = getDirectiveEntry(el, attrName);
+  const cloneEl = document.createElement(el.tagName);
+  const resultAttrs = [];
 
+  bindAttrs.forEach((bindAttr) => {
+    // 如果bindAttr是v-bind对象绑定
+    if (bindAttr === `${DIRECT_PREFIX}bind`) {
+      const attrValue = el.getAttribute(bindAttr);
+      const value = execExpression(context, attrValue);
+      // 如果这个值是Object
+      if (isObject(value)) {
+        Object.keys(value).forEach((key) => {
+          if (isProxyProperty(key)) {
+            // key是驼峰命名的需要转换成xxx-xxx形式
+            const bindKey = `${DIRECT_PREFIX}bind:${pascalCaseToKebabCase(key)}`;
+            cloneEl.setAttribute(bindKey, `${attrValue}.${key}`);
+            resultAttrs.push(bindKey);
+          }
+        });
+      }
+    }
+    // bindAttr是v-bind:xxx
+    else {
+      cloneEl.setAttribute(bindAttr, el.getAttribute(bindAttr));
+      resultAttrs.push(bindAttr);
+    }
+  });
+
+  return resultAttrs.map((attrName) => {
+    // 获取一个v-bind的实体
+    const entry = getDirectiveEntry(cloneEl, attrName);
+
+    // arg是class或者是style
     if (entry.arg === 'class' || entry.arg === 'style') {
+      // arg是class
       if (entry.arg === 'class') {
         if (entry.expression.startsWith('{') && entry.expression.endsWith('}')) {
           // { active: isActive, 'text-danger': hasError }
@@ -42,6 +75,7 @@ export function getVBindEntrys({ context, el, vAttrNames }) {
         }
       }
 
+      // arg是style
       if (entry.arg === 'style') {
         if (
           entry.expression.indexOf('{') === 0 &&
@@ -51,7 +85,8 @@ export function getVBindEntrys({ context, el, vAttrNames }) {
         }
         entry.value = execExpression(context, entry.expression);
       }
-    } else {
+    } else if (entry.arg) {
+      // 其他的情况
       entry.value = execExpression(context, entry.expression);
     }
 

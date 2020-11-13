@@ -28,6 +28,42 @@ export function getVOnEntrys({ el, vAttrNames }) {
 }
 
 /**
+ * executeVOn - 执行v-on内部的逻辑
+ * @param context - Object 上下文对象
+ * @param entry - Object v-on实体对象
+ * @param e - Event Html事件的对象
+ * @param argv - Array 调用函数的参数
+ */
+export function executeVOn({ context, entry, e, argv = [] }) {
+  const self = this;
+  // 下面的代码是执行v-on:click="" 里面代码具体的逻辑
+  // 1.a + 1 -> 表达式方式
+  // 2.display -> methods函数形式
+  // 3.display(a + $event) -> methods函数调用形式
+
+  // 函数名形式
+  if (entry.expression in self.$config.methods) {
+    // 函数名形式 直接调用
+    this[entry.expression].apply(context, argv);
+  }
+  // 其他的形式
+  else {
+    // 表达式
+    // 1 + 1
+    // item(item1,$event,3)
+    // 这个地方会创建新的context避免set陷阱函数执行
+    execExpression(
+      e
+        ? context === self.$dataProxy
+          ? createContext.call(self, { $event: e })
+          : context
+        : context,
+      entry.expression,
+    );
+  }
+}
+
+/**
  * parseVOn
  * @param context
  * @param el
@@ -106,20 +142,24 @@ export function parseVOn({ context, el, tagName, vAttrNames, VNode }) {
         }
       }
 
-      // a + 1 display display(a + $event)
-      if (entry.expression in self.$config.methods) {
-        // 函数名形式 直接调用
-        this[entry.expression]();
-      } else {
-        // 表达式
-        // 1 + 1
-        // item(item1,$event,3)
-        // 这个地方会创建新的context避免set陷阱函数执行
-        execExpression(
-          context === self.$dataProxy ? createContext.call(self, { $event: e }) : context,
-          entry.expression,
-        );
-      }
+      // 下面的代码是执行v-on:click="" 里面代码具体的逻辑
+      // 1.a + 1 -> 表达式方式
+      // 2.display -> methods函数形式
+      // 3.display(a + $event) -> methods函数调用形式
+      executeVOn.call(self, { context, entry, e });
+      // if (entry.expression in self.$config.methods) {
+      //   // 函数名形式 直接调用
+      //   this[entry.expression]();
+      // } else {
+      //   // 表达式
+      //   // 1 + 1
+      //   // item(item1,$event,3)
+      //   // 这个地方会创建新的context避免set陷阱函数执行
+      //   execExpression(
+      //     context === self.$dataProxy ? createContext.call(self, { $event: e }) : context,
+      //     entry.expression,
+      //   );
+      // }
 
       // <input v-model="a" />
     };

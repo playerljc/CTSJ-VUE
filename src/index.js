@@ -57,6 +57,9 @@ window.onload = () => {
 
 
             <my-component
+              v-on:onChange="onChange"
+              v-model="selected"
+              v-bind="obj"
               v-bind:list="list" 
               v-bind:class="[activeClass, errorClass]"
       		    v-bind:style="{color:activeColor,fontSize: fontSize + 'px'}"
@@ -78,6 +81,11 @@ window.onload = () => {
           </div>
       	`,
     data: () => ({
+      obj: {
+        cloneNode: { a: 1 },
+        textNode: 'textNode',
+        nodeValue: 'nodeValue',
+      },
       list: [
         {
           name: '张三',
@@ -206,6 +214,9 @@ window.onload = () => {
         // alert($event);
         // alert(str);
         alert(this.reversedMessage);
+      },
+      onChange(argv) {
+        alert('onChange', argv);
       },
     },
     computed: {
