@@ -39,6 +39,9 @@
 4.template的嵌套
 5.template带有v-for
 
+.slot的测试
+1.my-component加入一个简单的slot
+
 
 
 

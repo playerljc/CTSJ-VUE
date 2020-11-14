@@ -80,6 +80,15 @@ export function isTemplateNode(el) {
 }
 
 /**
+ * isSlotNode - 是否是slot元素
+ * @param el - Element
+ * @return {boolean}
+ */
+export function isSlotNode(el) {
+  return el.nodeName.toLowerCase() === 'slot';
+}
+
+/**
  * createElement - 根据html字符串创建dom
  * @param htmlStr - string
  * @return {Element}

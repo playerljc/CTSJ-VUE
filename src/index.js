@@ -3,11 +3,13 @@ import Vue from './core';
 import MyComponent from './components/myComponent';
 import MyComponentInner from './components/myComponentInner';
 import ForComponent from './components/forComponent';
+import MyComponentSlot from './components/myComponentSlot';
 
 // 注册的componentName是 MyComponent my-component
 Vue.component('my-component', MyComponent);
 Vue.component('MyComponentInner', MyComponentInner);
 Vue.component('for-component', ForComponent);
+Vue.component('MyComponentSlot', MyComponentSlot);
 
 // v-bind 指令名称 v-bind:id id是指令的参数 v-bind:id="123" 123是指令的值  v-bind.a.b:id="" .a.b是指令的modifiers
 window.onload = () => {
@@ -84,18 +86,56 @@ window.onload = () => {
 <!--            <input v-bind:type="type" v-model="input">-->
 <!--            <div>{{input}}</div>-->
 
-              <template v-for="(item,index) in list">
+              <!--<template v-for="(item,index) in list">
                 <div>111</div>
                 <my-component
-              v-on:onChange="onChange"
-              v-model="selected"
-              v-bind="obj"
-              v-bind:list="list" 
-              v-bind:class="[activeClass, errorClass]"
-      		    v-bind:style="{color:activeColor,fontSize: fontSize + 'px'}"
-      		    name="myComponent" 
-             ></my-component>
-              </template>
+                  v-on:onChange="onChange"
+                  v-model="selected"
+                  v-bind="obj"
+                  v-bind:list="list" 
+                  v-bind:class="[activeClass, errorClass]"
+                  v-bind:style="{color:activeColor,fontSize: fontSize + 'px'}"
+                  name="myComponent" 
+                 ></my-component>
+              </template>-->
+              
+              <MyComponentSlot>
+                <!--<template v-slot:default>
+                  <div>{{obj.cloneNode.a}}</div>
+                  <div>{{obj.textNode}}</div>
+                  <div>{{obj.nodeValue}}</div>
+                  <template>
+                    <div>222</div>
+                  </template>
+                  <template v-for="(item,index) in list">
+                    <div>111</div>
+                    <my-component
+                      v-on:onChange="onChange"
+                      v-model="selected"
+                      v-bind="obj"
+                      v-bind:list="list" 
+                      v-bind:class="[activeClass, errorClass]"
+                      v-bind:style="{color:activeColor,fontSize: fontSize + 'px'}"
+                      name="myComponent" 
+                     ></my-component>
+                  </template>
+                </template>-->
+                
+                <template v-slot:head>
+                  <div>head</div>
+                </template>
+                
+                <template v-slot:body>
+                  <div>body</div>
+                </template>
+                
+                <template v-slot:footer>
+                  <div>footer</div>
+                </template>
+                
+                
+              </MyComponentSlot>
+              
           </div>
       	`,
     data: () => ({

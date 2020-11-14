@@ -100,6 +100,7 @@ class Component {
    * @param config {
    *   attrs: Object - 外层标签所有的属性
    *   events: Object - 外层v-on的值
+   *   parentContext: Object - 父亲的上下文对象
    * }
    * @param key - 组件的key
    * @param el - 组件的el元素
@@ -189,8 +190,6 @@ class Component {
   /**
    * setParams
    * @param config
-   * @param el
-   * @param parent
    */
   setParams(config) {
     this.$argConfig = config;
@@ -230,6 +229,14 @@ class Component {
     });
 
     return components;
+  }
+
+  /**
+   * getParentContext - 获取父亲的上下文对象
+   * @return Object
+   */
+  getParentContext() {
+    return this.$argConfig.parentContext;
   }
 
   /**

@@ -25,9 +25,15 @@ import {
   isTextNode,
   isElementNode,
   isTemplateNode,
+  isSlotNode,
   toCamelCase,
 } from '../shared/util';
-import { END_TAG, START_TAG, FORM_CONTROL_BINDING_TAG_NAMES } from '../shared/constants';
+import {
+  END_TAG,
+  START_TAG,
+  FORM_CONTROL_BINDING_TAG_NAMES,
+  DIRECT_PREFIX,
+} from '../shared/constants';
 
 /**
  * render - Vue实例的渲染
@@ -95,6 +101,11 @@ export function renderLoop(context, el) {
     // 如果是template元素
     if (isTemplateNode(el)) {
       return renderTemplateNode.call(this, context, el);
+    }
+
+    // 如果是slot元素 vue实例没有slot元素
+    if (!isVueIns && isSlotNode(el)) {
+      return renderSlotNode.call(this, context, el);
     }
 
     // 是元素不是组件节点
@@ -305,7 +316,7 @@ export function renderElementNode(context, el) {
   renderAttr.call(this, { el, VNode });
 
   // loop children
-  for (let i = 0; i < el.childNodes.length; i++) {
+  for (let i = 0, len = el.childNodes.length; i < len; i++) {
     const VNodes = renderLoop.call(this, context, el.childNodes[i]);
     if (!VNodes) continue;
 
@@ -364,7 +375,7 @@ export function renderTemplateNode(context, el) {
 
   // loop template的children
   let result = [];
-  for (let i = 0; i < el.content.childNodes.length; i++) {
+  for (let i = 0, len = el.content.childNodes.length; i < len; i++) {
     const VNodes = renderLoop.call(this, context, el.content.childNodes[i]);
     if (!VNodes) continue;
 
@@ -377,6 +388,105 @@ export function renderTemplateNode(context, el) {
   }
 
   return result;
+}
+
+/**
+ * renderSlotNode - 渲染slot元素
+ * @param context - Object 上下文对象
+ * @param el - HtmlElement el元素
+ *
+ *
+ * --------------------下面是列举的一个例子---------------------
+ *
+ * wrap - 比如vue实例的模板
+ * 元素如果是这样定义的
+ * 1. 第一种情况 default用<template v-slot:default></template>表示的
+ * <my-component>
+ *   <template v-slot:head></template>
+ *   <template v-slot:footer></template>
+ *   <template v-slot:default>
+ *     <div>{{name}}</div>
+ *     <div>{{sex}}</div>
+ *     <my-component-inner></my-component-inner>
+ *   </template>
+ * </my-component>
+ *
+ * 2. 第二种情况 default没用template表示
+ * <li v-for="item in list">
+ *   <my-component>
+ *      <div>{{item.name}}</div>
+ *      <div>{{item.sex}}</div>
+ *      <template v-slot:head></template>
+ *      <template v-slot:footer></template>
+ *      <my-component-inner></my-component-inner>
+ *   </my-component>
+ * </li>
+ *
+ * inner - 比如my-component的template模板
+ * 比如VNode的结构是 my-component的template的内容
+ * 1.没有循环
+ * <div>
+ *   <div></div>
+ *   <div></div>
+ *   <slot></slot>
+ *   <slot name="head"></slot>
+ *   <slot name="footer"></slot>
+ *   <template></template>
+ * </div>
+ *
+ * 2.有循环
+ * <div>
+ *   <div></div>
+ *   <div></div>
+ *   <ul>
+ *    <li v-for="(item,index in list)">
+ *      {{item.name}}
+ *      <slot></slot>
+ *    </li>
+ *   </ul>
+ * </div>
+ */
+export function renderSlotNode(context, el) {
+  debugger;
+  // this是my-component的实例
+  // this.$parent是Vue实例或者是Component实例，应该用this.getParentContext()获取父亲的上下文对象作为调用renderTemplateNode的上下文参数
+
+  let name = 'default';
+
+  // 判断slot中是否存在name属性
+  if (el.hasAttribute('name')) {
+    // slot有name属性
+    name = el.getAttribute('name');
+  }
+
+  const templateEls = Array.from(this.$el.getElementsByTagName('template'));
+  const slotTemplateElIndex = templateEls.findIndex((templateEl) =>
+    templateEl.getAttributeNames().includes(`${DIRECT_PREFIX}slot:${name}`),
+  );
+  let slotTemplateEl = null;
+  if (slotTemplateElIndex !== -1) {
+    slotTemplateEl = templateEls[slotTemplateElIndex];
+  }
+
+  // 如果是default
+  if (name === 'default' && !slotTemplateEl) {
+    slotTemplateEl = document.createElement('template');
+    // 需要在this.$el的childrenNodes排除<template v-slot开头的元素
+    Array.from(this.$el.childNodes)
+      .filter((node) => {
+        if (isElementNode(node) && node.tagName.toLowerCase() === 'template') {
+          return !node
+            .getAttributeNames()
+            .some((attrName) => attrName.startsWith(`${DIRECT_PREFIX}slot:`));
+        }
+        return true;
+      })
+      .forEach((node) => {
+        slotTemplateEl.content.appendChild(node);
+      });
+  }
+
+  return renderTemplateNode.call(this.$parent, this.getParentContext(), slotTemplateEl);
 }
 
 /**
@@ -503,32 +613,13 @@ export function renderComponentNode(context, el) {
   // 根据key获取组件实例
   let component = self.componentsMap.get(key);
 
-  /**
-   * wrap
-   * 元素如果是这样定义的
-   * <my-component>
-   *   <template v-slot:head></template>
-   *   <template v-slot:footer></template>
-   *   <template v-slot:default></template>
-   * </my-component>
-   *
-   * inner
-   * 比如VNode的结构是
-   * <div>
-   *   <div></div>
-   *   <div></div>
-   *   <slot></slot>
-   *   <slot name="head"></slot>
-   *   <slot name="footer"></slot>
-   * </div>
-   */
-
   // 没有创建组件
   if (!component) {
     // 用key创建组件
     component = createComponent({
       attrs,
       events,
+      parentContext: context,
       parent: self,
       top: isVueInstance(self) ? self : self.$top,
       el,
@@ -540,7 +631,7 @@ export function renderComponentNode(context, el) {
   }
 
   // 不是第一次而是更新
-  component.setParams({ attrs, events });
+  component.setParams({ attrs, events, parentContext: context });
 
   // 调用组件的update方法返回VNode
   return component.update();
