@@ -13,6 +13,8 @@
 .template标签 ok
 
 .slot
+ 基本slot ok
+ 作用域slot
 
 .自定义指令
 .mixin
