@@ -55,7 +55,7 @@ export function executeVOn({ context, entry, e, argv = [] }) {
     execExpression(
       e
         ? context === self.$dataProxy
-          ? createContext.call(self, { $event: e })
+          ? createContext(self.$dataProxy, { $event: e })
           : context
         : context,
       entry.expression,

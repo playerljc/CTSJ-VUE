@@ -196,7 +196,7 @@ function renderVAttr({ el, context, renderFun }) {
         this,
         // 如果context是this.$dataProxy则需要重新创建新的context(上下文)，因为一个v-for就是一个新的上下文环境，因为v-for会有新的变量放入到this中
         {
-          context: context === this.$dataProxy ? createContext.call(this) : context,
+          context: context === this.$dataProxy ? createContext(this.$dataProxy) : context,
           el,
           vAttrNames,
           renderFun,
@@ -354,7 +354,7 @@ export function renderTemplateNode(context, el) {
         this,
         // 如果context是this.$dataProxy则需要重新创建新的context(上下文)，因为一个v-for就是一个新的上下文环境，因为v-for会有新的变量放入到this中
         {
-          context: context === this.$dataProxy ? createContext.call(this) : context,
+          context: context === this.$dataProxy ? createContext(this.$dataProxy) : context,
           el,
           vAttrNames,
           renderFun: renderTemplateNode,
@@ -447,9 +447,9 @@ export function renderTemplateNode(context, el) {
  * </div>
  */
 export function renderSlotNode(context, el) {
-  debugger;
   // this是my-component的实例
   // this.$parent是Vue实例或者是Component实例，应该用this.getParentContext()获取父亲的上下文对象作为调用renderTemplateNode的上下文参数
+  // el是my-component的template的el this.$el是$parent的template中<my-component></my-component>这个el
 
   let name = 'default';
 
@@ -459,9 +459,19 @@ export function renderSlotNode(context, el) {
     name = el.getAttribute('name');
   }
 
+  let bindEntrys;
+  // el可能会有多个v-bind,如果有则是作用域插槽
+  const vAttrNames = getVAttrNames(el);
+  if (hasVBind(vAttrNames)) {
+    bindEntrys = getVBindEntrys({ context, el, vAttrNames });
+  }
+
+  // 在父亲中寻找指定的<template v-slot:name></template>元素
   const templateEls = Array.from(this.$el.getElementsByTagName('template'));
   const slotTemplateElIndex = templateEls.findIndex((templateEl) =>
-    templateEl.getAttributeNames().includes(`${DIRECT_PREFIX}slot:${name}`),
+    templateEl
+      .getAttributeNames()
+      .some((attrName) => attrName.startsWith(`${DIRECT_PREFIX}slot:${name}`)),
   );
   let slotTemplateEl = null;
   if (slotTemplateElIndex !== -1) {
@@ -470,8 +480,11 @@ export function renderSlotNode(context, el) {
 
   // 如果是default
   if (name === 'default' && !slotTemplateEl) {
+    // 如果是default 没有定义<template v-slot:default></template> 则需要自己创建一个template元素
     slotTemplateEl = document.createElement('template');
-    // 需要在this.$el的childrenNodes排除<template v-slot开头的元素
+    slotTemplateEl.setAttribute(`${DIRECT_PREFIX}slot:default`, '');
+
+    // 需要在this.$el的childrenNodes排除<template v-slot开头的元素放入自定义template元素中
     Array.from(this.$el.childNodes)
       .filter((node) => {
         if (isElementNode(node) && node.tagName.toLowerCase() === 'template') {
@@ -486,7 +499,21 @@ export function renderSlotNode(context, el) {
       });
   }
 
-  return renderTemplateNode.call(this.$parent, this.getParentContext(), slotTemplateEl);
+  // 此处需要对parentContext进行克隆
+  const parentContext = createContext(this.getParentContext());
+  // 判断<template v-slot:名字=""></template>是否有v-slot:名字=""
+  const slotTemplateAttrValue = slotTemplateEl.getAttribute(`${DIRECT_PREFIX}slot:${name}`);
+  // 如果有v-slot:名字=""说明是作用域插槽
+  if (bindEntrys && bindEntrys.length && slotTemplateAttrValue) {
+    // 向parentContext中创建bindEntrys的作用域
+    parentContext[slotTemplateAttrValue] = {};
+    bindEntrys.forEach((bindEntry) => {
+      parentContext[slotTemplateAttrValue][bindEntry.arg] = bindEntry.value;
+    });
+  }
+
+  // 调用renderTemplateNode方法进行渲染
+  return renderTemplateNode.call(this.$parent, parentContext, slotTemplateEl);
 }
 
 /**
@@ -526,7 +553,7 @@ export function renderComponentNode(context, el) {
   if (hasVFor(vAttrNames)) {
     // parse v-for
     return parseVFor.call(this, {
-      context: context === this.$dataProxy ? createContext.call(this) : context,
+      context: context === this.$dataProxy ? createContext(this.$dataProxy) : context,
       el,
       vAttrNames,
       renderFun: renderComponentNode,

@@ -14,7 +14,7 @@
 
 .slot
  基本slot ok
- 作用域slot
+ 作用域slot ok
 
 .自定义指令
 .mixin

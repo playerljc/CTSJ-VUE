@@ -1,13 +1,27 @@
 export default {
   props: [],
   data() {
-    return {};
+    return {
+      user: {
+        name: 'playerljc',
+        sex: '男',
+        age: '20',
+      },
+      car: {
+        name: 'kia',
+        size: '20',
+      },
+      goods: {
+        name: 'cake',
+        size: '60',
+      },
+    };
   },
   template: `
     <div>
-      <slot name="head"></slot>
-      <slot name="body"></slot>
-      <slot name="footer"></slot>
+      <slot name="head" v-bind:user="user"></slot>
+      <slot name="body" v-bind:car="car"></slot>
+      <slot name="footer" v-bind:goods="goods"></slot>
     </div>
   `,
   methods: {},

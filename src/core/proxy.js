@@ -13,16 +13,17 @@ import {
 
 /**
  * createContext - 创建上下文(主要是在v-for的时候需要重新创建一个新的上下文)
+ * @param srcContext - Object 原始的srcContext对象
  * @param arg - Object 上下文的参数
  * @return Object 新的上下文
  */
-export function createContext(arg = {}) {
+export function createContext(srcContext, arg = {}) {
   const context = { ...(arg || {}) };
 
   // 根据this的代理对象创建上下对象
-  for (const p in this.$dataProxy) {
+  for (const p in srcContext) {
     if (isProxyProperty(p)) {
-      context[p] = this.$dataProxy[p];
+      context[p] = srcContext[p];
     }
   }
 

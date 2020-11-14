@@ -121,18 +121,21 @@ window.onload = () => {
                   </template>
                 </template>-->
                 
-                <template v-slot:head>
-                  <div>head</div>
+                <template v-slot:head="headProps">
+                  <div>{{headProps.user.name}}</div>
+                  <div>{{headProps.user.sex}}</div>
+                  <div>{{headProps.user.age}}</div>
                 </template>
                 
-                <template v-slot:body>
-                  <div>body</div>
+                <template v-slot:body="bodyProps">
+                  <div>{{bodyProps.car.name}}</div>
+                  <div>{{bodyProps.car.size}}</div>
                 </template>
                 
-                <template v-slot:footer>
-                  <div>footer</div>
+                <template v-slot:footer="goodsProps">
+                  <div>{{goodsProps.goods.name}}</div>
+                  <div>{{goodsProps.goods.size}}</div>
                 </template>
-                
                 
               </MyComponentSlot>
               
