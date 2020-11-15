@@ -21,7 +21,10 @@ export default {
     <div>
       <slot name="head" v-bind:user="user"></slot>
       <slot name="body" v-bind:car="car"></slot>
-      <slot name="footer" v-bind:goods="goods"></slot>
+      <slot name="footer" v-bind:goods="goods">
+        <div>{{goods.name}}</div>
+        <div>{{goods.size}}</div>
+      </slot>
     </div>
   `,
   methods: {},

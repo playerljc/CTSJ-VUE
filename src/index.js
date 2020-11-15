@@ -132,10 +132,10 @@ window.onload = () => {
                   <div>{{bodyProps.car.size}}</div>
                 </template>
                 
-                <template v-slot:footer="goodsProps">
-                  <div>{{goodsProps.goods.name}}</div>
-                  <div>{{goodsProps.goods.size}}</div>
-                </template>
+<!--                <template v-slot:footer="goodsProps">-->
+<!--                  <div>{{goodsProps.goods.name}}</div>-->
+<!--                  <div>{{goodsProps.goods.size}}</div>-->
+<!--                </template>-->
                 
               </MyComponentSlot>
               

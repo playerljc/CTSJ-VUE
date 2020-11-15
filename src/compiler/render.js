@@ -449,9 +449,11 @@ export function renderTemplateNode(context, el) {
 export function renderSlotNode(context, el) {
   // this是my-component的实例
   // this.$parent是Vue实例或者是Component实例，应该用this.getParentContext()获取父亲的上下文对象作为调用renderTemplateNode的上下文参数
-  // el是my-component的template的el this.$el是$parent的template中<my-component></my-component>这个el
+  // el<slot></slot>的el this.$el是$parent的template中<my-component></my-component>这个el
 
   let name = 'default';
+
+  let contextType = 'parent';
 
   // 判断slot中是否存在name属性
   if (el.hasAttribute('name')) {
@@ -478,42 +480,60 @@ export function renderSlotNode(context, el) {
     slotTemplateEl = templateEls[slotTemplateElIndex];
   }
 
-  // 如果是default
-  if (name === 'default' && !slotTemplateEl) {
+  // 如果没有找到<template v-slot:name></template>的元素
+  if (!slotTemplateEl) {
     // 如果是default 没有定义<template v-slot:default></template> 则需要自己创建一个template元素
     slotTemplateEl = document.createElement('template');
-    slotTemplateEl.setAttribute(`${DIRECT_PREFIX}slot:default`, '');
+    slotTemplateEl.setAttribute(`${DIRECT_PREFIX}slot:${name}`, '');
 
-    // 需要在this.$el的childrenNodes排除<template v-slot开头的元素放入自定义template元素中
-    Array.from(this.$el.childNodes)
-      .filter((node) => {
-        if (isElementNode(node) && node.tagName.toLowerCase() === 'template') {
-          return !node
-            .getAttributeNames()
-            .some((attrName) => attrName.startsWith(`${DIRECT_PREFIX}slot:`));
-        }
-        return true;
-      })
-      .forEach((node) => {
+    // 如果是default
+    if (name === 'default') {
+      // 需要在this.$el的childrenNodes排除<template v-slot开头的元素放入自定义template元素中
+      Array.from(this.$el.childNodes)
+        .filter((node) => {
+          if (isElementNode(node) && node.tagName.toLowerCase() === 'template') {
+            return !node
+              .getAttributeNames()
+              .some((attrName) => attrName.startsWith(`${DIRECT_PREFIX}slot:`));
+          }
+          return true;
+        })
+        .forEach((node) => {
+          slotTemplateEl.content.appendChild(node);
+        });
+    }
+    // 如果没有对应的template对应则使用slot的内部内容作为内容
+    else {
+      contextType = 'self';
+      Array.from(el.childNodes).forEach((node) => {
         slotTemplateEl.content.appendChild(node);
       });
+    }
   }
 
-  // 此处需要对parentContext进行克隆
-  const parentContext = createContext(this.getParentContext());
-  // 判断<template v-slot:名字=""></template>是否有v-slot:名字=""
-  const slotTemplateAttrValue = slotTemplateEl.getAttribute(`${DIRECT_PREFIX}slot:${name}`);
-  // 如果有v-slot:名字=""说明是作用域插槽
-  if (bindEntrys && bindEntrys.length && slotTemplateAttrValue) {
-    // 向parentContext中创建bindEntrys的作用域
-    parentContext[slotTemplateAttrValue] = {};
-    bindEntrys.forEach((bindEntry) => {
-      parentContext[slotTemplateAttrValue][bindEntry.arg] = bindEntry.value;
-    });
+  let curContext;
+
+  if (contextType === 'parent') {
+    // 此处需要对parentContext进行克隆
+    curContext = createContext(this.getParentContext());
+
+    // 判断<template v-slot:名字=""></template>是否有v-slot:名字=""
+    const slotTemplateAttrValue = slotTemplateEl.getAttribute(`${DIRECT_PREFIX}slot:${name}`);
+
+    // 如果有v-slot:名字=""说明是作用域插槽
+    if (bindEntrys && bindEntrys.length && slotTemplateAttrValue) {
+      // 向parentContext中创建bindEntrys的作用域
+      curContext[slotTemplateAttrValue] = {};
+      bindEntrys.forEach((bindEntry) => {
+        curContext[slotTemplateAttrValue][bindEntry.arg] = bindEntry.value;
+      });
+    }
+  } else {
+    curContext = context;
   }
 
   // 调用renderTemplateNode方法进行渲染
-  return renderTemplateNode.call(this.$parent, parentContext, slotTemplateEl);
+  return renderTemplateNode.call(this.$parent, curContext, slotTemplateEl);
 }
 
 /**
