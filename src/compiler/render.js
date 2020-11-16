@@ -1,6 +1,18 @@
 // render
 import { isVueInstance } from '../core/util';
 import {
+  isEmpty,
+  execExpression,
+  isArray,
+  isObject,
+  isTextNode,
+  isElementNode,
+  isTemplateNode,
+  isSlotNode,
+  isDynamicComponentNode,
+  toCamelCase,
+} from '../shared/util';
+import {
   isComponentInstance,
   isComponentNodeByVue,
   isComponentNodeByComponent,
@@ -8,7 +20,14 @@ import {
 } from '../core/component/util';
 
 import { createContext } from '../core/proxy';
-import { getAttrNames, getVAttrNames, getAttrEntrys, getKey } from './directives/util';
+import {
+  getAttrNames,
+  getVAttrNames,
+  getAttrEntrys,
+  getKey,
+  getAttribute,
+  getAttributeName,
+} from './directives/util';
 import { hasVHtml, parseVHtml } from './directives/html';
 import { hasVIf, parseVIf } from './directives/if';
 import { hasVOn, parseVOn, getVOnEntrys } from './directives/on';
@@ -18,16 +37,7 @@ import { hasVFor, parseVFor } from './directives/for';
 import { hasVModel, parseVModel, isFormTag, getVModelEntrys } from './directives/model';
 import { patch, createVNode, createTextVNode } from '../core/vdom';
 import uuid from '../shared/uuid';
-import {
-  execExpression,
-  isArray,
-  isObject,
-  isTextNode,
-  isElementNode,
-  isTemplateNode,
-  isSlotNode,
-  toCamelCase,
-} from '../shared/util';
+
 import {
   END_TAG,
   START_TAG,
@@ -86,13 +96,15 @@ export function renderLoop(context, el) {
     // 在vue实例下判断是否是组件节点
     isComponent = isComponentNodeByVue(el);
   } else {
-    // this是否是component实例
     const isComponentIns = isComponentInstance(this);
 
+    // this是否是component实例
     if (isComponentIns) {
       // 在component实例下判断是否是组件节点
       isComponent = isComponentNodeByComponent(el, this.getComponentsConfig());
-    } else {
+    }
+    // this既不是vue实例也不是component实例
+    else {
       return null;
     }
   }
@@ -108,8 +120,13 @@ export function renderLoop(context, el) {
       return renderSlotNode.call(this, context, el);
     }
 
-    // 是元素不是组件节点
+    // 如果是component元素
+    if (isDynamicComponentNode(el)) {
+      return renderDynamicComponentNode.call(this, context, el);
+    }
+
     if (isElementNode(el)) {
+      // 是元素不是组件节点
       return renderElementNode.call(this, context, el);
     }
   } else {
@@ -394,7 +411,7 @@ export function renderTemplateNode(context, el) {
  * renderSlotNode - 渲染slot元素
  * @param context - Object 上下文对象
  * @param el - HtmlElement el元素
- *
+ * @return VNode | VNodes
  *
  * --------------------下面是列举的一个例子---------------------
  *
@@ -537,6 +554,132 @@ export function renderSlotNode(context, el) {
 }
 
 /**
+ * renderDynamicComponent - 渲染动态组件节点
+ * @param context - Object 上下文对象
+ * @param el - HtmlElement el元素
+ * @return VNode | VNodes
+ *
+ * 如果<component></component>含有v-for和v-if则不用处理key
+ *
+ */
+export function renderDynamicComponentNode(context, el) {
+  const vAttrNames = getVAttrNames(el);
+
+  let key;
+
+  if (vAttrNames.length) {
+    // 解析el的v-for标签
+    if (hasVFor(vAttrNames)) {
+      // parse v-for
+      return parseVFor.call(
+        this,
+        // 如果context是this.$dataProxy则需要重新创建新的context(上下文)，因为一个v-for就是一个新的上下文环境，因为v-for会有新的变量放入到this中
+        {
+          context: context === this.$dataProxy ? createContext(this.$dataProxy) : context,
+          el,
+          vAttrNames,
+          renderFun: renderDynamicComponentNode,
+        },
+      );
+    }
+
+    // 这个key属性可能是v-bind:key=，也可能是key=
+    key = getKey({ context, el });
+
+    // 解析v-if
+    if (hasVIf(vAttrNames)) {
+      // parse v-if
+      const display = parseVIf({ context, el, vAttrNames });
+      if (!display) {
+        // 不显示这个节点
+        if (key) {
+          // 有key属性则在componentsMap中删除这个组件的引用
+          this.componentsMap.delete(key);
+        }
+        return null;
+      }
+    }
+  }
+
+  // 这个key属性可能是v-bind:key=，也可能是key=
+  key = getKey({ context, el });
+
+  // 获取is属性的值
+  // is属性的值就是组件的标签的名称
+
+  const componentTagName = getAttribute({ context, attrName: 'is', el });
+  // 如果没有is属性
+  if (!componentTagName) return null;
+
+  // 判断componentTagName是否注册过
+  let isComponent = false;
+  const componentEl = document.createElement(componentTagName);
+
+  const isVueIns = isVueInstance(this);
+
+  // this是否是vue实例
+  if (isVueIns) {
+    // 在vue实例下判断是否是组件节点
+    isComponent = isComponentNodeByVue(componentEl);
+  } else {
+    const isComponentIns = isComponentInstance(this);
+
+    // this是否是component实例
+    if (isComponentIns) {
+      // 在component实例下判断是否是组件节点
+      isComponent = isComponentNodeByComponent(componentEl, this.getComponentsConfig());
+    }
+    // this既不是vue实例也不是component实例
+    else {
+      return null;
+    }
+  }
+
+  // 如果is的值不是组件(没有注册过)
+  if (!isComponent) return null;
+
+  // 获取到组件名称之后调用renderComponentNode方法
+  // 赋值component标签所有的属性给componentEl除了is属性
+  const isAttrName = getAttributeName({ attrName: 'is', el });
+  el.getAttributeNames()
+    .filter(
+      (attrName) =>
+        attrName !== isAttrName &&
+        !attrName.startsWith(`${DIRECT_PREFIX}bind:key`) &&
+        attrName !== 'key',
+    )
+    .forEach((attrName) => componentEl.setAttribute(attrName, el.getAttribute(attrName)));
+
+  // el没有key属性
+  if (isEmpty(key)) {
+    key = uuid();
+    el.setAttribute('key', key);
+    this.componentsMap.set(key, { componentName: componentTagName, key: uuid() });
+  }
+
+  let entry = this.componentsMap.get(key);
+  if (isEmpty(entry)) {
+    this.componentsMap.set(key, { componentName: componentTagName, key: uuid() });
+  } else {
+    // 如果切换了componentName则需要进行删除和重新生成key的操作
+    if (entry.componentName !== componentTagName) {
+      this.componentsMap.delete(entry.key);
+      entry.componentName = componentTagName;
+      entry.key = uuid();
+    }
+  }
+  entry = this.componentsMap.get(key);
+  componentEl.setAttribute('key', entry.key);
+
+  return renderComponentNode.call(this, context, componentEl);
+
+  // 主要是需要create一个组件元素节点，这个节点的key属性的值需要斟酌一下
+
+  // key属性的值应该是component的key属性值从componentMap中进行获取，一般这个集合获取的值是组件的实例对象
+  // 而对于component节点来说，值是一个对象{componentName:'组件标签名称',key:'组件的key'}
+}
+
+/**
  * renderComponentNode - 渲染组件节点
  * @param context - Object 上下文对象
  * @param el - HtmlElement el元素
@@ -650,7 +793,7 @@ export function renderComponentNode(context, el) {
   //  <com1 key=2 />
   //  <com1 key=3 />
 
-  if (!key) {
+  if (isEmpty(key)) {
     // el没有key属性
     // 创建一个key属性并设置到el中
     key = uuid();

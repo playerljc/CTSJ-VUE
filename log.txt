@@ -14,8 +14,8 @@
 .slot
  基本slot ok
  作用域slot ok
+.component标签 ok
 
-.component标签
 .自定义指令
 .mixin
 

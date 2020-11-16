@@ -133,36 +133,6 @@ export function parseVFor({ context, el, vAttrNames, renderFun }) {
  * @return {VNode | Array<VNode>}
  */
 export function iteratorVFor({ context, el, itItemStr, itItemObj, renderFun }, index) {
-  // 对v-for元素进行克隆
-  const cloneEl = el.cloneNode(true);
-
-  // 处理cloneEl的key 需要加入group的值
-  const groupName = el.getAttribute(GROUP_KEY_NAME);
-
-  // 所有属性的集合
-  const attrNames = el.getAttributeNames();
-
-  // 元素有key属性
-  // 如果元素有key属性则需要对key属性进行一个全局唯一标识的处理
-  // 处理的方式就是给key加上groupName的前缀
-  if (attrNames.indexOf(`${DIRECT_PREFIX}bind:key`) !== -1) {
-    const key = `${DIRECT_PREFIX}bind:key`;
-    const value = el.getAttribute(key);
-    // 给key加入groupName前缀使之全局唯一
-    el.setAttribute(key, `'${groupName}' + (${value})`);
-  } else if (attrNames.indexOf('key')) {
-    const key = 'key';
-    const value = el.getAttribute(key);
-    // 给key加入groupName前缀使之全局唯一
-    el.setAttribute(key, `${groupName}(${value})`);
-  } else {
-    // 如果v-for没写key则用索引作为key
-    el.setAttribute('key', `${groupName}${index}`);
-  }
-
-  // 删除v-for属性
-  cloneEl.removeAttribute(`${DIRECT_PREFIX}for`);
-
   // 如果项的迭代对象是用()进行包裹的
   if (itItemStr.startsWith('(') && itItemStr.endsWith(')')) {
     // item   ,    index
@@ -181,6 +151,36 @@ export function iteratorVFor({ context, el, itItemStr, itItemObj, renderFun }, i
     // 从context中获取迭代项数据
     context[itItemStr] = itItemObj;
   }
+
+  // 所有属性的集合
+  const attrNames = el.getAttributeNames();
+
+  // 处理cloneEl的key 需要加入group的值
+  const groupName = el.getAttribute(GROUP_KEY_NAME);
+
+  // 元素有key属性
+  // 如果元素有key属性则需要对key属性进行一个全局唯一标识的处理
+  // 处理的方式就是给key加上groupName的前缀
+  if (attrNames.indexOf(`${DIRECT_PREFIX}bind:key`) !== -1) {
+    const key = `${DIRECT_PREFIX}bind:key`;
+    const value = el.getAttribute(key);
+    // 给key加入groupName前缀使之全局唯一
+    el.setAttribute(key, `'${groupName}' + '(${execExpression(context, value)})'`);
+  } else if (attrNames.indexOf('key')) {
+    const key = 'key';
+    const value = el.getAttribute(key);
+    // 给key加入groupName前缀使之全局唯一
+    el.setAttribute(key, `${groupName}(${value})`);
+  } else {
+    // 如果v-for没写key则用索引作为key
+    el.setAttribute('key', `${groupName}${index}`);
+  }
+
+  // 对v-for元素进行克隆
+  const cloneEl = el.cloneNode(true);
+
+  // 删除v-for属性
+  cloneEl.removeAttribute(`${DIRECT_PREFIX}for`);
 
   return renderFun.call(this, context, cloneEl);
 }

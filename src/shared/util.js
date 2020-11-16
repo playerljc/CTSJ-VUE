@@ -26,6 +26,16 @@ export function merge(srcObj, ...tarObjs) {
 }
 
 /**
+ * isEmpty - 对象是否为空
+ * @param value
+ */
+export function isEmpty(value) {
+  if (value === null || value === '' || value === undefined) return true;
+
+  return false;
+}
+
+/**
  * isArray - 判断数组
  * @param obj
  * @return {boolean}
@@ -86,6 +96,15 @@ export function isTemplateNode(el) {
  */
 export function isSlotNode(el) {
   return el.nodeName.toLowerCase() === 'slot';
+}
+
+/**
+ * isDynamicComponentNode - 是否是动态组件元素
+ * @param el - Element
+ * @return {boolean}
+ */
+export function isDynamicComponentNode(el) {
+  return el.nodeName.toLowerCase() === 'component';
 }
 
 /**

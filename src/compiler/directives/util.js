@@ -12,6 +12,20 @@ export function hasVAttr(attrNames, attrName) {
 }
 
 /**
+ * hasAttr - 是否存在指定的属性
+ * @param attrName - string 属性名称
+ * @param el - HTMLElement el
+ * @return {boolean}
+ */
+export function hasAttr(attrName, el) {
+  const attrNames = el.getAttributeNames();
+  return attrNames.some(
+    (curAttrName) =>
+      curAttrName.startsWith(`${DIRECT_PREFIX}bind:${attrName}`) || curAttrName === attrName,
+  );
+}
+
+/**
  * getDirectName - 在指令属性中获取指令的名称
  * 例如：v-bind:id 获取的是bind
  * @param attrName - string 指令属性名称
@@ -136,4 +150,46 @@ export function getKey({ context, el }) {
   }
 
   return null;
+}
+
+/**
+ * getAttribute - 获取指定属性的值
+ * @param context - Object 上下文对象
+ * @param attrName - string 属性的名称
+ * @param el - HtmlElement 元素
+ * @return String
+ */
+export function getAttribute({ context, attrName, el }) {
+  const attrNames = el.getAttributeNames();
+
+  const index = attrNames.findIndex(
+    (curAttrName) => curAttrName === `${DIRECT_PREFIX}bind:${attrName}`,
+  );
+
+  if (index !== -1) {
+    const value = el.getAttribute(attrNames[index]).trim();
+    return execExpression(context, value);
+  }
+
+  return el.getAttribute(attrName);
+}
+
+/**
+ * getAttributeName - 获取attrName属性的名字
+ * @param attrName - String
+ * @param el - HtmlElement
+ * @return string
+ */
+export function getAttributeName({ attrName, el }) {
+  const attrNames = el.getAttributeNames();
+
+  const index = attrNames.findIndex(
+    (curAttrName) => curAttrName === `${DIRECT_PREFIX}bind:${attrName}`,
+  );
+
+  if (index !== -1) {
+    return attrNames[index];
+  }
+
+  return attrName;
 }

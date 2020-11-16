@@ -43,6 +43,9 @@
 1.my-component加入一个简单的slot
 2.作用的插槽
 
+.dynamicComponent的测试
+1.
+
 
 
 

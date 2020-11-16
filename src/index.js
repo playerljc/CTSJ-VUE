@@ -99,8 +99,8 @@ window.onload = () => {
                  ></my-component>
               </template>-->
               
-              <MyComponentSlot>
-                <!--<template v-slot:default>
+              <!--<MyComponentSlot>
+                &lt;!&ndash;<template v-slot:default>
                   <div>{{obj.cloneNode.a}}</div>
                   <div>{{obj.textNode}}</div>
                   <div>{{obj.nodeValue}}</div>
@@ -119,9 +119,9 @@ window.onload = () => {
                       name="myComponent" 
                      ></my-component>
                   </template>
-                </template>-->
+                </template>&ndash;&gt;
                 
-                <template v-slot:head="headProps">
+                &lt;!&ndash;<template v-slot:head="headProps">
                   <div>{{headProps.user.name}}</div>
                   <div>{{headProps.user.sex}}</div>
                   <div>{{headProps.user.age}}</div>
@@ -130,15 +130,34 @@ window.onload = () => {
                 <template v-slot:body="bodyProps">
                   <div>{{bodyProps.car.name}}</div>
                   <div>{{bodyProps.car.size}}</div>
-                </template>
+                </template>&ndash;&gt;
                 
-<!--                <template v-slot:footer="goodsProps">-->
-<!--                  <div>{{goodsProps.goods.name}}</div>-->
-<!--                  <div>{{goodsProps.goods.size}}</div>-->
-<!--                </template>-->
+&lt;!&ndash;                <template v-slot:footer="goodsProps">&ndash;&gt;
+&lt;!&ndash;                  <div>{{goodsProps.goods.name}}</div>&ndash;&gt;
+&lt;!&ndash;                  <div>{{goodsProps.goods.size}}</div>&ndash;&gt;
+&lt;!&ndash;                </template>&ndash;&gt;
                 
-              </MyComponentSlot>
+              </MyComponentSlot>-->
               
+              <component 
+                is="for-component" 
+                v-for="(item,index) in list" 
+                v-bind:key="index" 
+                v-bind:list="[item.name]"
+      		    ></component>
+      		    
+      		    
+      		    <component 
+                is="my-component" 
+                v-on:onChange="onChange"
+                v-model="selected"
+                v-bind="obj"
+                v-bind:list="list" 
+                v-bind:class="[activeClass, errorClass]"
+                v-bind:style="{color:activeColor,fontSize: fontSize + 'px'}"
+                name="myComponent" 
+      		    ></component>
+      		    
           </div>
       	`,
     data: () => ({
@@ -364,36 +383,36 @@ window.onload = () => {
         //   { text: 'Two1', value: 'B1' },
         //   { text: 'Three1', value: 'C1' },
         // ];
-        // this.list = [
-        //   {
-        //     name: '赵六',
-        //     age: 20,
-        //     height: 1.8,
-        //     hometown: '沈阳',
-        //     city: '沈阳',
-        //   },
-        //   {
-        //     name: '王七',
-        //     age: 20,
-        //     height: 1.8,
-        //     hometown: '沈阳',
-        //     city: '沈阳',
-        //   },
-        //   {
-        //     name: '刘八',
-        //     age: 20,
-        //     height: 1.8,
-        //     hometown: '沈阳',
-        //     city: '沈阳',
-        //   },
-        //   {
-        //     name: '赵九',
-        //     age: 20,
-        //     height: 1.8,
-        //     hometown: '沈阳',
-        //     city: '沈阳',
-        //   },
-        // ];
+        this.list = [
+          {
+            name: '赵六',
+            age: 20,
+            height: 1.8,
+            hometown: '沈阳',
+            city: '沈阳',
+          },
+          {
+            name: '王七',
+            age: 20,
+            height: 1.8,
+            hometown: '沈阳',
+            city: '沈阳',
+          },
+          {
+            name: '刘八',
+            age: 20,
+            height: 1.8,
+            hometown: '沈阳',
+            city: '沈阳',
+          },
+          {
+            name: '赵九',
+            age: 20,
+            height: 1.8,
+            hometown: '沈阳',
+            city: '沈阳',
+          },
+        ];
       }, 2000);
     },
     beforeUpdate() {
