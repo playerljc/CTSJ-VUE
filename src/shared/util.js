@@ -1,3 +1,4 @@
+// import lodashCloneDeep from 'lodash/cloneDeep';
 import { DIRECT_DIVIDING_SYMBOL } from './constants';
 
 /**
@@ -129,6 +130,91 @@ export function execExpression(context, expressionStr) {
   /* replaceWith(context, expressionStr); */
   // const fun = new Function('context','expressionStr',`return with(context){${expressionStr}}`);
   // return fun(context, expressionStr);
+}
+
+/**
+ * clone - 创建一个 value 的浅拷贝
+ * @param value - Object | Array
+ * @return Object | Array | null
+ */
+export function clone(value) {
+  if (!isObject(value) && !isArray(value)) return null;
+
+  if (isObject(value)) {
+    // 新的引用
+    const cloneValue = {};
+    Object.keys(value).forEach((key) => {
+      if (value.hasOwnProperty(key)) {
+        cloneValue[key] = value[key];
+      }
+    });
+    return cloneValue;
+  }
+
+  if (isArray(value)) {
+    return [].concat(value);
+  }
+
+  return null;
+}
+
+/**
+ * cloneDeep - 创建一个value的深拷贝
+ * @param value - Object | Array
+ * @return Object | Array
+ */
+export function cloneDeep(value, map = new Map()) {
+  // return lodashCloneDeep(value);
+
+  if (!isObject(value) && !isArray(value)) return value;
+
+  if (isObject(value)) {
+    // 新的引用
+    const cloneValue = {};
+
+    if (map.get(value)) {
+      return map.get(value);
+    }
+
+    map.set(value, cloneValue);
+
+    Object.keys(value).forEach((key) => {
+      if (value.hasOwnProperty(key)) {
+        const itemValue = value[key];
+        if (isObject(itemValue) || isArray(itemValue)) {
+          cloneValue[key] = cloneDeep(itemValue, map);
+        } else {
+          cloneValue[key] = value[key];
+        }
+      } else {
+        // 如果itemValue不是对象或者数组则直接赋值就可以(例如: primary 类型，和Function类型)
+        cloneValue[key] = value[key];
+      }
+    });
+
+    return cloneValue;
+  }
+
+  if (isArray(value)) {
+    const cloneValue = [];
+
+    if (map.get(value)) {
+      return map.get(value);
+    }
+    map.set(value, cloneValue);
+
+    value.forEach((itemValue) => {
+      if (isObject(itemValue) || isArray(itemValue)) {
+        cloneValue.push(cloneDeep(itemValue, map));
+      } else {
+        // 如果itemValue不是对象或者数组则直接赋值就可以(例如: primary 类型，和Function类型)
+        cloneValue.push(itemValue);
+      }
+    });
+    return cloneValue;
+  }
+
+  return value;
 }
 
 /**

@@ -1,5 +1,4 @@
-import _ from 'lodash';
-import { isFunction, merge } from '../shared/util';
+import { isFunction, merge, cloneDeep } from '../shared/util';
 
 /**
  * mergeProps - 混入props到this中
@@ -29,7 +28,7 @@ export function mergeProps(props) {
  * mergeData - 混入data到this中
  */
 export function mergeData() {
-  merge(this, _.cloneDeep(isFunction(this.$config.data) ? this.$config.data() : {}));
+  merge(this, cloneDeep(isFunction(this.$config.data) ? this.$config.data() : {}));
 }
 
 /**

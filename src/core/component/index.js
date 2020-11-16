@@ -1,8 +1,7 @@
-import _ from 'lodash';
 import { executeVOn } from '../../compiler/directives/on';
 import { renderComponent } from '../../compiler/render';
 import { createComponentProxy, createPropsProxy } from '../proxy';
-import { createElement, isArray, isFunction, isObject } from '../../shared/util';
+import { createElement, isArray, isFunction, isObject, cloneDeep } from '../../shared/util';
 import { getComponentConfig, isKebabCase, isPascalCase, pascalCaseToKebabCase } from './util';
 import { mergeComputed, mergeData, mergeMethods, mergeProps } from '../merge';
 import { triggerLifecycle } from '../util';
@@ -17,7 +16,7 @@ function getPropsAndAttrs() {
   const { attrs } = this.$argConfig;
 
   // 配置定义的
-  let props = _.cloneDeep(this.$config.props);
+  let props = cloneDeep(this.$config.props);
   const prop = {};
   const attr = {};
 
@@ -120,7 +119,7 @@ class Component {
     // 获取父亲传递过来的props和attrs
     const { props, attrs } = getPropsAndAttrs.call(this);
     this.$attes = attrs;
-    this.$props = _.cloneDeep(props);
+    this.$props = cloneDeep(props);
 
     // 创建props的代理
     this.$propsProxy = createPropsProxy.call(this, this.$props);
@@ -128,7 +127,7 @@ class Component {
     // 没有被代理的props + data的合体
     this.$noProxySrcData = {
       ...this.$props,
-      ..._.cloneDeep(isFunction(this.$config.data) ? this.$config.data() : {}),
+      ...cloneDeep(isFunction(this.$config.data) ? this.$config.data() : {}),
     };
 
     // data混入
@@ -284,7 +283,7 @@ class Component {
     const prePropsKeys = Object.keys(this.$props);
 
     // 新的props
-    this.$props = _.cloneDeep(props);
+    this.$props = cloneDeep(props);
 
     // 先触发watch
     Object.assign(this.$propsProxy, this.$props);

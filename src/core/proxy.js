@@ -1,6 +1,4 @@
-import _ from 'lodash';
-
-import { execExpression, isArray, isFunction, isObject } from '../shared/util';
+import { execExpression, isArray, isFunction, isObject, cloneDeep } from '../shared/util';
 import { triggerLifecycle, resetComputed } from './util';
 import { render, renderComponent } from '../compiler/render';
 
@@ -126,7 +124,7 @@ function createProxy(srcObj, renderHandler) {
           // target[key]已经是被代理的对象，需要找到对应的非代理对象
           // clone的目的是不让用户修改这个值
 
-          cloneValue = _.cloneDeep(value);
+          cloneValue = cloneDeep(value);
           // 新的值
           let newVal = cloneValue;
 
@@ -134,7 +132,7 @@ function createProxy(srcObj, renderHandler) {
           // 如果是数组修改target的array对象,key是修改项的索引或者数组的length属性
           if (isArray(target) && key !== 'length') {
             // 在$noProxySrcData中取出array的值，clone的目的防止用户修改
-            const array = _.cloneDeep(eval(`self.$noProxySrcData.${propertyAccessStr}`));
+            const array = cloneDeep(eval(`self.$noProxySrcData.${propertyAccessStr}`));
             // key是数组的索引，为key索引赋值新值
             array[key] = cloneValue;
             newVal = array;
@@ -151,8 +149,9 @@ function createProxy(srcObj, renderHandler) {
       // 例如修改的是a
       // 例如修改的是a.b
 
+      const cloneDeepRef = cloneDeep;
       // 回写原始数据
-      eval('if(!cloneValue) {cloneValue = _.cloneDeep(value);}');
+      eval('if(!cloneValue) {cloneValue = cloneDeepRef(value);}');
       if (isArray(target) && key !== 'length') {
         // 数组则更新索引出的值
         eval(`self.$noProxySrcData.${propertyAccessStr}[${key}] = cloneValue`);
@@ -252,12 +251,12 @@ export function createPropsProxy(props) {
           // value是没有被代理的
           // target[key]已经是被代理的对象，需要找到对应的非代理对象
           // clone的目的是不让用户修改这个值
-          const cloneValue = _.cloneDeep(value);
+          const cloneValue = cloneDeep(value);
           let newVal = cloneValue;
           // 是数组且不是length监听
           if (isArray(target) && key !== 'length') {
             // 取出array的值，clone的目的防止用户修改
-            const array = _.cloneDeep(eval(`self.$noProxySrcData.${key}`));
+            const array = cloneDeep(eval(`self.$noProxySrcData.${key}`));
             // key是数组的索引，为key索引赋值新值
             array[key] = cloneValue;
             newVal = array;

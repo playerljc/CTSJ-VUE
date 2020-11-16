@@ -1,4 +1,3 @@
-import _ from 'lodash';
 import { isKebabCase, isPascalCase, pascalCaseToKebabCase } from './component/util';
 import { patch } from './vdom';
 import { register } from './component/register';
@@ -7,7 +6,7 @@ import { LIFECYCLE_HOOKS } from '../shared/constants';
 import { mergeData, mergeComputed, mergeMethods } from './merge';
 import { triggerLifecycle, getEl } from './util';
 import { createVueProxy } from './proxy';
-import { createElement, isFunction } from '../shared/util';
+import { createElement, isFunction, cloneDeep } from '../shared/util';
 
 /**
  * findVNodeParentByKey - 查询key的Parent
@@ -85,7 +84,7 @@ class Vue {
     this.$config.el = getEl(this.$config.el);
 
     // 纯净的data数据，没有进行代理的
-    this.$noProxySrcData = _.cloneDeep(isFunction(this.$config.data) ? this.$config.data() : {});
+    this.$noProxySrcData = cloneDeep(isFunction(this.$config.data) ? this.$config.data() : {});
 
     // 将data混入到this中
     mergeData.call(this);
@@ -133,7 +132,7 @@ class Vue {
    */
   refresh(VNode) {
     // this.$preVNode
-    const cloneNode = _.cloneDeep(this.$preVNode);
+    const cloneNode = cloneDeep(this.$preVNode);
     const parent = findVNodeParentByKey.call(this, cloneNode, VNode.key);
     if (parent) {
       const index = parent.children.findIndex((node) => node.key === VNode.key);
