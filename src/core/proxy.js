@@ -1,3 +1,4 @@
+import { isComputedProperty } from './util';
 import { push } from '../compiler/dirtyStack';
 import {
   execExpression,
@@ -93,8 +94,8 @@ function createProxy(srcObj, renderHandler) {
      */
     set(target, key, value, receiver) {
       // 如果不是代理属性则不处理
-      // 比如已$等开头的key不进行处理
-      if (!isProxyProperty(key)) {
+      // 比如已$等开头的key不进行处理 或者是计算属性的key
+      if (!isProxyProperty(key) || isComputedProperty(target, key)) {
         return Reflect.set(target, key, value, receiver);
       }
 
@@ -193,7 +194,7 @@ function createProxy(srcObj, renderHandler) {
      * @return Object
      */
     deleteProperty(target, property) {
-      if (!isProxyProperty(property)) {
+      if (!isProxyProperty(property) || isComputedProperty(target, property)) {
         return Reflect.deleteProperty(target, property);
       }
 

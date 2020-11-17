@@ -6,7 +6,7 @@ import { LIFECYCLE_HOOKS } from '../shared/constants';
 import { mergeData, mergeComputed, mergeMethods } from './merge';
 import { triggerLifecycle, getEl } from './util';
 import { createVueProxy } from './proxy';
-import { createElement, isFunction, cloneDeep } from '../shared/util';
+import { createElement, isFunction, cloneDeep, createExecutionContext } from '../shared/util';
 
 /**
  * findVNodeParentByKey - 查询key的Parent
@@ -111,6 +111,18 @@ class Vue {
 
     // 渲染
     render.call(this, this.$config.el, true);
+  }
+
+  /**
+   * createAsyncExecContext - 创建一个异步的执行上下文
+   * @param callBack - Function 回调的函数
+   * @return Function
+   */
+  createAsyncExecContext(callBack) {
+    const self = this;
+    return function () {
+      createExecutionContext.call(self, self, callBack);
+    };
   }
 
   /**

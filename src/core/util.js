@@ -1,3 +1,4 @@
+import { isComponentInstance } from './component/util';
 import { isFunction, isObject, createExecutionContext } from '../shared/util';
 import Vue from './index';
 
@@ -48,4 +49,22 @@ export function getEl(elConfig) {
  */
 export function isVueInstance(ins) {
   return isObject(ins) && ins instanceof Vue;
+}
+
+/**
+ * isComputedProperty - 是否是计算属性的key
+ * @param ins - 实例
+ * @param key - key
+ * @return boolean
+ */
+export function isComputedProperty(ins, key) {
+  if (isVueInstance(ins)) {
+    return key in (ins.$config.computed || {});
+  }
+
+  if (isComponentInstance(ins)) {
+    return key in (ins.$config.computed || {});
+  }
+
+  return false;
 }

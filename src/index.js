@@ -305,7 +305,14 @@ window.onload = () => {
         this.obj.nodeValue = 'nodeValue1';
       },
       update() {
-        delete this.obj.cloneNode.a;
+        setTimeout(
+          this.createAsyncExecContext(function () {
+            this.name = 'lzq';
+            this.age = '6';
+            this.address = 'q';
+          }),
+          2000,
+        );
       },
     },
     computed: {
@@ -327,10 +334,10 @@ window.onload = () => {
       items(oldVal, newVal) {
         console.log(oldVal, newVal);
       },
-      name() {
-        this.age = 6;
-        this.address = 'h';
-      },
+      // name() {
+      //   this.age = 6;
+      //   this.address = 'h';
+      // },
     },
     beforeCreate() {
       console.log('Vue', 'beforeCreate');

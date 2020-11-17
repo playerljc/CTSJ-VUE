@@ -152,6 +152,7 @@ export function createExecutionContext(codeCallContext, codeCallBack) {
   const self = this;
 
   executionContext(codeCallContext, codeCallBack, this, function () {
+    debugger;
     // 判断是否有数据的修改，如果有执行render或者
     if (dirtyStackIsEmpty()) return false;
 

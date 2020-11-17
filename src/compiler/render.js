@@ -52,6 +52,7 @@ import {
  * @param isMount - boolean 是否是挂载阶段
  */
 export function render(el, isMount) {
+  console.log('render');
   const self = this;
 
   // 进行loopRender
