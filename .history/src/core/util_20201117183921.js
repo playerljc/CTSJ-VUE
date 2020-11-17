@@ -27,23 +27,16 @@ export function triggerLifecycle(hookName) {
 
 /**
  * getEl - 根据Vue实例配置中的el获取实际的el对象
- * 因为VNode渲染的原因它会替换掉原始的el节点，所以要自己创建一个渲染子节点用来被替换
  * @param elConfig - HtmlElement | String
  * @return HTMLElement
  */
 export function getEl(elConfig) {
-  let el;
-
   if (elConfig instanceof HTMLElement) {
-    el = elConfig;
-  } else if (typeof elConfig === 'string') {
-    el = document.querySelector(elConfig);
+    return elConfig;
   }
 
-  if(el) {
-    const innerEl = document.createElement('div');
-    el.appendChild(innerEl);
-    return innerEl;
+  if (typeof elConfig === 'string') {
+    return document.querySelector(elConfig);
   }
 
   return null;
