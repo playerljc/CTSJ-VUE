@@ -15,8 +15,7 @@
  基本slot ok
  作用域slot ok
 .component标签 ok
-
-.在一个方法中多次修改data只render一次
+.在一个方法中多次修改data只render一次 ok
  在什么地方能进行数据的修改
  1.生命周期hook(在生命周期hook中在调用其他方法)
  2.事件处理函数(在事件处理函数中在调用其他方法)
