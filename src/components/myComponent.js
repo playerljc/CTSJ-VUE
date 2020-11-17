@@ -51,7 +51,7 @@ export default {
     <div>
       <div>{{checked}}</div>
       
-      <div>{{cloneNode}}-{{textNode}}-{{nodeValue}}</div>
+      <div>{{cloneNode.a}}-{{textNode}}-{{nodeValue}}</div>
       
       <table>
         <tr>
@@ -93,11 +93,55 @@ export default {
       <div>
         <MyComponentInner v-bind:list-inner="listInner"></MyComponentInner>
       </div>
+      
+      <button v-on:click="update">修改</button>
     </div>
   `,
   methods: {
     displayCardList() {
       return this.carList.map((item) => item.name).join(',');
+    },
+    update() {
+      this.carList = [
+        {
+          name: '1',
+          pp: '11',
+          xh: 'h6',
+          lx: 'SUV',
+          cd: 'China',
+        },
+        {
+          name: '2',
+          pp: '22',
+          xh: 'es',
+          lx: '轿车',
+          cd: 'China Japen',
+        },
+        {
+          name: '3',
+          pp: '33',
+          xh: '560',
+          lx: 'SUV',
+          cd: 'China',
+        },
+      ];
+      this.listInner = [
+        {
+          title: '123',
+          info: '123',
+          time: '2020-10-20',
+        },
+        {
+          title: '456',
+          info: '456',
+          time: '2020-10-20',
+        },
+        {
+          title: '789',
+          info: '789',
+          time: '2020-10-20',
+        },
+      ];
     },
   },
   computed: {
@@ -124,57 +168,57 @@ export default {
   },
   mounted() {
     console.log('myComponent', 'mounted');
-    this.$emit('onChange', 1, 2, 3, 4);
-    setTimeout(() => {
-      this.carList = [
-        {
-          name: '迈锐宝',
-          pp: '选弗兰',
-          xh: 'EX',
-          lx: '轿车',
-          cd: 'USA',
-        },
-        {
-          name: '昂卡拉',
-          pp: '雪佛兰',
-          xh: 'EX',
-          lx: 'SUV',
-          cd: 'USA',
-        },
-        {
-          name: '亚洲龙',
-          pp: '本田',
-          xh: 'EX',
-          lx: '轿车',
-          cd: '合资',
-        },
-        {
-          name: '五菱之光',
-          pp: '上汽',
-          xh: '1.0',
-          lx: 'MPV',
-          cd: '上汽',
-        },
-      ];
-
-      this.listInner = [
-        {
-          title: 'playerljc特朗普拒认败选很尴尬',
-          info: 'playerljc特朗普拒认败选很尴尬',
-          time: '2020-10-20',
-        },
-        // {
-        //   title: 'playerljc特朗普拒认败选很尴尬',
-        //   info: 'playerljc特朗普拒认败选很尴尬',
-        //   time: '2020-10-20',
-        // },
-        {
-          title: 'playerljc特朗普拒认败选很尴尬',
-          info: 'playerljc特朗普拒认败选很尴尬',
-          time: '2020-10-20',
-        },
-      ];
-    }, 6000);
+    // this.$emit('onChange', 1, 2, 3, 4);
+    // setTimeout(() => {
+    //   this.carList = [
+    //     {
+    //       name: '迈锐宝',
+    //       pp: '选弗兰',
+    //       xh: 'EX',
+    //       lx: '轿车',
+    //       cd: 'USA',
+    //     },
+    //     {
+    //       name: '昂卡拉',
+    //       pp: '雪佛兰',
+    //       xh: 'EX',
+    //       lx: 'SUV',
+    //       cd: 'USA',
+    //     },
+    //     {
+    //       name: '亚洲龙',
+    //       pp: '本田',
+    //       xh: 'EX',
+    //       lx: '轿车',
+    //       cd: '合资',
+    //     },
+    //     {
+    //       name: '五菱之光',
+    //       pp: '上汽',
+    //       xh: '1.0',
+    //       lx: 'MPV',
+    //       cd: '上汽',
+    //     },
+    //   ];
+    //
+    //   this.listInner = [
+    //     {
+    //       title: 'playerljc特朗普拒认败选很尴尬',
+    //       info: 'playerljc特朗普拒认败选很尴尬',
+    //       time: '2020-10-20',
+    //     },
+    //     // {
+    //     //   title: 'playerljc特朗普拒认败选很尴尬',
+    //     //   info: 'playerljc特朗普拒认败选很尴尬',
+    //     //   time: '2020-10-20',
+    //     // },
+    //     {
+    //       title: 'playerljc特朗普拒认败选很尴尬',
+    //       info: 'playerljc特朗普拒认败选很尴尬',
+    //       time: '2020-10-20',
+    //     },
+    //   ];
+    // }, 6000);
   },
   beforeUpdate() {
     console.log('myComponent', 'beforeUpdate');

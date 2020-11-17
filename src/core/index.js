@@ -93,6 +93,7 @@ class Vue {
     mergeComputed.call(this);
 
     // ------ beforeCreate
+    // 在实例初始化之后，数据观测 (data observer) 和 event/watcher 事件配置之前被调用。------这里是vue文档写的
     triggerLifecycle.call(this, LIFECYCLE_HOOKS[0]);
 
     // data observer - 数据响应式创建针对data和computed的响应式
@@ -108,22 +109,8 @@ class Vue {
     // 存放组件实例的Map
     this.componentsMap = new Map();
 
-    // ------ create
-    // 数据观测 (data observer) 已完成
-    triggerLifecycle.call(this, LIFECYCLE_HOOKS[1]);
-
-    // ------ beforeMount
-    triggerLifecycle.call(this, LIFECYCLE_HOOKS[2]);
-
     // 渲染
     render.call(this, this.$config.el, true);
-
-    // 插入dom到el(挂载)
-    // this.$config.el.innerHTML = '';
-    // this.$config.el.appendChild(this.$el);
-
-    // ------ mount
-    triggerLifecycle.call(this, LIFECYCLE_HOOKS[3]);
   }
 
   /**

@@ -139,15 +139,15 @@ window.onload = () => {
                 
               </MyComponentSlot>-->
               
-              <component 
+              <!--<component 
                 is="for-component" 
                 v-for="(item,index) in list" 
                 v-bind:key="index" 
                 v-bind:list="[item.name]"
-      		    ></component>
+      		    ></component>-->
       		    
       		    
-      		    <component 
+      		    <!--<component 
                 is="my-component" 
                 v-on:onChange="onChange"
                 v-model="selected"
@@ -156,8 +156,12 @@ window.onload = () => {
                 v-bind:class="[activeClass, errorClass]"
                 v-bind:style="{color:activeColor,fontSize: fontSize + 'px'}"
                 name="myComponent" 
-      		    ></component>
+      		    ></component>-->
       		    
+      		    <p>{{name}}</p>
+      		    <p>{{age}}</p>
+      		    <p>{{address}}</p>
+      		    <button v-on:click="update">修改</button>
           </div>
       	`,
     data: () => ({
@@ -296,7 +300,12 @@ window.onload = () => {
         alert(this.reversedMessage);
       },
       onChange(argv) {
-        alert('onChange', argv);
+        this.obj.cloneNode = { a: 3 };
+        this.obj.textNode = 'textNode1';
+        this.obj.nodeValue = 'nodeValue1';
+      },
+      update() {
+        delete this.obj.cloneNode.a;
       },
     },
     computed: {
@@ -318,6 +327,10 @@ window.onload = () => {
       items(oldVal, newVal) {
         console.log(oldVal, newVal);
       },
+      name() {
+        this.age = 6;
+        this.address = 'h';
+      },
     },
     beforeCreate() {
       console.log('Vue', 'beforeCreate');
@@ -330,90 +343,94 @@ window.onload = () => {
     },
     mounted() {
       console.log('Vue', 'mounted');
-      setTimeout(() => {
-        // this.name = 'playerljc';
-        // this.items[0].name = 'name2';
-        // // this.items[0].hobby.hobby1 = '游泳啊';
-        // this.items[0].hobby = {
-        //   hobby1: '设计啊'
-        // }
-        // this.name = 'hello';
-        // this.sex = '男';
-        // this.message = '6,6,6,6,6,6';
-        // this.data.push({
-        // 	name:'name4',
-        // });
-        // this.message = '1,2,3';
-        // this.items.push({
-        //   name: 'sdasdasdasdasd1',
-        // });
-        // this.items[0] = {
-        //   name: '111111',
-        // };
-        // this.items.pop();
-        // this.items[0].name = '111';
-        // this.a = {
-        //   b: {
-        //     c: {
-        //       d: 6,
-        //     },
-        //   },
-        // };
-        // setTimeout(() => {
-        //   this.a.b.c.d = 8;
-        //
-        //   setTimeout(() => {
-        //     this.a = {
-        //       b: {
-        //         c: {
-        //           d: 5,
-        //         },
-        //       },
-        //     };
-        //
-        //     setTimeout(() => {
-        //       this.a.b.c = {
-        //         d: 20,
-        //       };
-        //     }, 2000);
-        //   }, 2000);
-        // }, 2000);
-        // this.options = [
-        //   { text: 'One1', value: 'A1' },
-        //   { text: 'Two1', value: 'B1' },
-        //   { text: 'Three1', value: 'C1' },
-        // ];
-        this.list = [
-          {
-            name: '赵六',
-            age: 20,
-            height: 1.8,
-            hometown: '沈阳',
-            city: '沈阳',
-          },
-          {
-            name: '王七',
-            age: 20,
-            height: 1.8,
-            hometown: '沈阳',
-            city: '沈阳',
-          },
-          {
-            name: '刘八',
-            age: 20,
-            height: 1.8,
-            hometown: '沈阳',
-            city: '沈阳',
-          },
-          {
-            name: '赵九',
-            age: 20,
-            height: 1.8,
-            hometown: '沈阳',
-            city: '沈阳',
-          },
-        ];
-      }, 2000);
+      // setTimeout(() => {
+      // this.name = 'playerljc';
+      // this.items[0].name = 'name2';
+      // // this.items[0].hobby.hobby1 = '游泳啊';
+      // this.items[0].hobby = {
+      //   hobby1: '设计啊'
+      // }
+      // this.name = 'hello';
+      // this.sex = '男';
+      // this.message = '6,6,6,6,6,6';
+      // this.data.push({
+      // 	name:'name4',
+      // });
+      // this.message = '1,2,3';
+      // this.items.push({
+      //   name: 'sdasdasdasdasd1',
+      // });
+      // this.items[0] = {
+      //   name: '111111',
+      // };
+      // this.items.pop();
+      // this.items[0].name = '111';
+      // this.a = {
+      //   b: {
+      //     c: {
+      //       d: 6,
+      //     },
+      //   },
+      // };
+      // setTimeout(() => {
+      //   this.a.b.c.d = 8;
+      //
+      //   setTimeout(() => {
+      //     this.a = {
+      //       b: {
+      //         c: {
+      //           d: 5,
+      //         },
+      //       },
+      //     };
+      //
+      //     setTimeout(() => {
+      //       this.a.b.c = {
+      //         d: 20,
+      //       };
+      //     }, 2000);
+      //   }, 2000);
+      // }, 2000);
+      // this.options = [
+      //   { text: 'One1', value: 'A1' },
+      //   { text: 'Two1', value: 'B1' },
+      //   { text: 'Three1', value: 'C1' },
+      // ];
+      // this.list = [
+      //   {
+      //     name: '赵六',
+      //     age: 20,
+      //     height: 1.8,
+      //     hometown: '沈阳',
+      //     city: '沈阳',
+      //   },
+      //   {
+      //     name: '王七',
+      //     age: 20,
+      //     height: 1.8,
+      //     hometown: '沈阳',
+      //     city: '沈阳',
+      //   },
+      //   {
+      //     name: '刘八',
+      //     age: 20,
+      //     height: 1.8,
+      //     hometown: '沈阳',
+      //     city: '沈阳',
+      //   },
+      //   {
+      //     name: '赵九',
+      //     age: 20,
+      //     height: 1.8,
+      //     hometown: '沈阳',
+      //     city: '沈阳',
+      //   },
+      // ];
+
+      // this.name = 'lzq';
+      // this.age = 6;
+      // this.address = 'h';
+      // }, 2000);
     },
     beforeUpdate() {
       console.log('Vue', 'beforeUpdate');

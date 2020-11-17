@@ -1,7 +1,8 @@
 import { isFormTag } from './model';
-import { execExpression } from '../../shared/util';
+import { execExpression, createExecutionContext } from '../../shared/util';
 import { createContext } from '../../core/proxy';
 import { hasVAttr, getDirectiveEntry } from './util';
+
 import { DIRECT_PREFIX } from '../../shared/constants';
 
 /**
@@ -42,24 +43,30 @@ export function executeVOn({ context, entry, e, argv = [] }) {
   // 3.display(a + $event) -> methods函数调用形式
 
   // 函数名形式
+  // TODO: HTML的事件处理函数
   if (entry.expression in self.$config.methods) {
-    // 函数名形式 直接调用
-    this[entry.expression].apply(context, argv);
+    createExecutionContext.call(this, this, function () {
+      // 函数名形式 直接调用
+      this[entry.expression].apply(context, argv);
+    });
   }
   // 其他的形式
   else {
-    // 表达式
-    // 1 + 1
+    // 表达式(1 + 1)
+    //
     // item(item1,$event,3)
+    //
     // 这个地方会创建新的context避免set陷阱函数执行
-    execExpression(
-      e
-        ? context === self.$dataProxy
-          ? createContext(self.$dataProxy, { $event: e })
-          : context
-        : context,
-      entry.expression,
-    );
+    createExecutionContext.call(this, this, function () {
+      execExpression(
+        e
+          ? context === self.$dataProxy
+            ? createContext(self.$dataProxy, { $event: e })
+            : context
+          : context,
+        entry.expression,
+      );
+    });
   }
 }
 

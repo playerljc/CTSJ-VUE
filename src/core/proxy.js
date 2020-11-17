@@ -1,11 +1,17 @@
-import { execExpression, isArray, isFunction, isObject, cloneDeep } from '../shared/util';
-import { triggerLifecycle, resetComputed } from './util';
+import { push } from '../compiler/dirtyStack';
+import {
+  execExpression,
+  isArray,
+  isFunction,
+  isObject,
+  cloneDeep,
+  createExecutionContext,
+} from '../shared/util';
 import { render, renderComponent } from '../compiler/render';
 
 import {
   CREATE_PROXY_EXCLUDE_PREFIX,
   CREATE_PROXY_EXCLUDE_SUFFIX,
-  LIFECYCLE_HOOKS,
   PATH_SYMBOLS,
 } from '../shared/constants';
 
@@ -140,7 +146,10 @@ function createProxy(srcObj, renderHandler) {
 
           // 调用watch的相关句柄
           // oldVal,newVal
-          handler.call(self, execExpression(self.$noProxySrcData, propertyAccessStr), newVal);
+          // TODO: createProxy的watch的处理
+          createExecutionContext.call(self, self, function () {
+            handler.call(self, execExpression(self.$noProxySrcData, propertyAccessStr), newVal);
+          });
         }
       }
 
@@ -168,19 +177,47 @@ function createProxy(srcObj, renderHandler) {
         value[PATH_SYMBOLS[1]] = target /* [key] */;
       }
 
-      // 有数据更新
-      // beforeUpdate
-      triggerLifecycle.call(self, LIFECYCLE_HOOKS[4]);
+      // ---------------------------------有数据更新
       // 先进行计算
       const result = Reflect.set(target, key, value, receiver);
-      // 重新计算所有的计算属性，因为没细化的知道哪些变量在哪些计算属性函数中使用，所以这里只能全部重新计算
-      resetComputed.call(self);
-      // 进行render,render有2中，一种是vue实例的render，一种是component的render
-      if (renderHandler) {
-        renderHandler.call(self);
+
+      push(renderHandler, value);
+      // -----------------------------------end
+
+      return result;
+    },
+    /**
+     * deleteProperty - 对象删除属性
+     * @param target - 目标对象
+     * @param property - 删除的属性
+     * @return Object
+     */
+    deleteProperty(target, property) {
+      if (!isProxyProperty(property)) {
+        return Reflect.deleteProperty(target, property);
       }
-      // update
-      triggerLifecycle.call(self, LIFECYCLE_HOOKS[5]);
+
+      const propertyAccessStr = getPropertyVisitPathStr(target, property);
+
+      // watch监听
+      if (self.$config.watch && isObject(self.$config.watch)) {
+        const handler = self.$config.watch[propertyAccessStr];
+        if (handler) {
+          // TODO: createProxy的watch的处理
+          createExecutionContext.call(self, self, function () {
+            // oldVal, newVal
+            handler.call(self, execExpression(self.$noProxySrcData, propertyAccessStr), null);
+          });
+        }
+      }
+
+      eval(`delete self.$noProxySrcData.${propertyAccessStr}`);
+
+      // 先进行计算
+      const result = Reflect.deleteProperty(target, property);
+
+      push(renderHandler, property);
+
       return result;
     },
   });
@@ -217,7 +254,7 @@ export function createVueProxy(srcObj) {
 }
 
 /**
- * createComponentProxy - Vue实例创建代理
+ * createComponentProxy - 组件实例创建代理
  * @param srcObj - Object | Array 被代理的对象
  * @return {Proxy} - 代理对象
  */
@@ -262,7 +299,10 @@ export function createPropsProxy(props) {
             newVal = array;
           }
           // 调用watch的相关句柄
-          handler.call(self, execExpression(self.$noProxySrcData, key), newVal);
+          // TODO: createPropsProxy的watch的处理
+          createExecutionContext.call(self, self, function () {
+            handler.call(self, execExpression(self.$noProxySrcData, key), newVal);
+          });
         }
       }
       return Reflect.set(target, key, value, receiver);

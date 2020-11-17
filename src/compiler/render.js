@@ -1,5 +1,5 @@
 // render
-import { isVueInstance } from '../core/util';
+import { isVueInstance, triggerLifecycle } from '../core/util';
 import {
   isEmpty,
   execExpression,
@@ -43,6 +43,7 @@ import {
   START_TAG,
   FORM_CONTROL_BINDING_TAG_NAMES,
   DIRECT_PREFIX,
+  LIFECYCLE_HOOKS,
 } from '../shared/constants';
 
 /**
@@ -51,18 +52,65 @@ import {
  * @param isMount - boolean 是否是挂载阶段
  */
 export function render(el, isMount) {
+  const self = this;
+
   // 进行loopRender
+  // vue实例代表的vnode
   const vnode = renderLoop.call(this, this.$dataProxy, this.templateEl);
 
+  // vnode的hook设置
+  vnode.data.hook = {
+    /**
+     * 一个vnode已添加
+     * @param vnode
+     */
+    init: (vnode) => {
+      triggerLifecycle.call(self, LIFECYCLE_HOOKS[1]);
+    },
+    /**
+     * 已基于vnode创建了一个DOM元素
+     * @param emptyVnode
+     * @param vnode
+     */
+    create: (emptyVnode, vnode) => {
+      triggerLifecycle.call(self, LIFECYCLE_HOOKS[2]);
+    },
+    /**
+     * insert - 元素已插入DOM
+     * @param vnode
+     */
+    insert: (vnode) => {
+      // ------ mount
+      triggerLifecycle.call(self, LIFECYCLE_HOOKS[3]);
+    },
+    /**
+     * 元素即将被修补
+     */
+    prepatch: () => {
+      // beforeUpdate
+      triggerLifecycle.call(self, LIFECYCLE_HOOKS[4]);
+    },
+    /**
+     * 元素已被修补
+     */
+    postpatch: () => {
+      // update
+      triggerLifecycle.call(self, LIFECYCLE_HOOKS[5]);
+    },
+    /**
+     * 一个元素被直接或间接删除
+     */
+    destroy: () => {
+      triggerLifecycle.call(self, LIFECYCLE_HOOKS[7]);
+    },
+  };
+
   if (isMount) {
+    // 需要赋值$preVNode
+    this.$preVNode = vnode;
     this.$preVNode = patch(el, vnode);
   } else {
     this.$preVNode = patch(this.$preVNode, vnode);
-    // setTimeout(() => {
-    //   const cloneNode = _.cloneDeep(this.$preVNode);
-    //   cloneNode.data.props.id = '666';
-    //   patch(this.$preVNode, cloneNode);
-    // }, 2000);
   }
 }
 
@@ -71,7 +119,59 @@ export function render(el, isMount) {
  * @return VNode | Array<VNode>
  */
 export function renderComponent() {
-  return renderLoop.call(this, this.$dataProxy, this.templateEl);
+  const self = this;
+
+  // 组件实例代表的vnode
+  const vnode = renderLoop.call(this, this.$dataProxy, this.templateEl);
+
+  // vnode的hook设置
+  vnode.data.hook = {
+    /**
+     * 一个vnode已添加
+     * @param vnode
+     */
+    init: (vnode) => {
+      triggerLifecycle.call(self, LIFECYCLE_HOOKS[1]);
+    },
+    /**
+     * 已基于vnode创建了一个DOM元素
+     * @param emptyVnode
+     * @param vnode
+     */
+    create: (emptyVnode, vnode) => {
+      triggerLifecycle.call(self, LIFECYCLE_HOOKS[2]);
+    },
+    /**
+     * insert - 元素已插入DOM
+     * @param vnode
+     */
+    insert: (vnode) => {
+      // ------ mount
+      triggerLifecycle.call(self, LIFECYCLE_HOOKS[3]);
+    },
+    /**
+     * 元素即将被修补
+     */
+    prepatch: () => {
+      // beforeUpdate
+      triggerLifecycle.call(self, LIFECYCLE_HOOKS[4]);
+    },
+    /**
+     * 元素已被修补
+     */
+    postpatch: () => {
+      // update
+      triggerLifecycle.call(self, LIFECYCLE_HOOKS[5]);
+    },
+    /**
+     * 一个元素被直接或间接删除
+     */
+    destroy: () => {
+      triggerLifecycle.call(self, LIFECYCLE_HOOKS[7]);
+    },
+  };
+
+  return vnode;
 }
 
 /**

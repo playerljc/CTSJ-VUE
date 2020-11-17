@@ -1,10 +1,18 @@
 import { executeVOn } from '../../compiler/directives/on';
 import { renderComponent } from '../../compiler/render';
 import { createComponentProxy, createPropsProxy } from '../proxy';
-import { createElement, isArray, isFunction, isObject, cloneDeep } from '../../shared/util';
+import {
+  createElement,
+  isArray,
+  isFunction,
+  isObject,
+  cloneDeep,
+  createExecutionContext,
+} from '../../shared/util';
 import { getComponentConfig, isKebabCase, isPascalCase, pascalCaseToKebabCase } from './util';
 import { mergeComputed, mergeData, mergeMethods, mergeProps } from '../merge';
 import { triggerLifecycle } from '../util';
+
 import { LIFECYCLE_HOOKS } from '../../shared/constants';
 
 /**
@@ -62,6 +70,7 @@ function getPropsAndAttrs() {
  * createEmit - 创建$emit对象
  * @return Function
  */
+// TODO:$emit的事件处理函数
 function createEmit() {
   const self = this;
   // <my-component v-on:abc="xxxxxx"></my-component>
@@ -78,12 +87,14 @@ function createEmit() {
 
     if (!(eventNameFormat in events)) return false;
 
-    executeVOn.call(self.$parent, {
-      context: self.$parent.$dataProxy,
-      entry: {
-        expression: events[eventNameFormat],
-      },
-      argv,
+    createExecutionContext.call(self, self, function () {
+      executeVOn.call(self.$parent, {
+        context: self.$parent.$dataProxy,
+        entry: {
+          expression: events[eventNameFormat],
+        },
+        argv,
+      });
     });
   };
 }
@@ -153,9 +164,6 @@ class Component {
 
     // 存放组件实例的Map
     this.componentsMap = new Map();
-
-    // create
-    triggerLifecycle.call(this, LIFECYCLE_HOOKS[1]);
   }
 
   /**
@@ -248,9 +256,6 @@ class Component {
     // render
     // mount
 
-    // ------ beforeMount
-    triggerLifecycle.call(this, LIFECYCLE_HOOKS[2]);
-
     // 渲染
     const VNode = renderComponent.call(this);
 
@@ -258,9 +263,6 @@ class Component {
     this.assignClassAndStyle(VNode);
 
     VNode.key = this.$key;
-
-    // ------ mount
-    triggerLifecycle.call(this, LIFECYCLE_HOOKS[3]);
 
     return VNode;
   }
@@ -310,18 +312,12 @@ class Component {
     // 把之前的props删除，混入现在的props
     mergeMethods.call(this);
 
-    // beforeUpdate
-    triggerLifecycle.call(this, LIFECYCLE_HOOKS[4]);
-
     const VNode = renderComponent.call(this);
 
     // class和style的处理
     this.assignClassAndStyle(VNode);
 
     VNode.key = this.$key;
-
-    // update
-    triggerLifecycle.call(this, LIFECYCLE_HOOKS[5]);
 
     return VNode;
   }

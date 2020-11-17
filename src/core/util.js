@@ -1,4 +1,4 @@
-import { isFunction, isObject } from '../shared/util';
+import { isFunction, isObject, createExecutionContext } from '../shared/util';
 import Vue from './index';
 
 /**
@@ -17,7 +17,10 @@ export function resetComputed() {
 export function triggerLifecycle(hookName) {
   if (this.$config[hookName] && isFunction(this.$config[hookName])) {
     // 生命周期调用后，生命周期函数中的this是代理对象，因为在生命周期函数中可能(肯定)会修改data中的值
-    this.$config[hookName].call(this.$dataProxy);
+    // TODO: 调用生命周期HOOKS
+    createExecutionContext.call(this, this, function () {
+      this.$config[hookName].call(this.$dataProxy);
+    });
   }
 }
 

@@ -1,5 +1,8 @@
 // import lodashCloneDeep from 'lodash/cloneDeep';
-import { DIRECT_DIVIDING_SYMBOL } from './constants';
+// import { render } from 'src/compiler/render';
+import { resetComputed /* triggerLifecycle */ } from '../core/util';
+import { clear, isEmpty as dirtyStackIsEmpty, getRenderHandler } from '../compiler/dirtyStack';
+import { DIRECT_DIVIDING_SYMBOL /* lifecycle_hooks */ } from './constants';
 
 /**
  * toCamelCase - 用连接符链接的字符串转换成驼峰写法
@@ -130,6 +133,45 @@ export function execExpression(context, expressionStr) {
   /* replaceWith(context, expressionStr); */
   // const fun = new Function('context','expressionStr',`return with(context){${expressionStr}}`);
   // return fun(context, expressionStr);
+}
+
+/**
+ * createExecutionContext
+ * @param codeCallContext - Object 调用上下文
+ * @param codeCallBack - Function 回调的函数
+ */
+export function createExecutionContext(codeCallContext, codeCallBack) {
+  const executionContext = new Function(
+    'codeCallContext',
+    'codeCallBack',
+    'dirtyCallContext',
+    'dirtyCallBack',
+    'codeCallBack.call(codeCallContext);dirtyCallBack.call(dirtyCallContext);',
+  );
+
+  const self = this;
+
+  executionContext(codeCallContext, codeCallBack, this, function () {
+    // 判断是否有数据的修改，如果有执行render或者
+    if (dirtyStackIsEmpty()) return false;
+
+    // 先获取renderHandler
+    const renderHandler = getRenderHandler();
+    // 在清空
+    clear();
+    // 以上2行代码的位置不能改变，否则会引起死循环
+
+    // $stack不为空说明了有数据的修改
+    // ---------------------------------有数据更新
+    // 重新计算所有的计算属性，因为没细化的知道哪些变量在哪些计算属性函数中使用，所以这里只能全部重新计算
+    resetComputed.call(self);
+    // 进行render,render有2中，一种是vue实例的render，一种是component的render
+    if (renderHandler) {
+      renderHandler.call(self);
+    }
+    return false;
+    // -----------------------------------end
+  });
 }
 
 /**
