@@ -3,6 +3,7 @@ import { hasVAttr } from './util';
 import { EMPTY_SPLIT } from '../../shared/regexp';
 import { DIRECT_PREFIX, GROUP_KEY_NAME } from '../../shared/constants';
 import { execExpression, isObject, isArray } from '../../shared/util';
+import { createContext, isProxyProperty } from '../../core/proxy';
 
 /**
  * hasVFor - 是否有v-for属性
@@ -14,14 +15,15 @@ export function hasVFor(attrNames) {
 }
 
 /**
- * parseVFor
- * @param context
- * @param el
- * @param vAttrNames
- * @param renderFun - render函数
+ * parseVFor - 解析v-for
+ * @param context - Object 上下文对象
+ * @param el - HtmlElement 当前元素
+ * @param parentVNode - VNode 父VNode节点
+ * @param vAttrNames - Array 指令属性集合
+ * @param renderFun - Function render函数
  * @return {Array<VNode>}
  */
-export function parseVFor({ context, el, vAttrNames, renderFun }) {
+export function parseVFor({ context, el, parentVNode, vAttrNames, renderFun }) {
   // 如果没有group属性则创建一个
   // group属性使用来给v-for进行分组的
   let groupName = el.getAttribute(GROUP_KEY_NAME);
@@ -55,29 +57,31 @@ export function parseVFor({ context, el, vAttrNames, renderFun }) {
   let VNodes = [];
 
   // 获取迭代的对象，分为对象迭代和数组迭代
-  const itObj = execExpression(context, itObjStr); // eval(`with(context){${itObjStr}}`); /* context[itObjStr] */
+  const itObj = execExpression.call(this, context, itObjStr); // eval(`with(context){${itObjStr}}`); /* context[itObjStr] */
 
   // 对象迭代
   if (isObject(itObj)) {
-    let index = 0;
     for (const p in itObj) {
-      // iteratorVFor会创建一个VNode或VNodes
-      const itemVNodes = iteratorVFor.call(
-        this,
-        {
-          context,
-          el,
-          itItemStr,
-          itItemObj: itObj[p],
-          renderFun,
-        },
-        index++,
-      );
+      if (isProxyProperty(p)) {
+        // iteratorVFor会创建一个VNode或VNodes
+        const itemVNodes = iteratorVFor.call(
+          this,
+          {
+            context: createContext(context),
+            el,
+            parentVNode,
+            itItemStr,
+            itItemObj: itObj[p],
+            renderFun,
+          },
+          p,
+        );
 
-      if (isArray(itemVNodes)) {
-        VNodes = VNodes.concat(itemVNodes);
-      } else if (isObject(itemVNodes)) {
-        VNodes.push(itemVNodes);
+        if (isArray(itemVNodes)) {
+          VNodes = VNodes.concat(itemVNodes);
+        } else if (isObject(itemVNodes)) {
+          VNodes.push(itemVNodes);
+        }
       }
     }
   }
@@ -87,8 +91,9 @@ export function parseVFor({ context, el, vAttrNames, renderFun }) {
       const itemVNodes = iteratorVFor.call(
         this,
         {
-          context,
+          context: createContext(context),
           el,
+          parentVNode,
           itItemStr,
           itItemObj: itObj[i],
           renderFun,
@@ -126,13 +131,14 @@ export function parseVFor({ context, el, vAttrNames, renderFun }) {
  * iteratorVFor - 对v-for进行迭代(一个的生成)
  * @param context - Object 上下文对象
  * @param el - HtmlElement
+ * @param parentVNode - VNode 父VNode
  * @param itItemStr - Object 迭代项变量
  * @param itItemObj - Object | Array 迭代的变量
  * @param renderFun - Function 渲染函数
  * @param index - number v-for的索引
  * @return {VNode | Array<VNode>}
  */
-export function iteratorVFor({ context, el, itItemStr, itItemObj, renderFun }, index) {
+export function iteratorVFor({ context, el, parentVNode, itItemStr, itItemObj, renderFun }, index) {
   // 如果项的迭代对象是用()进行包裹的
   if (itItemStr.startsWith('(') && itItemStr.endsWith(')')) {
     // item   ,    index
@@ -165,7 +171,7 @@ export function iteratorVFor({ context, el, itItemStr, itItemObj, renderFun }, i
     const key = `${DIRECT_PREFIX}bind:key`;
     const value = el.getAttribute(key);
     // 给key加入groupName前缀使之全局唯一
-    el.setAttribute(key, `'${groupName}' + '(${execExpression(context, value)})'`);
+    el.setAttribute(key, `'${groupName}' + '(${execExpression.call(this, context, value)})'`);
   } else if (attrNames.indexOf('key')) {
     const key = 'key';
     const value = el.getAttribute(key);
@@ -182,5 +188,10 @@ export function iteratorVFor({ context, el, itItemStr, itItemObj, renderFun }, i
   // 删除v-for属性
   cloneEl.removeAttribute(`${DIRECT_PREFIX}for`);
 
-  return renderFun.call(this, context, cloneEl);
+  return renderFun.call(this, {
+    context,
+    el: cloneEl,
+    parentVNode,
+    parentElement: el.parentElement,
+  });
 }

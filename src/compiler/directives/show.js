@@ -22,7 +22,7 @@ export function hasVShow(attrNames) {
 export function parseVShow({ context, el, vAttrNames, VNode }) {
   const attrName = vAttrNames.find((n) => n.indexOf(`${DIRECT_PREFIX}show`) !== -1);
   const value = el.getAttribute(attrName);
-  const display = execExpression(context, value);
+  const display = execExpression.call(this, context, value);
   VNode.data.style.display = display ? '' : 'none';
   return display;
 }

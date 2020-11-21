@@ -1,5 +1,5 @@
 import { isComputedProperty } from './util';
-import { push } from '../compiler/dirtyStack';
+import { push } from '../compiler/proxyDirtyStack';
 import {
   execExpression,
   isArray,
@@ -19,29 +19,31 @@ import {
 /**
  * createContext - 创建上下文(主要是在v-for的时候需要重新创建一个新的上下文)
  * @param srcContext - Object 原始的srcContext对象
- * @param arg - Object 上下文的参数
+ * @param argv - Object 上下文的参数
  * @return Object 新的上下文
  */
-export function createContext(srcContext, arg = {}) {
-  const context = { ...(arg || {}) };
-
-  // 根据this的代理对象创建上下对象
-  for (const p in srcContext) {
-    if (isProxyProperty(p)) {
-      context[p] = srcContext[p];
-    }
-  }
-
-  return context;
+export function createContext(srcContext, argv = {}) {
+  // const context = { ...(arg || {}) };
+  //
+  // // 根据this的代理对象创建上下对象
+  // for (const p in srcContext) {
+  //   if (isProxyProperty(p)) {
+  //     context[p] = srcContext[p];
+  //   }
+  // }
+  //
+  // return context;
+  return { ...srcContext, ...(argv || {}) };
 }
 
 /**
  * createProxy - 创建对象的代理(对data和computed的响应式创建，支持Object和Array)
  * @param srcObj - Object | Array 要代理的对象
+ * @param depth - boolean 是否深度创建
  * @param renderHandler - Function 渲染的句柄函数
  * @return Proxy
  */
-function createProxy(srcObj, renderHandler) {
+function createProxy(srcObj, depth, renderHandler) {
   const self = this;
 
   let proxy = null;
@@ -93,6 +95,7 @@ function createProxy(srcObj, renderHandler) {
      * @return {boolean}
      */
     set(target, key, value, receiver) {
+      debugger;
       // 如果不是代理属性则不处理
       // 比如已$等开头的key不进行处理 或者是计算属性的key
       if (!isProxyProperty(key) || isComputedProperty(target, key)) {
@@ -149,7 +152,11 @@ function createProxy(srcObj, renderHandler) {
           // oldVal,newVal
           // TODO: createProxy的watch的处理
           createExecutionContext.call(self, self, function () {
-            handler.call(self, execExpression(self.$noProxySrcData, propertyAccessStr), newVal);
+            handler.call(
+              self,
+              execExpression.call(self, self.$noProxySrcData, propertyAccessStr),
+              newVal,
+            );
           });
         }
       }
@@ -162,9 +169,11 @@ function createProxy(srcObj, renderHandler) {
       const cloneDeepRef = cloneDeep;
       // 回写原始数据
       eval('if(!cloneValue) {cloneValue = cloneDeepRef(value);}');
-      if (isArray(target) && key !== 'length') {
-        // 数组则更新索引出的值
-        eval(`self.$noProxySrcData.${propertyAccessStr}[${key}] = cloneValue`);
+      if (isArray(target)) {
+        if (key !== 'length') {
+          // 数组则更新索引出的值
+          eval(`self.$noProxySrcData.${propertyAccessStr}[${key}] = cloneValue`);
+        }
       } else {
         // 其他则直接更新
         eval(`self.$noProxySrcData.${propertyAccessStr} = cloneValue`);
@@ -172,7 +181,7 @@ function createProxy(srcObj, renderHandler) {
 
       // 如果不是私有属性且是对象或数组继续loop，给value进行代理
       if (isObject(value) || isArray(value)) {
-        value = createProxy.call(self, value, renderHandler);
+        value = createProxy.call(self, value, depth, renderHandler);
         // 创建value的上下级关系(留着在watch中在原始对象中通过上下级关系找到变量)
         value[PATH_SYMBOLS[0]] = key;
         value[PATH_SYMBOLS[1]] = target /* [key] */;
@@ -198,6 +207,10 @@ function createProxy(srcObj, renderHandler) {
         return Reflect.deleteProperty(target, property);
       }
 
+      if (isArray(target)) {
+        return Reflect.deleteProperty(target, property);
+      }
+
       const propertyAccessStr = getPropertyVisitPathStr(target, property);
 
       // watch监听
@@ -207,7 +220,11 @@ function createProxy(srcObj, renderHandler) {
           // TODO: createProxy的watch的处理
           createExecutionContext.call(self, self, function () {
             // oldVal, newVal
-            handler.call(self, execExpression(self.$noProxySrcData, propertyAccessStr), null);
+            handler.call(
+              self,
+              execExpression.call(self, self.$noProxySrcData, propertyAccessStr),
+              null,
+            );
           });
         }
       }
@@ -223,19 +240,21 @@ function createProxy(srcObj, renderHandler) {
     },
   });
 
-  /**
-   * 继续进行迭代，迭代srcObj的所有属性，为srcObj的所有属性都进行代理
-   */
-  for (const p in srcObj) {
-    // obj是Array, 迭代数组
-    // p是0,1,2,3...等索引
-    const objItem = srcObj[p];
-    if (isProxyProperty(p) && (isObject(objItem) || isArray(objItem))) {
-      srcObj[p] = createProxy.call(self, objItem, renderHandler);
-      // 创建value的上下级关系
-      // 如果srcObj是数组则记录数组的索引
-      objItem[PATH_SYMBOLS[0]] = isArray(srcObj) ? `[${p}]` : p;
-      objItem[PATH_SYMBOLS[1]] = srcObj;
+  if (depth) {
+    /**
+     * 继续进行迭代，迭代srcObj的所有属性，为srcObj的所有属性都进行代理
+     */
+    for (const p in srcObj) {
+      // obj是Array, 迭代数组
+      // p是0,1,2,3...等索引
+      const objItem = srcObj[p];
+      if (isProxyProperty(p) && (isObject(objItem) || isArray(objItem))) {
+        srcObj[p] = createProxy.call(self, objItem, depth, renderHandler);
+        // 创建value的上下级关系
+        // 如果srcObj是数组则记录数组的索引
+        objItem[PATH_SYMBOLS[0]] = isArray(srcObj) ? `[${p}]` : p;
+        objItem[PATH_SYMBOLS[1]] = srcObj;
+      }
     }
   }
 
@@ -245,10 +264,11 @@ function createProxy(srcObj, renderHandler) {
 /**
  * createVueProxy - Component实例创建代理
  * @param srcObj - Object | Array 被代理的对象
+ * @param depth - boolean 是否深度创建
  * @return {Proxy} - 代理对象
  */
-export function createVueProxy(srcObj) {
-  return createProxy.call(this, srcObj, function () {
+export function createVueProxy(srcObj, depth = true) {
+  return createProxy.call(this, srcObj, depth, function () {
     // 调用渲染句柄
     render.call(this, this.$config.el, false);
   });
@@ -257,16 +277,17 @@ export function createVueProxy(srcObj) {
 /**
  * createComponentProxy - 组件实例创建代理
  * @param srcObj - Object | Array 被代理的对象
+ * @param depth - boolean 是否深度创建
  * @return {Proxy} - 代理对象
  */
-export function createComponentProxy(srcObj) {
-  return createProxy.call(this, srcObj, function () {
+export function createComponentProxy(srcObj, depth = true) {
+  return createProxy.call(this, srcObj, depth, function () {
     // 组件自身更新
     const VNode = renderComponent.call(this);
     VNode.key = this.$key;
-    this.assignClassAndStyle(VNode);
-    if (this.$top && isFunction(this.$top.refresh)) {
-      this.$top.refresh(VNode);
+    this.$assignClassAndStyle(VNode);
+    if (this.$top && isFunction(this.$top.$refresh)) {
+      this.$top.$refresh(VNode);
     }
   });
 }
@@ -302,7 +323,7 @@ export function createPropsProxy(props) {
           // 调用watch的相关句柄
           // TODO: createPropsProxy的watch的处理
           createExecutionContext.call(self, self, function () {
-            handler.call(self, execExpression(self.$noProxySrcData, key), newVal);
+            handler.call(self, execExpression.call(self, self.$noProxySrcData, key), newVal);
           });
         }
       }

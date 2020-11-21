@@ -40,13 +40,15 @@ export function getEl(elConfig) {
     el = document.querySelector(elConfig);
   }
 
-  if(el) {
-    const innerEl = document.createElement('div');
-    el.appendChild(innerEl);
-    return innerEl;
-  }
+  return el;
 
-  return null;
+  // if(el) {
+  //   const innerEl = document.createElement('div');
+  //   el.appendChild(innerEl);
+  //   return innerEl;
+  // }
+  //
+  // return null;
 }
 
 /**

@@ -1,7 +1,7 @@
 // import lodashCloneDeep from 'lodash/cloneDeep';
 // import { render } from 'src/compiler/render';
 import { resetComputed /* triggerLifecycle */ } from '../core/util';
-import { clear, isEmpty as dirtyStackIsEmpty, getRenderHandler } from '../compiler/dirtyStack';
+import { clear, isEmpty as dirtyStackIsEmpty, getRenderHandler } from '../compiler/proxyDirtyStack';
 import { DIRECT_DIVIDING_SYMBOL /* lifecycle_hooks */ } from './constants';
 
 /**
@@ -129,7 +129,26 @@ export function createElement(htmlStr) {
  * @return {any}
  */
 export function execExpression(context, expressionStr) {
-  return eval(`with(context){${expressionStr}}`);
+  // return eval(`with(context){${expressionStr}}`);
+
+  const argv = [this.$dataProxy];
+  const parameters = ['context'];
+  for (const p in context) {
+    argv.push(context[p]);
+    parameters.push(p);
+  }
+
+  return eval(
+    `
+    const fun = new Function(
+      \`${parameters.join(',')}\`,
+      \`return eval("with(context){${expressionStr}}")\`,
+    );
+  
+    fun.apply(window, argv);
+  `,
+  );
+
   /* replaceWith(context, expressionStr); */
   // const fun = new Function('context','expressionStr',`return with(context){${expressionStr}}`);
   // return fun(context, expressionStr);
@@ -152,7 +171,6 @@ export function createExecutionContext(codeCallContext, codeCallBack) {
   const self = this;
 
   executionContext(codeCallContext, codeCallBack, this, function () {
-    debugger;
     // 判断是否有数据的修改，如果有执行render或者
     if (dirtyStackIsEmpty()) return false;
 

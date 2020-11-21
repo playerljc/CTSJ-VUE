@@ -1,7 +1,7 @@
-// 渲染的句柄
+// proxy中执行set渲染的句柄
 let $renderHandler;
 
-// 改变的数据stack
+// proxy代理中执行set操作改变数据的stack
 let $stack = [];
 
 /**

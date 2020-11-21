@@ -31,27 +31,27 @@ export default {
   computed: {},
   watch: {},
   beforeCreate() {
-    console.log('myComponentInner', 'beforeCreate');
+    console.log('myComponentSlot', 'beforeCreate');
   },
   created() {
-    console.log('myComponentInner', 'created');
+    console.log('myComponentSlot', 'created');
   },
   beforeMount() {
-    console.log('myComponentInner', 'beforeMount');
+    console.log('myComponentSlot', 'beforeMount');
   },
   mounted() {
-    console.log('myComponentInner', 'mounted');
+    console.log('myComponentSlot', 'mounted');
   },
   beforeUpdate() {
-    console.log('myComponentInner', 'beforeUpdate');
+    console.log('myComponentSlot', 'beforeUpdate');
   },
   updated() {
-    console.log('myComponentInner', 'updated');
+    console.log('myComponentSlot', 'updated');
   },
   beforeDestroy() {
-    console.log('myComponentInner', 'beforeDestroy');
+    console.log('myComponentSlot', 'beforeDestroy');
   },
   destroyed() {
-    console.log('myComponentInner', 'destroyed');
+    console.log('myComponentSlot', 'destroyed');
   },
 };

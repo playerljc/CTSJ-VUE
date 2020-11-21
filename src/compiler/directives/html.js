@@ -25,7 +25,7 @@ export function parseVHtml({ context, el, vAttrNames, VNode }) {
   const value = el.getAttribute(attrName);
   // 在此处需要进行实体字符的替换
   // <div>111</div>
-  const html = execExpression(context, value);
+  const html = execExpression.call(this, context, value);
   const htmlVNode = toVNode(createElement(html));
   VNode.children.push(htmlVNode);
   return html;

@@ -167,58 +167,83 @@ export default {
     console.log('myComponent', 'beforeMount');
   },
   mounted() {
-    console.log('myComponent', 'mounted');
+    // console.log('myComponent', 'mounted');
     // this.$emit('onChange', 1, 2, 3, 4);
-    // setTimeout(() => {
-    //   this.carList = [
-    //     {
-    //       name: '迈锐宝',
-    //       pp: '选弗兰',
-    //       xh: 'EX',
-    //       lx: '轿车',
-    //       cd: 'USA',
-    //     },
-    //     {
-    //       name: '昂卡拉',
-    //       pp: '雪佛兰',
-    //       xh: 'EX',
-    //       lx: 'SUV',
-    //       cd: 'USA',
-    //     },
-    //     {
-    //       name: '亚洲龙',
-    //       pp: '本田',
-    //       xh: 'EX',
-    //       lx: '轿车',
-    //       cd: '合资',
-    //     },
-    //     {
-    //       name: '五菱之光',
-    //       pp: '上汽',
-    //       xh: '1.0',
-    //       lx: 'MPV',
-    //       cd: '上汽',
-    //     },
-    //   ];
+    // setTimeout(
+    //   this.$createAsyncExecContext(function () {
+    //     this.listInner = [
+    //       {
+    //         title: '拜登称特朗普拒认败选很尴尬11111111111111111',
+    //         info: '拜登称特朗普拒认败选很尴尬',
+    //         time: '2020-10-20',
+    //       },
+    //       {
+    //         title: '拜登称特朗普拒认败选很尴尬',
+    //         info: '拜登称特朗普拒认败选很尴尬',
+    //         time: '2020-10-20',
+    //       },
+    //       {
+    //         title: '拜登称特朗普拒认败选很尴尬',
+    //         info: '拜登称特朗普拒认败选很尴尬',
+    //         time: '2020-10-20',
+    //       },
+    //     ];
+    //   }),
+    //   2000,
+    // );
+    // setTimeout(
+    //   this.$createAsyncExecContext(function () {
+    //     this.carList = [
+    //       {
+    //         name: '迈锐宝',
+    //         pp: '选弗兰',
+    //         xh: 'EX',
+    //         lx: '轿车',
+    //         cd: 'USA',
+    //       },
+    //       {
+    //         name: '昂卡拉',
+    //         pp: '雪佛兰',
+    //         xh: 'EX',
+    //         lx: 'SUV',
+    //         cd: 'USA',
+    //       },
+    //       {
+    //         name: '亚洲龙',
+    //         pp: '本田',
+    //         xh: 'EX',
+    //         lx: '轿车',
+    //         cd: '合资',
+    //       },
+    //       {
+    //         name: '五菱之光',
+    //         pp: '上汽',
+    //         xh: '1.0',
+    //         lx: 'MPV',
+    //         cd: '上汽',
+    //       },
+    //     ];
     //
-    //   this.listInner = [
-    //     {
-    //       title: 'playerljc特朗普拒认败选很尴尬',
-    //       info: 'playerljc特朗普拒认败选很尴尬',
-    //       time: '2020-10-20',
-    //     },
-    //     // {
-    //     //   title: 'playerljc特朗普拒认败选很尴尬',
-    //     //   info: 'playerljc特朗普拒认败选很尴尬',
-    //     //   time: '2020-10-20',
-    //     // },
-    //     {
-    //       title: 'playerljc特朗普拒认败选很尴尬',
-    //       info: 'playerljc特朗普拒认败选很尴尬',
-    //       time: '2020-10-20',
-    //     },
-    //   ];
-    // }, 6000);
+    //     this.listInner = [
+    //       {
+    //         title: 'playerljc特朗普拒认败选很尴尬',
+    //         info: 'playerljc特朗普拒认败选很尴尬',
+    //         time: '2020-10-20',
+    //       },
+    //       // {
+    //       //   title: 'playerljc特朗普拒认败选很尴尬',
+    //       //   info: 'playerljc特朗普拒认败选很尴尬',
+    //       //   time: '2020-10-20',
+    //       // },
+    //       {
+    //         title: 'playerljc特朗普拒认败选很尴尬',
+    //         info: 'playerljc特朗普拒认败选很尴尬',
+    //         time: '2020-10-20',
+    //       },
+    //     ];
+    //   }),
+    //   6000,
+    // );
   },
   beforeUpdate() {
     console.log('myComponent', 'beforeUpdate');

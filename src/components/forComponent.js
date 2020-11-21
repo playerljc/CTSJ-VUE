@@ -13,27 +13,27 @@ export default {
   computed: {},
   watch: {},
   beforeCreate() {
-    console.log('myComponent', 'beforeCreate');
+    console.log('forComponent', 'beforeCreate');
   },
   created() {
-    console.log('myComponent', 'created');
+    console.log('forComponent', 'created');
   },
   beforeMount() {
-    console.log('myComponent', 'beforeMount');
+    console.log('forComponent', 'beforeMount');
   },
   mounted() {
-    console.log('myComponent', 'mounted');
+    console.log('forComponent', 'mounted');
   },
   beforeUpdate() {
-    console.log('myComponent', 'beforeUpdate');
+    console.log('forComponent', 'beforeUpdate');
   },
   updated() {
-    console.log('myComponent', 'updated');
+    console.log('forComponent', 'updated');
   },
   beforeDestroy() {
-    console.log('myComponent', 'beforeDestroy');
+    console.log('forComponent', 'beforeDestroy');
   },
   destroyed() {
-    console.log('myComponent', 'destroyed');
+    console.log('forComponent', 'destroyed');
   },
 };

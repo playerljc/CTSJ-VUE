@@ -15,7 +15,7 @@ import { createElement, isFunction, cloneDeep, createExecutionContext } from '..
  * @return {VNode}
  */
 function findVNodeParentByKey(VNode, key) {
-  if (VNode.key === key) {
+  if (!VNode || VNode.key === key) {
     return null;
   }
 
@@ -25,6 +25,7 @@ function findVNodeParentByKey(VNode, key) {
 
   for (let i = 0; i < VNode.children.length; i++) {
     const curVNode = VNode.children[i];
+    if (!curVNode) continue;
 
     if (curVNode.key === key) {
       parent = VNode;
@@ -114,11 +115,11 @@ class Vue {
   }
 
   /**
-   * createAsyncExecContext - 创建一个异步的执行上下文
+   * $createAsyncExecContext - 创建一个异步的执行上下文
    * @param callBack - Function 回调的函数
    * @return Function
    */
-  createAsyncExecContext(callBack) {
+  $createAsyncExecContext(callBack) {
     const self = this;
     return function () {
       createExecutionContext.call(self, self, callBack);
@@ -126,10 +127,10 @@ class Vue {
   }
 
   /**
-   * refresh - 指定VNode刷新
+   * $refresh - 指定VNode刷新
    * @param VNode
    */
-  refresh(VNode) {
+  $refresh(VNode) {
     // this.$preVNode
     const cloneNode = cloneDeep(this.$preVNode);
     const parent = findVNodeParentByKey.call(this, cloneNode, VNode.key);

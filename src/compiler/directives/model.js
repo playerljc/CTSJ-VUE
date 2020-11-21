@@ -1,4 +1,4 @@
-import { execExpression, isArray } from '../../shared/util';
+import { execExpression, isArray, createExecutionContext } from '../../shared/util';
 import { getDirectiveEntry, hasVAttr } from './util';
 import {
   FORM_CONTROL_BINDING_TAG_NAMES,
@@ -22,7 +22,7 @@ export function hasVModel(attrNames) {
  * @return String
  */
 function getInputType(context, el) {
-  return getInputProp({ context, el, propName: 'type' }) || 'text';
+  return getInputProp.call(this, { context, el, propName: 'type' }) || 'text';
 }
 
 /**
@@ -32,7 +32,7 @@ function getInputType(context, el) {
  * @return String
  */
 function getInputValue(context, el) {
-  return getInputProp({ context, el, propName: 'value' });
+  return getInputProp.call(this, { context, el, propName: 'value' });
 }
 
 /**
@@ -49,7 +49,7 @@ function getInputProp({ context, el, propName }) {
   }
   if (attrNames.includes(`${DIRECT_PREFIX}bind:${propName}`)) {
     const value = el.getAttribute(`${DIRECT_PREFIX}bind:${propName}`);
-    return execExpression(context, value);
+    return execExpression.call(this, context, value);
   }
 
   return '';
@@ -72,6 +72,12 @@ function hasProp({ el, prop }) {
   return exists;
 }
 
+/**
+ * getVModelEntrys
+ * @param el
+ * @param vAttrNames
+ * @return {{expression: *, arg: string, name: string, modifiers: {}|{}, value: string}|null}
+ */
 export function getVModelEntrys({ el, vAttrNames }) {
   const attrs = vAttrNames.filter((n) => n.indexOf(`${DIRECT_PREFIX}model`) !== -1);
 
@@ -110,10 +116,10 @@ export function parseVModel({ context, el, vAttrNames, tagName, VNode }) {
   if (!entry) return null;
 
   // v-model的值
-  const value = execExpression(context, entry.expression);
+  const value = execExpression.call(this, context, entry.expression);
 
-  const inputType = getInputType(context, el);
-  const inputValue = getInputValue(context, el);
+  const inputType = getInputType.call(this, context, el);
+  const inputValue = getInputValue.call(this, context, el);
 
   // 1.赋值
   if (tagName === 'input') {
@@ -153,31 +159,31 @@ export function parseVModel({ context, el, vAttrNames, tagName, VNode }) {
     VNode.data.props.value = value;
   }
   // select
-  else if (tagName === 'select') {
-    //  <select>
-    //    <option>java</option>
-    //    <option>c++</option>
-    //    <option>javascript</option>
-    //  </select>
-
-    // 获取select下所有的option
-    const optionEls = Array.from(el.querySelectorAll('option'));
-    optionEls.forEach((optionEl) => {
-      // 获取option的value value表示的是text或value
-      const val = optionEl.value.trim();
-
-      // model的值是数组
-      if (isArray(value)) {
-        if (value.includes(val)) {
-          optionEl.setAttribute('selected', 'selected');
-        }
-      }
-      // model的值不是数组
-      else if (val == value) {
-        optionEl.setAttribute('selected', 'selected');
-      }
-    });
-  }
+  // else if (tagName === 'select') {
+  //   //  <select>
+  //   //    <option>java</option>
+  //   //    <option>c++</option>
+  //   //    <option>javascript</option>
+  //   //  </select>
+  //
+  //   // 获取select下所有的option
+  //   const optionEls = Array.from(el.querySelectorAll('option'));
+  //   optionEls.forEach((optionEl) => {
+  //     // 获取option的value value表示的是text或value
+  //     const val = optionEl.value.trim();
+  //
+  //     // model的值是数组
+  //     if (isArray(value)) {
+  //       if (value.includes(val)) {
+  //         optionEl.setAttribute('selected', 'selected');
+  //       }
+  //     }
+  //     // model的值不是数组
+  //     else if (val == value) {
+  //       optionEl.setAttribute('selected', 'selected');
+  //     }
+  //   });
+  // }
 
   const { lazy } = entry.modifiers;
 
@@ -185,25 +191,27 @@ export function parseVModel({ context, el, vAttrNames, tagName, VNode }) {
   // select标签
   if (tagName === 'select') {
     VNode.data.on.change = (e) => {
-      const { selectedOptions } = e.target;
+      createExecutionContext.call(self, self, function () {
+        const { selectedOptions } = e.target;
 
-      // 多选的模式
-      if (hasProp({ el, prop: 'multiple' })) {
-        // model的值是数组
-        if (isArray(value)) {
-          self.$dataProxy[entry.expression] = Array.from(selectedOptions).map((selectedOption) =>
-            filterChain(selectedOption.value, entry),
-          );
+        // 多选的模式
+        if (hasProp({ el, prop: 'multiple' })) {
+          // model的值是数组
+          if (isArray(value)) {
+            self.$dataProxy[entry.expression] = Array.from(selectedOptions).map((selectedOption) =>
+              filterChain(selectedOption.value, entry),
+            );
+          }
+          // 不是数组不处理
         }
-        // 不是数组不处理
-      }
-      // 非多选的模式
-      else {
-        // 不是数组才处理
-        if (!isArray(value)) {
-          self.$dataProxy[entry.expression] = filterChain(selectedOptions[0].value, entry);
+        // 非多选的模式
+        else {
+          // 不是数组才处理
+          if (!isArray(value)) {
+            self.$dataProxy[entry.expression] = filterChain(selectedOptions[0].value, entry);
+          }
         }
-      }
+      });
     };
   }
   // input标签
@@ -216,7 +224,9 @@ export function parseVModel({ context, el, vAttrNames, tagName, VNode }) {
         //  <input type="radio" value="2" v-model="sex" />女
         if (inputType === 'radio') {
           VNode.data.on.change = (e) => {
-            self.$dataProxy[entry.expression] = e.target.checked ? inputValue : '';
+            createExecutionContext.call(self, self, function () {
+              self.$dataProxy[entry.expression] = e.target.checked ? inputValue : '';
+            });
           };
         }
         //  <input type="checkbox" value="1" v-model="data" />java
@@ -225,20 +235,24 @@ export function parseVModel({ context, el, vAttrNames, tagName, VNode }) {
         else if (inputType === 'checkbox') {
           if (isArray(value)) {
             VNode.data.on.change = (e) => {
-              if (e.target.checked) {
-                self.$dataProxy[entry.expression].push(inputValue);
-              } else {
-                const deleteIndex = self.$dataProxy[entry.expression].indexOf(inputValue);
-                if (deleteIndex !== -1) {
-                  self.$dataProxy[entry.expression].splice(deleteIndex, 1);
+              createExecutionContext.call(self, self, function () {
+                if (e.target.checked) {
+                  self.$dataProxy[entry.expression].push(inputValue);
+                } else {
+                  const deleteIndex = self.$dataProxy[entry.expression].indexOf(inputValue);
+                  if (deleteIndex !== -1) {
+                    self.$dataProxy[entry.expression].splice(deleteIndex, 1);
+                  }
                 }
-              }
+              });
             };
           }
           // 不是数组
           else {
             VNode.data.on.change = (e) => {
-              self.$dataProxy[entry.expression] = e.target.checked ? inputValue : '';
+              createExecutionContext.call(self, self, function () {
+                self.$dataProxy[entry.expression] = e.target.checked ? inputValue : '';
+              });
             };
           }
         }
@@ -246,37 +260,76 @@ export function parseVModel({ context, el, vAttrNames, tagName, VNode }) {
       // 没有value属性
       else {
         VNode.data.on.change = (e) => {
-          self.$dataProxy[entry.expression] = e.target.checked;
+          createExecutionContext.call(self, self, function () {
+            self.$dataProxy[entry.expression] = e.target.checked;
+          });
         };
       }
     }
     // text | number ... lazy
     else if (lazy) {
       VNode.data.on.change = (e) => {
-        self.$dataProxy[entry.expression] = filterChain(e.target.value, entry);
+        createExecutionContext.call(self, self, function () {
+          self.$dataProxy[entry.expression] = filterChain(e.target.value, entry);
+        });
       };
     }
     // text | number ... 没有lazy
     else {
       VNode.data.on.input = (e) => {
-        self.$dataProxy[entry.expression] = filterChain(e.target.value, entry);
+        createExecutionContext.call(self, self, function () {
+          self.$dataProxy[entry.expression] = filterChain(e.target.value, entry);
+        });
       };
     }
   }
   // textarea标签 lazy
   else if (lazy) {
     VNode.data.on.change = (e) => {
-      self.$dataProxy[entry.expression] = filterChain(e.target.value, entry);
+      createExecutionContext.call(self, self, function () {
+        self.$dataProxy[entry.expression] = filterChain(e.target.value, entry);
+      });
     };
   }
   // textarea标签 没有lazy
   else {
     VNode.data.on.input = (e) => {
-      self.$dataProxy[entry.expression] = filterChain(e.target.value, entry);
+      createExecutionContext.call(self, self, function () {
+        self.$dataProxy[entry.expression] = filterChain(e.target.value, entry);
+      });
     };
   }
 
   return entry;
+}
+
+/**
+ * parseOption - 解析option 主要是赋值
+ * @param context
+ * @param VNode
+ * @param parentElement
+ */
+export function parseOption({ context, VNode, parentElement }) {
+  // v-model的值
+  const value = execExpression.call(
+    this,
+    context,
+    parentElement.getAttribute(`${DIRECT_PREFIX}model`),
+  );
+
+  // 获取option的value value表示的是text或value
+  const val = VNode.data.props.value;
+
+  // model的值是数组
+  if (isArray(value)) {
+    if (value.includes(val)) {
+      VNode.data.props.selected = 'selected';
+    }
+  }
+  // model的值不是数组
+  else if (val == value) {
+    VNode.data.props.selected = 'selected';
+  }
 }
 
 /**

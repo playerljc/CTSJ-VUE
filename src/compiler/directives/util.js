@@ -142,7 +142,7 @@ export function getKey({ context, el }) {
   const attrNames = el.getAttributeNames();
   // 元素有key属性
   if (attrNames.indexOf(`${DIRECT_PREFIX}bind:key`) !== -1) {
-    return execExpression(context, el.getAttribute(`${DIRECT_PREFIX}bind:key`));
+    return execExpression.call(this, context, el.getAttribute(`${DIRECT_PREFIX}bind:key`));
   }
 
   if (el.getAttribute('key')) {
@@ -168,7 +168,7 @@ export function getAttribute({ context, attrName, el }) {
 
   if (index !== -1) {
     const value = el.getAttribute(attrNames[index]).trim();
-    return execExpression(context, value);
+    return execExpression.call(this, context, value);
   }
 
   return el.getAttribute(attrName);

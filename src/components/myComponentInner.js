@@ -57,15 +57,19 @@ export default {
   },
   mounted() {
     console.log('myComponentInner', 'mounted');
-    setTimeout(() => {
-      this.list = [
-        {
-          title: '333',
-          info: '666',
-          time: '2020-10-20',
-        },
-      ];
-    }, 8000);
+
+    // setTimeout(
+    //   this.$createAsyncExecContext(function () {
+    //     this.list = [
+    //       {
+    //         title: '33333333333333333333333333333333333333333333333333333333333333',
+    //         info: '666',
+    //         time: '2020-10-20',
+    //       },
+    //     ];
+    //   }),
+    //   8000,
+    // );
   },
   beforeUpdate() {
     console.log('myComponentInner', 'beforeUpdate');

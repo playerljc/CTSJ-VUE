@@ -31,7 +31,7 @@ export function getVBindEntrys({ context, el, vAttrNames }) {
     // 如果bindAttr是v-bind对象绑定
     if (bindAttr === `${DIRECT_PREFIX}bind`) {
       const attrValue = el.getAttribute(bindAttr);
-      const value = execExpression(context, attrValue);
+      const value = execExpression.call(this, context, attrValue);
       // 如果这个值是Object
       if (isObject(value)) {
         Object.keys(value).forEach((key) => {
@@ -65,7 +65,7 @@ export function getVBindEntrys({ context, el, vAttrNames }) {
         }
         // <div v-bind:class="classObject"></div>
         // [activeClass, errorClass]
-        entry.value = execExpression(context, entry.expression);
+        entry.value = execExpression.call(this, context, entry.expression);
         if (isArray(entry.value)) {
           const classNames = entry.value;
           entry.value = {};
@@ -83,11 +83,11 @@ export function getVBindEntrys({ context, el, vAttrNames }) {
         ) {
           entry.expression = `Object(${entry.expression})`;
         }
-        entry.value = execExpression(context, entry.expression);
+        entry.value = execExpression.call(this, context, entry.expression);
       }
     } else if (entry.arg) {
       // 其他的情况
-      entry.value = execExpression(context, entry.expression);
+      entry.value = execExpression.call(this, context, entry.expression);
     }
 
     return entry;
@@ -109,7 +109,13 @@ export function parseVBind({ context, el, vAttrNames, VNode }) {
     if (entry.arg === 'key') {
       VNode.key = entry.value;
     } else if (entry.arg === 'class') {
-      Object.assign(VNode.data.class, entry.value);
+      const value = {};
+      Object.keys(entry.value).forEach((key) => {
+        if (isProxyProperty(key)) {
+          value[key] = entry.value[key];
+        }
+      });
+      Object.assign(VNode.data.class, value);
     } else if (entry.arg === 'style') {
       Object.assign(VNode.data.style, entry.value);
     } else if (entry.arg.startsWith('data-')) {

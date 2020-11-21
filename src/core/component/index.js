@@ -87,14 +87,12 @@ function createEmit() {
 
     if (!(eventNameFormat in events)) return false;
 
-    createExecutionContext.call(self, self, function () {
-      executeVOn.call(self.$parent, {
-        context: self.$parent.$dataProxy,
-        entry: {
-          expression: events[eventNameFormat],
-        },
-        argv,
-      });
+    executeVOn.call(self.$parent, {
+      context: self.$parent.$dataProxy,
+      entry: {
+        expression: events[eventNameFormat],
+      },
+      argv,
     });
   };
 }
@@ -122,7 +120,7 @@ class Component {
     this.$top = top;
     this.$parent = parent;
     this.$key = key;
-    this.$config = this.getConfig();
+    this.$config = this.$getConfig();
     this.$argConfig = config;
     // 创建组件的$emit实例
     this.$emit = createEmit.call(this);
@@ -167,10 +165,10 @@ class Component {
   }
 
   /**
-   * assignClassAndStyle - 混入class和style
+   * $assignClassAndStyle - 混入class和style
    * @param VNode
    */
-  assignClassAndStyle(VNode) {
+  $assignClassAndStyle(VNode) {
     const { attrs } = this.$argConfig;
     if (attrs.class) {
       if (isObject(attrs.class)) {
@@ -195,27 +193,27 @@ class Component {
   }
 
   /**
-   * setParams
+   * $setParams
    * @param config
    */
-  setParams(config) {
+  $setParams(config) {
     this.$argConfig = config;
   }
 
   /**
-   * 获取组件配置
+   * $getConfig- 获取组件配置
    * @return Object
    */
-  getConfig() {
+  $getConfig() {
     return getComponentConfig(this.$parent, this.$el.tagName.toLowerCase());
   }
 
   /**
-   * 获取组件components的配置
+   * $getComponentsConfig - 获取组件components的配置
    * @return Object
    */
-  getComponentsConfig() {
-    const config = this.getConfig();
+  $getComponentsConfig() {
+    const config = this.$getConfig();
 
     if (!config || !('components' in config) || !config.components) return {};
 
@@ -239,18 +237,30 @@ class Component {
   }
 
   /**
-   * getParentContext - 获取父亲的上下文对象
+   * $getParentContext - 获取父亲的上下文对象
    * @return Object
    */
-  getParentContext() {
+  $getParentContext() {
     return this.$argConfig.parentContext;
   }
 
   /**
-   * compiler - 编译这个Component返回这个Component的VNode
+   * $createAsyncExecContext - 创建一个异步的执行上下文
+   * @param callBack - Function 回调的函数
+   * @return Function
+   */
+  $createAsyncExecContext(callBack) {
+    const self = this;
+    return function () {
+      createExecutionContext.call(self, self, callBack);
+    };
+  }
+
+  /**
+   * $render - 编译这个Component返回这个Component的VNode
    * @return {VNode}
    */
-  render() {
+  $render() {
     // 渲染
     // beforeMount
     // render
@@ -260,7 +270,7 @@ class Component {
     const VNode = renderComponent.call(this);
 
     // class和style的处理
-    this.assignClassAndStyle(VNode);
+    this.$assignClassAndStyle(VNode);
 
     VNode.key = this.$key;
 
@@ -268,7 +278,7 @@ class Component {
   }
 
   /**
-   * update - 更新这个Component返回这个Component的VNode
+   * $update - 更新这个Component返回这个Component的VNode
    * 更新分为2中
    *  1.父容器更新导致组件的更新(props)
    *    父容器的更新需要调用update方法只返回VNode即可
@@ -276,7 +286,7 @@ class Component {
    *    组件内部的更新需要调用$top的refresh来执行虚拟Dom的path操作
    * @return {VNode}
    */
-  update() {
+  $update() {
     // 父容器更新
     const { props, attrs } = getPropsAndAttrs.call(this);
     this.$attes = attrs;
@@ -315,7 +325,7 @@ class Component {
     const VNode = renderComponent.call(this);
 
     // class和style的处理
-    this.assignClassAndStyle(VNode);
+    this.$assignClassAndStyle(VNode);
 
     VNode.key = this.$key;
 

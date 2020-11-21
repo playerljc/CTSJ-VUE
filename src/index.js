@@ -1,343 +1,319 @@
 import Vue from './core';
 
-import MyComponent from './components/myComponent';
-import MyComponentInner from './components/myComponentInner';
-import ForComponent from './components/forComponent';
-import MyComponentSlot from './components/myComponentSlot';
+// import MyComponent from './components/myComponent';
+// import MyComponentInner from './components/myComponentInner';
+// import ForComponent from './components/forComponent';
+// import MyComponentSlot from './components/myComponentSlot';
+//
+// Vue.component('my-component', MyComponent);
+// Vue.component('MyComponentInner', MyComponentInner);
+// Vue.component('for-component', ForComponent);
+// Vue.component('MyComponentSlot', MyComponentSlot);
 
-// 注册的componentName是 MyComponent my-component
-Vue.component('my-component', MyComponent);
-Vue.component('MyComponentInner', MyComponentInner);
-Vue.component('for-component', ForComponent);
-Vue.component('MyComponentSlot', MyComponentSlot);
-
-// v-bind 指令名称 v-bind:id id是指令的参数 v-bind:id="123" 123是指令的值  v-bind.a.b:id="" .a.b是指令的modifiers
 window.onload = () => {
-  // v-bind:class="{active: isActive, 'text-danger': hasError}"
-
-  const vm2 = new Vue({
-    el: '#container2', // document.getElementById('container2'),
+  // vm1
+  const vm1 = new Vue({
+    el: '#container1',
     template: `
-<!--      		<div -->
-<!--      		  v-bind:id="id + '我' + [1,2,3].join(',') + reversedMessage"-->
-<!--            v-bind:class="[activeClass, errorClass]"-->
-<!--      		  v-bind:style="{color:activeColor,fontSize: fontSize + 'px'}"-->
-<!--      		  v-bind:data-ent-id="name"-->
-<!--      		  name="playerljc"-->
-<!--      		>-->
-<!--      			<p v-show="true" v-on:click="sum(name,sex,age,$event,'1' + '2')">我的名字叫"{{name + new Date().getTime() + [1,2,3] + Math.random() + (2 > 3 ? 'aaa' : 'bbb')}}~{{display()}}",我的性别是"{{sex}}"性,我家住在"{{address}}"地方</p>-->
-<!--      			<p v-on:click="sum(name,sex,age,$event,'1' + '2')">display{{display()}}是display</p>-->
-<!--      			<p>{{items[0].name}}</p>-->
-<!--      			<p>{{items[0].hobby.hobby1}}</p>-->
-<!--      			<p>{{'你' + '是   &nbsp;' + '谁'}}</p>-->
-<!--      			<p>{{reversedMessage}}</p>-->
-<!--      			<ul>-->
-<!--      				<li v-for="(item,index) in data">-->
-<!--      					<div>{{item.name}}:{{index}}</div>-->
-<!--      					<ul>-->
-<!--      						<li v-for="(item2,index1) in item.data">-->
-<!--      							<div>{{item2.name}}:{{index + index1}}</div>-->
-<!--      							<ul>-->
-<!--      								<li v-for="(item3,index2) in item2.data" v-if="item2.data.length !== 0">{{item3.name}}:{{index + index1 + index2}}</li>-->
-<!--										</ul>-->
-<!--      						</li>-->
-<!--								</ul>-->
-<!--      				</li>-->
-<!--      				<div>{{sex}}</div>-->
-<!--            </ul>-->
-<!--            <div v-html="htmlStr"></div>-->
-<!--      		</div>-->
-          <div>
-          
-          
-<!--            <p v-if="checkbox">{{name}}</p>-->
-            
-            
-            
-<!--            <p key="1" data-a="1">{{a.b.c.d}}</p>-->
-<!--            <p key="2" v-bind:data-a="name">{{reversedMessage}}</p>-->
-<!--            <p>{{name}}</p>-->
-<!--            <p>{{checkbox}}</p>-->
+       <!--<div>
+        {{ message }}
+       </div>-->
+       
+      <!-- <div v-bind:class="{ active: isActive }">
+        {{message}}
+       </div>-->
+       
+       <!--<div class="static"
+            v-bind:class="{ active: isActive, 'text-danger': hasError }">
+        {{message}}
+       </div>-->
+       
+       <!--<div v-bind:class="classObject">
+        {{message}}
+       </div>-->
+       
+       <!--<div v-bind:style="{ color: activeColor, fontSize: fontSize + 'px' }">
+         {{message}}
+       </div>-->
+       
+       <!--<div v-bind:style="styleObject">
+         {{message}}
+       </div>-->
+       
+       <!--<div>
+         <p>Original message: "{{ message }}"</p>
+         <p>Computed reversed message: "{{ reversedMessage }}"</p>
+       </div>-->
+      
+      <!--<div id="demo">{{ fullName }}</div>-->
+      
+      <!--<h1 v-if="true">Vue is awesome!</h1>-->
 
-
-            <!--<my-component
-              v-on:onChange="onChange"
-              v-model="selected"
-              v-bind="obj"
-              v-bind:list="list" 
-              v-bind:class="[activeClass, errorClass]"
-      		    v-bind:style="{color:activeColor,fontSize: fontSize + 'px'}"
-      		    name="myComponent" 
-             ></my-component>-->
-             
-             
-<!--             <for-component v-for="(item,index) in list" v-bind:key="index" v-bind:list="[item.name]"></for-component>-->
-            
-            
-<!--            <select v-model="selected">-->
-<!--              <option v-for="option in options" v-bind:key="option.value" v-bind:value="option.value">-->
-<!--                {{ option.text }}-->
-<!--              </option>-->
-<!--            </select>-->
-<!--            <span>Selected: {{ selected }}</span>-->
-            
-            
-            
-<!--            <input v-bind:type="type" v-model="input">-->
-<!--            <div>{{input}}</div>-->
-
-              <!--<template v-for="(item,index) in list">
-                <div>111</div>
-                <my-component
-                  v-on:onChange="onChange"
-                  v-model="selected"
-                  v-bind="obj"
-                  v-bind:list="list" 
-                  v-bind:class="[activeClass, errorClass]"
-                  v-bind:style="{color:activeColor,fontSize: fontSize + 'px'}"
-                  name="myComponent" 
-                 ></my-component>
-              </template>-->
-              
-              <!--<MyComponentSlot>
-                &lt;!&ndash;<template v-slot:default>
-                  <div>{{obj.cloneNode.a}}</div>
-                  <div>{{obj.textNode}}</div>
-                  <div>{{obj.nodeValue}}</div>
-                  <template>
-                    <div>222</div>
-                  </template>
-                  <template v-for="(item,index) in list">
-                    <div>111</div>
-                    <my-component
-                      v-on:onChange="onChange"
-                      v-model="selected"
-                      v-bind="obj"
-                      v-bind:list="list" 
-                      v-bind:class="[activeClass, errorClass]"
-                      v-bind:style="{color:activeColor,fontSize: fontSize + 'px'}"
-                      name="myComponent" 
-                     ></my-component>
-                  </template>
-                </template>&ndash;&gt;
-                
-                &lt;!&ndash;<template v-slot:head="headProps">
-                  <div>{{headProps.user.name}}</div>
-                  <div>{{headProps.user.sex}}</div>
-                  <div>{{headProps.user.age}}</div>
-                </template>
-                
-                <template v-slot:body="bodyProps">
-                  <div>{{bodyProps.car.name}}</div>
-                  <div>{{bodyProps.car.size}}</div>
-                </template>&ndash;&gt;
-                
-&lt;!&ndash;                <template v-slot:footer="goodsProps">&ndash;&gt;
-&lt;!&ndash;                  <div>{{goodsProps.goods.name}}</div>&ndash;&gt;
-&lt;!&ndash;                  <div>{{goodsProps.goods.size}}</div>&ndash;&gt;
-&lt;!&ndash;                </template>&ndash;&gt;
-                
-              </MyComponentSlot>-->
-              
-              <!--<component 
-                is="for-component" 
-                v-for="(item,index) in list" 
-                v-bind:key="index" 
-                v-bind:list="[item.name]"
-      		    ></component>-->
-      		    
-      		    
-      		    <!--<component 
-                is="my-component" 
-                v-on:onChange="onChange"
-                v-model="selected"
-                v-bind="obj"
-                v-bind:list="list" 
-                v-bind:class="[activeClass, errorClass]"
-                v-bind:style="{color:activeColor,fontSize: fontSize + 'px'}"
-                name="myComponent" 
-      		    ></component>-->
-      		    
-      		    <p>{{name}}</p>
-      		    <p>{{age}}</p>
-      		    <p>{{address}}</p>
-      		    <button v-on:click="update">修改</button>
-          </div>
-      	`,
+       <!--<div>
+        <h1 v-if="false">Vue is awesome!</h1>
+        <h1 v-else="true">Oh no 😢</h1>
+       </div>-->
+       
+       <!--<div>
+         <template v-if="true">
+          <h1>Title</h1>
+          <p>Paragraph 1</p>
+          <p>Paragraph 2</p>
+        </template>
+      </div>-->
+      
+      <!--<div>
+        <div v-if="Math.random() > 0.5">
+          Now you see me
+        </div>
+        <div v-else>
+          Now you don't
+        </div>
+      </div>-->
+      
+      <!--<div>
+        <div v-if="type === 'A'">
+          A
+        </div>
+        <div v-else-if="type === 'B'">
+          B
+        </div>
+        <div v-else-if="type === 'C'">
+          C
+        </div>
+        <div v-else>
+          Not A/B/C
+        </div>
+      </div>-->
+      
+      <!--<h1 v-show="false">Hello!</h1>-->
+      
+      <!--<ul id="example-1">
+        <li v-for="item in items" :key="item.message">
+          {{ item.message }}
+        </li>
+      </ul>-->
+      
+      <!--<ul id="example-2">
+        <li v-for="(item, index) in items">
+          {{ parentMessage }} - {{ index }} - {{ item.message }}
+        </li>
+      </ul>-->
+      
+      <!--<ul id="v-for-object" class="demo">
+        <li v-for="value in object">
+          {{ value }}
+        </li>
+      </ul>-->
+      
+      <div>
+        <div v-for="(value, name) in object">
+          <div v-on:click="display(value,name)">{{name}}</div>
+          {{ name }}: {{ value }}
+        </div>
+      </div>
+      
+      <!--<ul>
+        <template v-for="item in items">
+          <li>{{ item.message }}</li>
+          <li class="divider" role="presentation"></li>
+        </template>
+      </ul>-->
+      
+      <!--<ul>
+        <li v-for="todo in todos" v-if="!todo.isComplete">
+          {{ todo.name }}
+        </li>
+      </ul>-->
+      
+      <!--<div id="example-1">
+        <button v-on:click="counter += 1">Add 1</button>
+        <p>The button above has been clicked {{ counter }} times.</p>
+      </div>-->
+      
+      <!--<div id="example-2">
+        <button v-on:click="greet">Greet</button>
+      </div>-->
+      
+      <!--<div id="example-3">
+        <button v-on:click="say('hi')">Say hi</button>
+        <button v-on:click="say('what')">Say what</button>
+      </div>-->
+      
+      <!--<button v-on:click="warn('Form cannot be submitted yet.', $event)">
+        Submit
+      </button>-->
+      
+      <!--<div>
+        <input v-model="message" placeholder="edit me">
+        <p>Message is: {{ message }}</p>
+      </div>-->
+      
+      <!--<div>
+        <span>Multiline message is:</span>
+          <p style="white-space: pre-line;">{{ message }}</p>
+          <br>
+        <textarea v-model="message" placeholder="add multiple lines"></textarea>
+      </div>-->
+      
+      <!--<div>
+        <input type="checkbox" id="checkbox" v-model="checked">
+        <label for="checkbox">{{ checked }}</label>
+      </div>-->
+      
+      <!--<div>
+        <input type="checkbox" id="jack" value="Jack" v-model="checkedNames">
+        <label for="jack">Jack</label>
+        <input type="checkbox" id="john" value="John" v-model="checkedNames">
+        <label for="john">John</label>
+        <input type="checkbox" id="mike" value="Mike" v-model="checkedNames">
+        <label for="mike">Mike</label>
+        <br>
+        <span>Checked names: {{ checkedNames }}</span>
+      </div>-->
+      
+      <!--<div id="example-4">
+        <input type="radio" id="one" value="One" v-model="picked">
+        <label for="one">One</label>
+        <br>
+        <input type="radio" id="two" value="Two" v-model="picked">
+        <label for="two">Two</label>
+        <br>
+        <span>Picked: {{ picked }}</span>
+      </div>-->
+      
+      <!--<div id="example-5">
+        <select v-model="selected">
+          <option disabled value="">请选择</option>
+          <option>A</option>
+          <option>B</option>
+          <option>C</option>
+        </select>
+        <span>Selected: {{ selected }}</span>
+      </div>-->
+      
+      <!--<div id="example-6">
+        <select v-model="selected" multiple style="width: 50px;">
+          <option>A</option>
+          <option>B</option>
+          <option>C</option>
+        </select>
+        <br>
+        <span>Selected: {{ selected }}</span>
+      </div>-->
+      
+      <!--<div>
+        <select v-model="selected">
+          <option v-for="option in options" v-bind:value="option.value">
+            {{ option.text }}
+          </option>
+        </select>
+        <span>Selected: {{ selected }}</span>
+      </div>-->
+    `,
     data: () => ({
-      obj: {
-        cloneNode: { a: 1 },
-        textNode: 'textNode',
-        nodeValue: 'nodeValue',
+      message: 'Hello Word',
+      isActive: true,
+      hasError: true,
+      classObject: {
+        active: true,
+        'text-danger': true,
       },
-      list: [
+      activeColor: 'red',
+      fontSize: 30,
+      styleObject: {
+        color: 'red',
+        fontSize: '13px',
+      },
+
+      firstName: 'Foo',
+      lastName: 'Bar',
+
+      type: 'D',
+
+      // items: [{ message: 'Foo' }, { message: 'Bar' }],
+
+      parentMessage: 'Parent',
+      items: [{ message: 'Foo' }, { message: 'Bar' }],
+
+      object: {
+        title: 'How to do lists in Vue',
+        author: 'Jane Doe',
+        publishedAt: '2016-04-10',
+      },
+
+      counter: 0,
+
+      todos: [
         {
-          name: '张三',
-          age: 20,
-          height: 1.8,
-          hometown: '沈阳',
-          city: '沈阳',
+          isComplete: false,
+          name: 'task1',
         },
         {
-          name: '李四',
-          age: 20,
-          height: 1.8,
-          hometown: '沈阳',
-          city: '沈阳',
-        },
-        {
-          name: '王五',
-          age: 20,
-          height: 1.8,
-          hometown: '沈阳',
-          city: '沈阳',
+          isComplete: false,
+          name: 'task2',
         },
       ],
+      // name: 'Vue.js',
+      checked: false,
+      checkedNames: [],
+      picked: '',
+      // selected: '',
+      // selected: [],
       selected: 'A',
       options: [
         { text: 'One', value: 'A' },
         { text: 'Two', value: 'B' },
         { text: 'Three', value: 'C' },
       ],
-
-      books: ['java'],
-      type: 'text',
-      input: '',
-
-      checkbox: false,
-      name: 'playerljc',
-      // sex: '女',
-      age: '666',
-      address: '不知道',
-
-      activeColor: 'red',
-      fontSize: 30,
-      activeClass: 'active',
-      errorClass: 'text-danger',
-
-      items: [
-        {
-          name: 'name2222',
-          sex: '女',
-          age: '666',
-          address: '不知道',
-          hobby: {
-            hobby1: '篮球1',
-            hobby2: '足球2',
-            hobby3: '乒乓球3',
-          },
-        },
-      ],
-      message: '1,2,3,4,5,6',
-      id: '111111',
-      isActive: true,
-      hasError: true,
-      data: [
-        {
-          name: 'name1',
-          data: [
-            {
-              name: 'name11',
-              data: [
-                {
-                  name: 'name111',
-                },
-              ],
-            },
-            {
-              name: 'name22',
-            },
-          ],
-        },
-        {
-          name: 'name2',
-          data: [
-            {
-              name: 'name11',
-            },
-            {
-              name: 'name22',
-            },
-          ],
-        },
-        {
-          name: 'name3',
-          data: [
-            {
-              name: 'name11',
-            },
-            {
-              name: 'name22',
-            },
-          ],
-        },
-      ],
-      htmlStr: `<p>我是谁666</p>`,
-      a: {
-        b: {
-          c: {
-            d: 100,
-          },
-        },
-      },
     }),
     methods: {
-      onInput(e) {
-        console.log(e.target.checked);
+      greet(event) {
+        // `this` 在方法里指向当前 Vue 实例
+        alert(`Hello ${this.name}!`);
+        // `event` 是原生 DOM 事件
+        if (event) {
+          alert(event.target.tagName);
+        }
       },
-      display() {
-        return `${this.name}\r\n${this.sex}\r\n${this.age}\r\n${this.address}`;
+      say(message) {
+        alert(message);
       },
-      show() {
-        alert('666');
+      warn(message, event) {
+        // 现在我们可以访问原生事件对象
+        if (event) {
+          event.preventDefault();
+        }
+        alert(message);
       },
-      sum(name, sex, age, $event, str) {
-        // alert(name);
-        // alert(sex);
-        // alert(age);
-        // alert($event);
-        // alert(str);
-        alert(this.reversedMessage);
-      },
-      onChange(argv) {
-        this.obj.cloneNode = { a: 3 };
-        this.obj.textNode = 'textNode1';
-        this.obj.nodeValue = 'nodeValue1';
-      },
-      update() {
-        setTimeout(
-          this.createAsyncExecContext(function () {
-            this.name = 'lzq';
-            this.age = '6';
-            this.address = 'q';
-          }),
-          2000,
-        );
+      display(value, name) {
+        alert(`${value}-${name}`);
+        // this.object = {
+        //   title: '1',
+        //   author: '2',
+        //   publishedAt: '3',
+        // };
+        /* this.object.title = '1';
+        this.object.author = '2';
+        this.object.publishedAt = '3'; */
       },
     },
     computed: {
       reversedMessage() {
-        return this.message.split(',').reverse().join(',');
+        // `this` 指向 vm 实例
+        return this.message.split('').reverse().join('');
+      },
+      fullName() {
+        return `${this.firstName} ${this.lastName}`;
       },
     },
     watch: {
-      a(oldVal, newVal) {
-        console.log(oldVal, newVal);
+      firstName(val) {
+        this.fullName = `${val} ${this.lastName}`;
       },
-      'a.b.c': function (oldVal, newVal) {
-        console.log(oldVal, newVal);
-        this.name = 'playerljc6';
+      lastName(val) {
+        this.fullName = `${this.firstName} ${val}`;
       },
-      'a.b.c.d': function (oldVal, newVal) {
-        console.log(oldVal, newVal);
-      },
-      items(oldVal, newVal) {
-        console.log(oldVal, newVal);
-      },
-      // name() {
-      //   this.age = 6;
-      //   this.address = 'h';
-      // },
     },
     beforeCreate() {
       console.log('Vue', 'beforeCreate');
@@ -350,94 +326,6 @@ window.onload = () => {
     },
     mounted() {
       console.log('Vue', 'mounted');
-      // setTimeout(() => {
-      // this.name = 'playerljc';
-      // this.items[0].name = 'name2';
-      // // this.items[0].hobby.hobby1 = '游泳啊';
-      // this.items[0].hobby = {
-      //   hobby1: '设计啊'
-      // }
-      // this.name = 'hello';
-      // this.sex = '男';
-      // this.message = '6,6,6,6,6,6';
-      // this.data.push({
-      // 	name:'name4',
-      // });
-      // this.message = '1,2,3';
-      // this.items.push({
-      //   name: 'sdasdasdasdasd1',
-      // });
-      // this.items[0] = {
-      //   name: '111111',
-      // };
-      // this.items.pop();
-      // this.items[0].name = '111';
-      // this.a = {
-      //   b: {
-      //     c: {
-      //       d: 6,
-      //     },
-      //   },
-      // };
-      // setTimeout(() => {
-      //   this.a.b.c.d = 8;
-      //
-      //   setTimeout(() => {
-      //     this.a = {
-      //       b: {
-      //         c: {
-      //           d: 5,
-      //         },
-      //       },
-      //     };
-      //
-      //     setTimeout(() => {
-      //       this.a.b.c = {
-      //         d: 20,
-      //       };
-      //     }, 2000);
-      //   }, 2000);
-      // }, 2000);
-      // this.options = [
-      //   { text: 'One1', value: 'A1' },
-      //   { text: 'Two1', value: 'B1' },
-      //   { text: 'Three1', value: 'C1' },
-      // ];
-      // this.list = [
-      //   {
-      //     name: '赵六',
-      //     age: 20,
-      //     height: 1.8,
-      //     hometown: '沈阳',
-      //     city: '沈阳',
-      //   },
-      //   {
-      //     name: '王七',
-      //     age: 20,
-      //     height: 1.8,
-      //     hometown: '沈阳',
-      //     city: '沈阳',
-      //   },
-      //   {
-      //     name: '刘八',
-      //     age: 20,
-      //     height: 1.8,
-      //     hometown: '沈阳',
-      //     city: '沈阳',
-      //   },
-      //   {
-      //     name: '赵九',
-      //     age: 20,
-      //     height: 1.8,
-      //     hometown: '沈阳',
-      //     city: '沈阳',
-      //   },
-      // ];
-
-      // this.name = 'lzq';
-      // this.age = 6;
-      // this.address = 'h';
-      // }, 2000);
     },
     beforeUpdate() {
       console.log('Vue', 'beforeUpdate');

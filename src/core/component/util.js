@@ -98,7 +98,7 @@ export function getComponentConfig(ins, componentName) {
 
   // 如果是组件实例
   if (isComponentInstance(ins)) {
-    const components = ins.getComponentsConfig();
+    const components = ins.$getComponentsConfig();
 
     // 如果组件的components中定义了
     if (components[componentName]) {
