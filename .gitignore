@@ -1,5 +1,7 @@
 .idea
 
+.history
+
 node_modules
 
 dist
@@ -42,3 +44,5 @@ src/pages/Wrygljk - 副本/
 src/pages/Wrygljk/Qysbbbdj/
 src/pages/Wrygljk/Qyzxjk/
 src/components/task/NewTask/NewTask copy.jsx
+
+packages
