@@ -44,10 +44,10 @@ export function executeExecutionContextVOn({ context, entry, e, argv = [] }) {
 
   // 函数名形式
   // TODO: HTML的事件处理函数
-  if (entry.expression in self.$config.methods) {
+  if (entry.expression in (self.$config.methods || {})) {
     createExecutionContext.call(this, this, function () {
       // 函数名形式 直接调用
-      this[entry.expression].call(this.$dataProxy, e);
+      this[entry.expression].call(this.$dataProxy, e ? e : argv && argv.length ? argv[0] : null);
     });
   }
   // 其他的形式
@@ -60,7 +60,11 @@ export function executeExecutionContextVOn({ context, entry, e, argv = [] }) {
     createExecutionContext.call(this, this, function () {
       execExpression.call(
         this,
-        e ? createContext(context, { $event: e }) : context,
+        e
+          ? createContext(context, { $event: e })
+          : argv && argv.length
+          ? createContext(context, { $event: argv[0] })
+          : context,
         entry.expression,
       );
     });
@@ -85,7 +89,7 @@ export function executeVOn({ context, entry, e, argv = [] }) {
   // TODO: HTML的事件处理函数
   if (entry.expression in self.$config.methods) {
     // 函数名形式 直接调用
-    this[entry.expression].apply(this.$dataProxy, argv);
+    this[entry.expression].apply(this.$dataProxy, e ? e : argv && argv.length ? argv[0] : null);
   }
   // 其他的形式
   else {
@@ -96,7 +100,11 @@ export function executeVOn({ context, entry, e, argv = [] }) {
     // 这个地方会创建新的context避免set陷阱函数执行
     execExpression.call(
       this,
-      e ? createContext(context, { $event: e }) : context,
+      e
+        ? createContext(context, { $event: e })
+        : argv && argv.length
+        ? createContext(context, { $event: argv[0] })
+        : context,
       entry.expression,
     );
   }

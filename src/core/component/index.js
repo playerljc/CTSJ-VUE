@@ -1,4 +1,4 @@
-import { executeVOn } from '../../compiler/directives/on';
+import { executeExecutionContextVOn } from '../../compiler/directives/on';
 import { renderComponent } from '../../compiler/render';
 import { createComponentProxy, createPropsProxy } from '../proxy';
 import {
@@ -11,7 +11,7 @@ import {
 } from '../../shared/util';
 import { getComponentConfig, isKebabCase, isPascalCase, pascalCaseToKebabCase } from './util';
 import { mergeComputed, mergeData, mergeMethods, mergeProps } from '../merge';
-import { triggerLifecycle } from '../util';
+import { resetComputed, triggerLifecycle } from '../util';
 
 import { LIFECYCLE_HOOKS } from '../../shared/constants';
 
@@ -80,15 +80,22 @@ function createEmit() {
    * @param eventName string - 事件名称
    * @param argv Array - 事件的参数
    */
-  return function (eventName, ...argv) {
+  return function (eventName) {
     const { events } = self.$argConfig;
+
+    const argv = [];
+    for (let i = 0; i < arguments.length; i++) {
+      // arguments.length
+      if (i === 0 && eventName) continue;
+      argv.push(arguments[i]);
+    }
 
     const eventNameFormat = eventName.toLowerCase();
 
     if (!(eventNameFormat in events)) return false;
 
-    executeVOn.call(self.$parent, {
-      context: self.$parent.$dataProxy,
+    executeExecutionContextVOn.call(self.$parent, {
+      context: {},
       entry: {
         expression: events[eventNameFormat],
       },
@@ -322,6 +329,7 @@ class Component {
     // 把之前的props删除，混入现在的props
     mergeMethods.call(this);
 
+    resetComputed.call(this);
     const VNode = renderComponent.call(this);
 
     // class和style的处理

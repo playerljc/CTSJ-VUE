@@ -4,11 +4,109 @@ import Vue from './core';
 // import MyComponentInner from './components/myComponentInner';
 // import ForComponent from './components/forComponent';
 // import MyComponentSlot from './components/myComponentSlot';
-//
+
+import TableComponent from './components/tableComponent';
+import PagingComponent from './components/pagingComponent';
+
 // Vue.component('my-component', MyComponent);
 // Vue.component('MyComponentInner', MyComponentInner);
 // Vue.component('for-component', ForComponent);
 // Vue.component('MyComponentSlot', MyComponentSlot);
+
+Vue.component('button-counter', {
+  data() {
+    return {
+      count: 0,
+    };
+  },
+  template: '<button v-on:click="count++">You clicked me {{ count }} times.</button>',
+  beforeCreate() {
+    console.log('button-counter', 'beforeCreate');
+  },
+  created() {
+    console.log('button-counter', 'created');
+  },
+  beforeMount() {
+    console.log('button-counter', 'beforeMount');
+  },
+  mounted() {
+    console.log('button-counter', 'mounted');
+  },
+});
+
+// Vue.component('blog-post', {
+//   props: ['title'],
+//   template: '<h3>{{ title }}</h3>',
+//   beforeCreate() {
+//     console.log('blog-post', 'beforeCreate');
+//   },
+//   created() {
+//     console.log('blog-post', 'created');
+//   },
+//   beforeMount() {
+//     console.log('blog-post', 'beforeMount');
+//   },
+//   mounted() {
+//     console.log('blog-post', 'mounted');
+//   },
+// });
+
+Vue.component('blog-post', {
+  props: ['post'],
+  template: `
+    <div class="blog-post">
+      <h3>{{ post.title }}</h3>
+        <button v-on:click="$emit('enlarge-text', 0.1)">
+        Enlarge text
+      </button>
+      <div v-html="post.content"></div>
+    </div>
+  `,
+  beforeCreate() {
+    console.log('blog-post', 'beforeCreate');
+  },
+  created() {
+    console.log('blog-post', 'created');
+  },
+  beforeMount() {
+    console.log('blog-post', 'beforeMount');
+  },
+  mounted() {
+    console.log('blog-post', 'mounted');
+  },
+});
+
+Vue.component('custom-input', {
+  props: ['value'],
+  template: `
+    <input v-model="value"
+    >
+  `,
+});
+
+Vue.component('alert-box', {
+  template: `
+    <div class="demo-alert-box">
+      <strong>Error!</strong>
+      <slot></slot>
+    </div>
+  `,
+});
+
+Vue.component('table-component', TableComponent);
+Vue.component('paging-component', PagingComponent);
+
+const data = [];
+for (let i = 0; i < 100; i++) {
+  data.push({
+    id: `${i + 1}`,
+    name: `playerljc(${i + 1})`,
+    sex: `${i % 2 === 0 ? '男' : '女'}`,
+    birthDay: `2018-10-${i + 1}`,
+    jg: `jg-${i + 1}`,
+    address: `address-${i + 1}`,
+  });
+}
 
 window.onload = () => {
   // vm1
@@ -106,12 +204,12 @@ window.onload = () => {
         </li>
       </ul>-->
       
-      <div>
+      <!--<div>
         <div v-for="(value, name) in object">
           <div v-on:click="display(value,name)">{{name}}</div>
           {{ name }}: {{ value }}
         </div>
-      </div>
+      </div>-->
       
       <!--<ul>
         <template v-for="item in items">
@@ -210,6 +308,76 @@ window.onload = () => {
         </select>
         <span>Selected: {{ selected }}</span>
       </div>-->
+      
+      <!--<div id="components-demo">
+        <button-counter></button-counter>
+      </div>-->
+      
+      <!--<div id="components-demo">
+        <button-counter></button-counter>
+        <button-counter></button-counter>
+        <button-counter></button-counter>
+      </div>-->
+      
+      <!--<div>
+        <blog-post title="My journey with Vue"></blog-post>
+        <blog-post title="Blogging with Vue"></blog-post>
+        <blog-post title="Why Vue is so fun"></blog-post>
+      </div>-->
+      
+      <!--<div>
+        <blog-post
+            v-for="post in posts"
+            v-bind:key="post.id"
+            v-bind:title="post.title"
+          ></blog-post>  
+      </div>-->
+      
+      <!--<div>
+        <div v-bind:style="{ fontSize: postFontSize + 'em' }">
+        <blog-post
+          v-for="post in posts"
+          v-bind:key="post.id"
+          v-bind:post="post"
+          v-on:enlarge-text="postFontSize += $event"
+        ></blog-post>
+      </div>-->
+      
+      <!--<div>
+        <div v-bind:style="{ fontSize: postFontSize + 'em' }">
+        <blog-post
+          v-for="post in posts"
+          v-bind:key="post.id"
+          v-bind:post="post"
+          v-on:enlarge-text="onEnlargeText"
+        ></blog-post>
+      </div>-->
+      
+      <!--<div>
+        <custom-input v-model="searchText"></custom-input>
+        <p>searchText:{{searchText}}</p>
+      </div>-->
+      
+      <!--<alert-box>
+        Something bad happened.
+      </alert-box>-->
+      
+      <div>
+        <table-component 
+          v-bind:data-source="tableData" 
+          v-bind:column="tableColumn" 
+          v-bind:page="page" 
+          v-bind:total="total"
+          v-bind:page-size="pageSize"
+          v-on:onPageChange="onPageChange"
+        >
+          <template v-slot:option="slotProps">
+            <a href="#" v-on:click="deleteRow(slotProps.record)">删除</a>
+          </template>
+        
+        </table-component>
+      </div>
+      
     `,
     data: () => ({
       message: 'Hello Word',
@@ -225,25 +393,18 @@ window.onload = () => {
         color: 'red',
         fontSize: '13px',
       },
-
       firstName: 'Foo',
       lastName: 'Bar',
-
       type: 'D',
-
       // items: [{ message: 'Foo' }, { message: 'Bar' }],
-
       parentMessage: 'Parent',
       items: [{ message: 'Foo' }, { message: 'Bar' }],
-
       object: {
         title: 'How to do lists in Vue',
         author: 'Jane Doe',
         publishedAt: '2016-04-10',
       },
-
       counter: 0,
-
       todos: [
         {
           isComplete: false,
@@ -266,6 +427,57 @@ window.onload = () => {
         { text: 'Two', value: 'B' },
         { text: 'Three', value: 'C' },
       ],
+
+      posts: [
+        {
+          id: 1,
+          title: 'My journey with Vue',
+          content: '<p style="color: red">My journey with Vue</p>',
+        },
+        {
+          id: 2,
+          title: 'Blogging with Vue',
+          content: '<p style="color: blue">Blogging with Vue</p>',
+        },
+        {
+          id: 3,
+          title: 'Why Vue is so fun',
+          content: '<p style="color: yellow">Why Vue is so fun</p>',
+        },
+      ],
+      postFontSize: 1,
+      searchText: 'searchText',
+
+      page: 1,
+      total: 0,
+      pageSize: 10,
+      tableData: [],
+      tableColumn: [
+        {
+          title: '姓名',
+          dataIndex: 'name',
+        },
+        {
+          title: '性别',
+          dataIndex: 'sex',
+        },
+        {
+          title: '出生年月',
+          dataIndex: 'birthDay',
+        },
+        {
+          title: '籍贯',
+          dataIndex: 'jg',
+        },
+        {
+          title: '住址',
+          dataIndex: 'address',
+        },
+        {
+          title: '操作',
+          slotName: 'option',
+        },
+      ],
     }),
     methods: {
       greet(event) {
@@ -286,6 +498,9 @@ window.onload = () => {
         }
         alert(message);
       },
+      onEnlargeText: function (enlargeAmount) {
+        this.postFontSize += enlargeAmount;
+      },
       display(value, name) {
         alert(`${value}-${name}`);
         // this.object = {
@@ -296,6 +511,24 @@ window.onload = () => {
         /* this.object.title = '1';
         this.object.author = '2';
         this.object.publishedAt = '3'; */
+      },
+      loadData() {
+        setTimeout(
+          this.$createAsyncExecContext(function () {
+            this.total = data.length;
+            this.tableData = data.slice((this.page - 1) * this.pageSize, this.page * this.pageSize);
+          }),
+          100,
+        );
+      },
+      deleteRow(record) {
+        const index = data.findIndex((t) => t.id === record.id);
+        data.splice(index, 1);
+        this.loadData();
+      },
+      onPageChange(page) {
+        this.page = page;
+        this.loadData();
       },
     },
     computed: {
@@ -326,6 +559,7 @@ window.onload = () => {
     },
     mounted() {
       console.log('Vue', 'mounted');
+      this.loadData();
     },
     beforeUpdate() {
       console.log('Vue', 'beforeUpdate');

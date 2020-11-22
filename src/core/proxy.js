@@ -95,7 +95,6 @@ function createProxy(srcObj, depth, renderHandler) {
      * @return {boolean}
      */
     set(target, key, value, receiver) {
-      debugger;
       // 如果不是代理属性则不处理
       // 比如已$等开头的key不进行处理 或者是计算属性的key
       if (!isProxyProperty(key) || isComputedProperty(target, key)) {

@@ -27,6 +27,7 @@ import {
   getKey,
   getAttribute,
   getAttributeName,
+  hasAttr,
 } from './directives/util';
 import { hasVHtml, parseVHtml } from './directives/html';
 import { hasVIf, parseVIf } from './directives/if';
@@ -81,7 +82,6 @@ export function render(el, isMount) {
      */
     init: (curVNode) => {
       if (curVNode === vnode) {
-        debugger;
         triggerLifecycle.call(self, LIFECYCLE_HOOKS[1]);
       }
     },
@@ -92,7 +92,6 @@ export function render(el, isMount) {
      */
     create: (emptyVnode, curVNode) => {
       if (curVNode === vnode) {
-        debugger;
         triggerLifecycle.call(self, LIFECYCLE_HOOKS[2]);
       }
     },
@@ -101,7 +100,6 @@ export function render(el, isMount) {
     //  * @param vnode
     //  */
     // insert: (vnode) => {
-    //   debugger;
     //   // ------ mount
     //   console.log(33333333333);
     //   triggerLifecycle.call(self, LIFECYCLE_HOOKS[3]);
@@ -111,7 +109,6 @@ export function render(el, isMount) {
      */
     prepatch: (oldVNode, newVNode) => {
       if (newVNode === vnode) {
-        debugger;
         // beforeUpdate
         triggerLifecycle.call(self, LIFECYCLE_HOOKS[4]);
       }
@@ -121,7 +118,6 @@ export function render(el, isMount) {
      */
     postpatch: (oldVNode, newVNode) => {
       if (newVNode === vnode) {
-        debugger;
         // update
         triggerLifecycle.call(self, LIFECYCLE_HOOKS[5]);
       }
@@ -131,7 +127,6 @@ export function render(el, isMount) {
      */
     destroy: (curVNode) => {
       if (curVNode === vnode) {
-        debugger;
         triggerLifecycle.call(self, LIFECYCLE_HOOKS[7]);
       }
     },
@@ -729,9 +724,9 @@ export function renderSlotNode({ context, el, parentVNode, parentElement }) {
   let contextType = 'parent';
 
   // 判断slot中是否存在name属性
-  if (el.hasAttribute('name')) {
+  if (hasAttr('name', el)) {
     // slot有name属性
-    name = el.getAttribute('name');
+    name = getAttribute.call(this, { context, attrName: 'name', el });
   }
 
   let bindEntrys;
