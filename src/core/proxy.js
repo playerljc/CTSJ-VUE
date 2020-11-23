@@ -152,7 +152,7 @@ function createProxy(srcObj, depth, renderHandler) {
         return result;
       }
       // 是对象
-      else if (isObject(target)) {
+      if (isObject(target)) {
         // a.b.c.d = 1
 
         // target = c

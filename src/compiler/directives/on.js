@@ -47,7 +47,7 @@ export function executeExecutionContextVOn({ context, entry, e, argv = [] }) {
   if (entry.expression in (self.$config.methods || {})) {
     createExecutionContext.call(this, this, function () {
       // 函数名形式 直接调用
-      this[entry.expression].call(this.$dataProxy, e ? e : argv && argv.length ? argv[0] : null);
+      this[entry.expression].call(this.$dataProxy, e || (argv && argv.length ? argv[0] : null));
     });
   }
   // 其他的形式
@@ -89,7 +89,7 @@ export function executeVOn({ context, entry, e, argv = [] }) {
   // TODO: HTML的事件处理函数
   if (entry.expression in self.$config.methods) {
     // 函数名形式 直接调用
-    this[entry.expression].apply(this.$dataProxy, e ? e : argv && argv.length ? argv[0] : null);
+    this[entry.expression].apply(this.$dataProxy, e || (argv && argv.length ? argv[0] : null));
   }
   // 其他的形式
   else {

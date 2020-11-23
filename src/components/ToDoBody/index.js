@@ -31,17 +31,17 @@ export default {
   data: () => ({}),
   methods: {
     onComplete(id) {
-      this.$emit('onComplete',id);
+      this.$emit('onComplete', id);
     },
     onProcess(id) {
-      this.$emit('onProcess',id);
+      this.$emit('onProcess', id);
     },
     onProcessDelete(id) {
-      this.$emit('onProcessDelete',id);
+      this.$emit('onProcessDelete', id);
     },
     onCompleteDelete(id) {
-      this.$emit('onCompleteDelete',id);
-    }
+      this.$emit('onCompleteDelete', id);
+    },
   },
   computed: {},
   watch: {},

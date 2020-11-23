@@ -1,5 +1,5 @@
-import styles from './index.less';
 import _ from 'lodash';
+import styles from './index.less';
 
 import Vue from './core';
 import uuid from './shared/uuid';
