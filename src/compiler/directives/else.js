@@ -25,7 +25,7 @@ export function parseVElse({ context, el, parentElement }) {
   // 说明el是v-for的一个克隆元素
   if (!parentElement) {
     // 寻找el元素的克隆元素
-    let groupName = el.getAttribute(GROUP_KEY_NAME);
+    const groupName = el.getAttribute(GROUP_KEY_NAME);
     // 获取含有GROUP_KEY_NAME属性且值等于groupName的元素
     const srcEl = this.templateEl.querySelector(`[${GROUP_KEY_NAME}=${groupName}]`);
     if (srcEl) {
