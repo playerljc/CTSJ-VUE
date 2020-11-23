@@ -29,15 +29,19 @@
 .v-if
 .v-else-if
 
+
+.对数组的操作上代理有问题，没有考虑到push,splice等一系列操作
 .自定义指令
 .mixin
-
-.keep-alive标签
+.组件上v-model
+.v-model的节流
 .computed(不需要)
  get
  set
 .filter (很难)
  自定义filter
+
+
 
 // components集合的键应该用元素的key
 // 每一个组件元素没有key都要随机生成一个key
