@@ -24,7 +24,7 @@ function getPropsAndAttrs() {
   const { attrs } = this.$argConfig;
 
   // 配置定义的
-  let props = cloneDeep(this.$config.props);
+  let props = cloneDeep(this.$config.props) || [];
   const prop = {};
   const attr = {};
 

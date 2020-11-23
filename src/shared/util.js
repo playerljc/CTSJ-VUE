@@ -1,4 +1,4 @@
-// import lodashCloneDeep from 'lodash/cloneDeep';
+import lodashCloneDeep from 'lodash/cloneDeep';
 // import { render } from 'src/compiler/render';
 import { resetComputed /* triggerLifecycle */ } from '../core/util';
 import { clear, isEmpty as dirtyStackIsEmpty, getRenderHandler } from '../compiler/proxyDirtyStack';
@@ -225,57 +225,57 @@ export function clone(value) {
  * @return Object | Array
  */
 export function cloneDeep(value, map = new Map()) {
-  // return lodashCloneDeep(value);
+  return lodashCloneDeep(value);
 
-  if (!isObject(value) && !isArray(value)) return value;
-
-  if (isObject(value)) {
-    // 新的引用
-    const cloneValue = {};
-
-    if (map.get(value)) {
-      return map.get(value);
-    }
-
-    map.set(value, cloneValue);
-
-    Object.keys(value).forEach((key) => {
-      if (value.hasOwnProperty(key)) {
-        const itemValue = value[key];
-        if (isObject(itemValue) || isArray(itemValue)) {
-          cloneValue[key] = cloneDeep(itemValue, map);
-        } else {
-          cloneValue[key] = value[key];
-        }
-      } else {
-        // 如果itemValue不是对象或者数组则直接赋值就可以(例如: primary 类型，和Function类型)
-        cloneValue[key] = value[key];
-      }
-    });
-
-    return cloneValue;
-  }
-
-  if (isArray(value)) {
-    const cloneValue = [];
-
-    if (map.get(value)) {
-      return map.get(value);
-    }
-    map.set(value, cloneValue);
-
-    value.forEach((itemValue) => {
-      if (isObject(itemValue) || isArray(itemValue)) {
-        cloneValue.push(cloneDeep(itemValue, map));
-      } else {
-        // 如果itemValue不是对象或者数组则直接赋值就可以(例如: primary 类型，和Function类型)
-        cloneValue.push(itemValue);
-      }
-    });
-    return cloneValue;
-  }
-
-  return value;
+  // if (!isObject(value) && !isArray(value)) return value;
+  //
+  // if (isObject(value)) {
+  //   // 新的引用
+  //   const cloneValue = {};
+  //
+  //   if (map.get(value)) {
+  //     return map.get(value);
+  //   }
+  //
+  //   map.set(value, cloneValue);
+  //
+  //   Object.keys(value).forEach((key) => {
+  //     if (value.hasOwnProperty(key)) {
+  //       const itemValue = value[key];
+  //       if (isObject(itemValue) || isArray(itemValue)) {
+  //         cloneValue[key] = cloneDeep(itemValue, map);
+  //       } else {
+  //         cloneValue[key] = value[key];
+  //       }
+  //     } else {
+  //       // 如果itemValue不是对象或者数组则直接赋值就可以(例如: primary 类型，和Function类型)
+  //       cloneValue[key] = value[key];
+  //     }
+  //   });
+  //
+  //   return cloneValue;
+  // }
+  //
+  // if (isArray(value)) {
+  //   const cloneValue = [];
+  //
+  //   if (map.get(value)) {
+  //     return map.get(value);
+  //   }
+  //   map.set(value, cloneValue);
+  //
+  //   value.forEach((itemValue) => {
+  //     if (isObject(itemValue) || isArray(itemValue)) {
+  //       cloneValue.push(cloneDeep(itemValue, map));
+  //     } else {
+  //       // 如果itemValue不是对象或者数组则直接赋值就可以(例如: primary 类型，和Function类型)
+  //       cloneValue.push(itemValue);
+  //     }
+  //   });
+  //   return cloneValue;
+  // }
+  //
+  // return value;
 }
 
 /**

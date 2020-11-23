@@ -36,6 +36,13 @@ export function createContext(srcContext, argv = {}) {
   return { ...srcContext, ...(argv || {}) };
 }
 
+function nextCreateProxy({ target, value, depth, renderHandler }) {
+  value = createProxy.call(this, value, depth, renderHandler);
+  // 创建value的上下级关系(留着在watch中在原始对象中通过上下级关系找到变量)
+  value[PATH_SYMBOLS[0]] = key;
+  value[PATH_SYMBOLS[1]] = target /* [key] */;
+}
+
 /**
  * createProxy - 创建对象的代理(对data和computed的响应式创建，支持Object和Array)
  * @param srcObj - Object | Array 要代理的对象
@@ -101,99 +108,128 @@ function createProxy(srcObj, depth, renderHandler) {
         return Reflect.set(target, key, value, receiver);
       }
 
-      // a.b.c.d = 1
-
-      // target = c
-      // key = d
-      // value = 1
-
-      // 对data和computed的值进行了修改
-      // 1.进行watch监听
-      // 2.对代理的修改同步到noProxy对象上
-      // 3.如果修改的值是引用类型则递归的设置代理
-      // 4.重新计算所有的计算属性
-      // 5.进行render
-
-      // 一个表达式路径 比如a.b.c.d这样的一个路径，key是target的一个键，但是target也是其他对象键的值，
-      // 这个方法会返回追溯到整个的一个访问链
-      const propertyAccessStr = getPropertyVisitPathStr(target, key);
-
-      let cloneValue;
-
-      // watch监听
-      if (self.$config.watch && isObject(self.$config.watch)) {
-        // 监听表达式 例如：'a.b.c.d'
-
-        // 根据propertyAccessStr获取watch的句柄
-        const handler = self.$config.watch[propertyAccessStr];
-        if (handler) {
-          // 调用watch的监听句柄
-          // handler(oldValue,newValue)
-          // value是没有被代理的
-          // target[key]已经是被代理的对象，需要找到对应的非代理对象
-          // clone的目的是不让用户修改这个值
-
-          cloneValue = cloneDeep(value);
-          // 新的值
-          let newVal = cloneValue;
-
-          // 是数组且不是length监听
-          // 如果是数组修改target的array对象,key是修改项的索引或者数组的length属性
-          if (isArray(target) && key !== 'length') {
-            // 在$noProxySrcData中取出array的值，clone的目的防止用户修改
-            const array = cloneDeep(eval(`self.$noProxySrcData.${propertyAccessStr}`));
-            // key是数组的索引，为key索引赋值新值
-            array[key] = cloneValue;
-            newVal = array;
-          }
-
-          // 调用watch的相关句柄
-          // oldVal,newVal
-          // TODO: createProxy的watch的处理
-          createExecutionContext.call(self, self, function () {
-            handler.call(
-              self,
-              execExpression.call(self, self.$noProxySrcData, propertyAccessStr),
-              newVal,
-            );
-          });
-        }
-      }
-
-      // 对代理的修改同步到noProxy对象上
-      // 例如修改的是a.b.c.d
-      // 例如修改的是a
-      // 例如修改的是a.b
-
       const cloneDeepRef = cloneDeep;
-      // 回写原始数据
-      eval('if(!cloneValue) {cloneValue = cloneDeepRef(value);}');
+
+      // 是数组
       if (isArray(target)) {
-        if (key !== 'length') {
-          // 数组则更新索引出的值
-          eval(`self.$noProxySrcData.${propertyAccessStr}[${key}] = cloneValue`);
+        const srcLength = target.length;
+
+        let result = Reflect.set(target, key, value, receiver);
+
+        const propertyAccessStr = getPropertyVisitPathStr(target, key);
+
+        eval(`self.$noProxySrcData.${propertyAccessStr} = cloneDeepRef(target)`);
+
+        const targetLength = target.length;
+
+        // watch监听
+        if (self.$config.watch && isObject(self.$config.watch)) {
+          const handler = self.$config.watch[propertyAccessStr];
+          if (handler) {
+            createExecutionContext.call(self, self, function () {
+              handler.call(self, key, value);
+            });
+          }
         }
-      } else {
+
+        if (targetLength < srcLength) {
+          console.log('删除', `key:${key}`, `value:${value}`);
+        } else if (targetLength > srcLength) {
+          console.log('添加', `key:${key}`, `value:${value}`);
+
+          if ((isObject(value) || isArray(value)) && !(PATH_SYMBOLS[0] in value)) {
+            nextCreateProxy.call(self, { target, value, depth, renderHandler });
+            result = Reflect.set(target, key, value, receiver);
+          }
+        } else {
+          console.log('修改', `key:${key}`, `value:${value}`);
+
+          if ((isObject(value) || isArray(value)) && !(PATH_SYMBOLS[0] in value)) {
+            nextCreateProxy.call(self, { target, value, depth, renderHandler });
+            result = Reflect.set(target, key, value, receiver);
+          }
+        }
+
+        push(renderHandler, value);
+
+        return result;
+      }
+      // 是对象
+      else if (isObject(target)) {
+        // a.b.c.d = 1
+
+        // target = c
+        // key = d
+        // value = 1
+
+        // 对data和computed的值进行了修改
+        // 1.进行watch监听
+        // 2.对代理的修改同步到noProxy对象上
+        // 3.如果修改的值是引用类型则递归的设置代理
+        // 4.重新计算所有的计算属性
+        // 5.进行render
+
+        // 一个表达式路径 比如a.b.c.d这样的一个路径，key是target的一个键，但是target也是其他对象键的值，
+        // 这个方法会返回追溯到整个的一个访问链
+        const propertyAccessStr = getPropertyVisitPathStr(target, key);
+
+        let cloneValue;
+
+        // watch监听
+        if (self.$config.watch && isObject(self.$config.watch)) {
+          // 监听表达式 例如：'a.b.c.d'
+
+          // 根据propertyAccessStr获取watch的句柄
+          const handler = self.$config.watch[propertyAccessStr];
+          if (handler) {
+            // 调用watch的监听句柄
+            // handler(oldValue,newValue)
+            // value是没有被代理的
+            // target[key]已经是被代理的对象，需要找到对应的非代理对象
+            // clone的目的是不让用户修改这个值
+
+            // 新的值
+            const newVal = cloneDeep(value);
+
+            // 调用watch的相关句柄
+            // oldVal,newVal
+            // TODO: createProxy的watch的处理
+            createExecutionContext.call(self, self, function () {
+              handler.call(
+                self,
+                execExpression.call(self, self.$noProxySrcData, propertyAccessStr),
+                newVal,
+              );
+            });
+          }
+        }
+
+        // 对代理的修改同步到noProxy对象上
+        // 例如修改的是a.b.c.d
+        // 例如修改的是a
+        // 例如修改的是a.b
+
+        // 回写原始数据
+        eval('if(!cloneValue) {cloneValue = cloneDeepRef(value);}');
         // 其他则直接更新
         eval(`self.$noProxySrcData.${propertyAccessStr} = cloneValue`);
+
+        // 如果不是私有属性且是对象或数组继续loop，给value进行代理
+        if ((isObject(value) || isArray(value)) && !(PATH_SYMBOLS[0] in value)) {
+          nextCreateProxy.call(self, { target, value, depth, renderHandler });
+        }
+
+        // ---------------------------------有数据更新
+        // 先进行计算
+        const result = Reflect.set(target, key, value, receiver);
+
+        push(renderHandler, value);
+        // -----------------------------------end
+
+        return result;
       }
 
-      // 如果不是私有属性且是对象或数组继续loop，给value进行代理
-      if (isObject(value) || isArray(value)) {
-        value = createProxy.call(self, value, depth, renderHandler);
-        // 创建value的上下级关系(留着在watch中在原始对象中通过上下级关系找到变量)
-        value[PATH_SYMBOLS[0]] = key;
-        value[PATH_SYMBOLS[1]] = target /* [key] */;
-      }
-
-      // ---------------------------------有数据更新
-      // 先进行计算
-      const result = Reflect.set(target, key, value, receiver);
-
-      push(renderHandler, value);
-      // -----------------------------------end
-
-      return result;
+      return Reflect.set(target, key, value, receiver);
     },
     /**
      * deleteProperty - 对象删除属性
@@ -339,7 +375,7 @@ export function createPropsProxy(props) {
  */
 export function getPropertyVisitPathStr(target, key) {
   // 最终的访问路径 - 先将最后一个key放入
-  const visitPath = isArray(target) && key !== 'length' ? [] : [key];
+  const visitPath = isArray(target) /* && key !== 'length' */ ? [] : [key];
 
   if (target[PATH_SYMBOLS[0]]) {
     visitPath.push(target[PATH_SYMBOLS[0]]);
