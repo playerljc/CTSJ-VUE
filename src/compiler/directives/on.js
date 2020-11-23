@@ -178,6 +178,8 @@ export function parseVOn({ context, el, tagName, vAttrNames, VNode }) {
       // 即事件不是从内部元素触发的
       // <div v-on:click.self="doThat">...</div>
 
+      const startTime = new Date().getTime();
+      console.log('on开始执行');
       // 标识符
       if (entry.modifiers) {
         if (entry.modifiers.stop) {
@@ -193,6 +195,9 @@ export function parseVOn({ context, el, tagName, vAttrNames, VNode }) {
       // 2.display -> methods函数形式
       // 3.display(a + $event) -> methods函数调用形式
       executeExecutionContextVOn.call(self, { context, entry, e });
+      const endTime = new Date().getTime();
+      console.log(`on所执行的时间${(endTime - startTime) / 1000}m`);
+      console.log('on执行结束');
       // if (entry.expression in self.$config.methods) {
       //   // 函数名形式 直接调用
       //   this[entry.expression]();

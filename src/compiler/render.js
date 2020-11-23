@@ -65,12 +65,15 @@ export function render(el, isMount) {
 
   // 进行loopRender
   // vue实例代表的vnode
+  const startTime = new Date().getTime();
   const vnode = renderLoop.call(this, {
     context: {},
     el: this.templateEl,
     parentVNode: null,
     parentElement: null,
   });
+  const endTime = new Date().getTime();
+  console.log(`render所用时间${(endTime - startTime) / 1000}m`);
 
   if (!vnode) return false;
 
@@ -142,7 +145,10 @@ export function render(el, isMount) {
     if (!this.$preVNode) {
       this.$preVNode = vnode;
     }
+    const startTime = new Date().getTime();
     this.$preVNode = patch(this.$preVNode, vnode);
+    const endTime = new Date().getTime();
+    console.log(`patch所用时间${(endTime - startTime) / 1000}m`);
   }
 
   return true;

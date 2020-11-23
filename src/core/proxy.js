@@ -36,13 +36,6 @@ export function createContext(srcContext, argv = {}) {
   return { ...srcContext, ...(argv || {}) };
 }
 
-function nextCreateProxy({ target, value, depth, renderHandler }) {
-  value = createProxy.call(this, value, depth, renderHandler);
-  // 创建value的上下级关系(留着在watch中在原始对象中通过上下级关系找到变量)
-  value[PATH_SYMBOLS[0]] = key;
-  value[PATH_SYMBOLS[1]] = target /* [key] */;
-}
-
 /**
  * createProxy - 创建对象的代理(对data和computed的响应式创建，支持Object和Array)
  * @param srcObj - Object | Array 要代理的对象
@@ -138,14 +131,18 @@ function createProxy(srcObj, depth, renderHandler) {
           console.log('添加', `key:${key}`, `value:${value}`);
 
           if ((isObject(value) || isArray(value)) && !(PATH_SYMBOLS[0] in value)) {
-            nextCreateProxy.call(self, { target, value, depth, renderHandler });
+            value = createProxy.call(self, value, depth, renderHandler);
+            value[PATH_SYMBOLS[0]] = key;
+            value[PATH_SYMBOLS[1]] = target;
             result = Reflect.set(target, key, value, receiver);
           }
         } else {
           console.log('修改', `key:${key}`, `value:${value}`);
 
           if ((isObject(value) || isArray(value)) && !(PATH_SYMBOLS[0] in value)) {
-            nextCreateProxy.call(self, { target, value, depth, renderHandler });
+            value = createProxy.call(self, value, depth, renderHandler);
+            value[PATH_SYMBOLS[0]] = key;
+            value[PATH_SYMBOLS[1]] = target;
             result = Reflect.set(target, key, value, receiver);
           }
         }
@@ -216,7 +213,10 @@ function createProxy(srcObj, depth, renderHandler) {
 
         // 如果不是私有属性且是对象或数组继续loop，给value进行代理
         if ((isObject(value) || isArray(value)) && !(PATH_SYMBOLS[0] in value)) {
-          nextCreateProxy.call(self, { target, value, depth, renderHandler });
+          value = createProxy.call(self, value, depth, renderHandler);
+          // 创建value的上下级关系(留着在watch中在原始对象中通过上下级关系找到变量)
+          value[PATH_SYMBOLS[0]] = key;
+          value[PATH_SYMBOLS[1]] = target /* [key] */;
         }
 
         // ---------------------------------有数据更新

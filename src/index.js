@@ -49,61 +49,115 @@ window.onload = () => {
             this.processingList = data.processingList;
             this.completedList = data.completedList;
           }),
-          2000,
+          500,
         );
       },
       onKeyDown(value) {
-        this.processingList.push({
+        // this.processingList.push({
+        //   active: false,
+        //   id: uuid(),
+        //   info: value,
+        // });
+        //
+        // DB.save({
+        //   processingList: this.processingList,
+        //   completedList: this.completedList,
+        // });
+
+        const data = DB.getData();
+        data.processingList.push({
           active: false,
           id: uuid(),
           info: value,
         });
 
-        DB.save({
-          processingList: this.processingList,
-          completedList: this.completedList,
-        });
+        this.processingList = data.processingList;
+
+        DB.save(data);
       },
       onComplete(id) {
-        const index = this.processingList.findIndex((t) => t.id === id);
-        const item = this.processingList[index];
+        // const index = this.processingList.findIndex((t) => t.id === id);
+        // const item = this.processingList[index];
+        //
+        // this.completedList.push(clone(item));
+        // this.processingList.splice(index, 1);
+        //
+        // DB.save({
+        //   processingList: this.processingList,
+        //   completedList: this.completedList,
+        // });
 
-        this.completedList.push(clone(item));
-        this.processingList.splice(index, 1);
+        const data = DB.getData();
 
-        DB.save({
-          processingList: this.processingList,
-          completedList: this.completedList,
-        });
+        const index = data.processingList.findIndex((t) => t.id === id);
+        const item = data.processingList[index];
+
+        data.completedList.push(clone(item));
+        data.processingList.splice(index, 1);
+
+        this.processingList = data.processingList;
+        this.completedList = data.completedList;
+
+        DB.save(data);
       },
       onProcessDelete(id) {
-        const index = this.processingList.findIndex((t) => t.id === id);
-        this.processingList.splice(index, 1);
-        DB.save({
-          processingList: this.processingList,
-          completedList: this.completedList,
-        });
+        // const index = this.processingList.findIndex((t) => t.id === id);
+        // this.processingList.splice(index, 1);
+        // DB.save({
+        //   processingList: this.processingList,
+        //   completedList: this.completedList,
+        // });
+
+        const data = DB.getData();
+        const index = data.processingList.findIndex((t) => t.id === id);
+        data.processingList.splice(index, 1);
+
+        this.processingList = data.processingList;
+        this.completedList = data.completedList;
+
+        DB.save(data);
       },
 
       onProcess(id) {
-        const index = this.completedList.findIndex((t) => t.id === id);
-        const item = this.completedList[index];
+        // const index = this.completedList.findIndex((t) => t.id === id);
+        // const item = this.completedList[index];
+        //
+        // this.processingList.push(clone(item));
+        // this.completedList.splice(index, 1);
+        //
+        // DB.save({
+        //   processingList: this.processingList,
+        //   completedList: this.completedList,
+        // });
 
-        this.processingList.push(clone(item));
-        this.completedList.splice(index, 1);
+        const data = DB.getData();
+        const index = data.completedList.findIndex((t) => t.id === id);
+        const item = data.completedList[index];
 
-        DB.save({
-          processingList: this.processingList,
-          completedList: this.completedList,
-        });
+        data.processingList.push(clone(item));
+        data.completedList.splice(index, 1);
+
+        this.processingList = data.processingList;
+        this.completedList = data.completedList;
+
+        DB.save(data);
       },
       onCompleteDelete(id) {
-        const index = this.completedList.findIndex((t) => t.id === id);
-        this.completedList.splice(index, 1);
-        DB.save({
-          processingList: this.processingList,
-          completedList: this.completedList,
-        });
+        // const index = this.completedList.findIndex((t) => t.id === id);
+        // this.completedList.splice(index, 1);
+        // DB.save({
+        //   processingList: this.processingList,
+        //   completedList: this.completedList,
+        // });
+
+        const data = DB.getData();
+
+        const index = data.completedList.findIndex((t) => t.id === id);
+        data.completedList.splice(index, 1);
+
+        this.completedList = data.completedList;
+
+        DB.save(data);
       },
     },
     computed: {},
