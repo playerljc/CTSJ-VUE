@@ -54,7 +54,7 @@ import {
   DIRECT_PREFIX,
   LIFECYCLE_HOOKS,
 } from '../shared/constants';
-
+import { log } from '../shared/util';
 /**
  * render - Vue实例的渲染
  * @param el - HtmlElement
@@ -73,7 +73,7 @@ export function render(el, isMount) {
     parentElement: null,
   });
   const endTime = new Date().getTime();
-  console.log(`render所用时间${(endTime - startTime) / 1000}m`);
+  log(`render所用时间${(endTime - startTime) / 1000}m`);
 
   if (!vnode) return false;
 
@@ -104,7 +104,7 @@ export function render(el, isMount) {
     //  */
     // insert: (vnode) => {
     //   // ------ mount
-    //   console.log(33333333333);
+    //   log(33333333333);
     //   triggerLifecycle.call(self, LIFECYCLE_HOOKS[3]);
     // },
     /**
@@ -148,7 +148,7 @@ export function render(el, isMount) {
     const startTime = new Date().getTime();
     this.$preVNode = patch(this.$preVNode, vnode);
     const endTime = new Date().getTime();
-    console.log(`patch所用时间${(endTime - startTime) / 1000}m`);
+    log(`patch所用时间${(endTime - startTime) / 1000}m`);
   }
 
   return true;
@@ -1180,6 +1180,7 @@ export function renderComponentNode({ context, el, parentVNode, parentElement })
   // 不是第一次而是更新
   component.$setParams({ attrs, events, parentContext: context });
 
+  console.log('componentUpdate', 'update');
   // 调用组件的update方法返回VNode
   return component.$update();
 }

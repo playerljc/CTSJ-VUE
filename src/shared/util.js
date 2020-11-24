@@ -1,8 +1,7 @@
 import lodashCloneDeep from 'lodash/cloneDeep';
-// import { render } from 'src/compiler/render';
-import { resetComputed /* triggerLifecycle */ } from '../core/util';
+import { resetComputed } from '../core/util';
 import { clear, isEmpty as dirtyStackIsEmpty, getRenderHandler } from '../compiler/proxyDirtyStack';
-import { DIRECT_DIVIDING_SYMBOL /* lifecycle_hooks */ } from './constants';
+import { DIRECT_DIVIDING_SYMBOL, IS_LOG_OUTPUT } from './constants';
 
 /**
  * toCamelCase - 用连接符链接的字符串转换成驼峰写法
@@ -131,13 +130,21 @@ export function createElement(htmlStr) {
 export function execExpression(context, expressionStr) {
   // return eval(`with(context){${expressionStr}}`);
 
+  // 实参列表，调用函数传递的参数
   const argv = [this.$dataProxy];
+
+  // 形参列表，函数声明的参数列表
   const parameters = ['context'];
+
+  // 迭代context
   for (const p in context) {
+    // 拼凑其他实参
     argv.push(context[p]);
+    // 拼凑其他形参
     parameters.push(p);
   }
 
+  // 创建函数并调用
   return eval(
     `
     const fun = new Function(
@@ -155,17 +162,18 @@ export function execExpression(context, expressionStr) {
 }
 
 /**
- * createExecutionContext
+ * createExecutionContext - 创建一个执行上下文的调用
+ * 其实就是创建一个函数，然后调用这个函数，在这个函数的最后会去调用render或者是renderComponent进行render的操作
  * @param codeCallContext - Object 调用上下文
  * @param codeCallBack - Function 回调的函数
  */
 export function createExecutionContext(codeCallContext, codeCallBack) {
   const executionContext = new Function(
-    'codeCallContext',
-    'codeCallBack',
-    'dirtyCallContext',
-    'dirtyCallBack',
-    'codeCallBack.call(codeCallContext);dirtyCallBack.call(dirtyCallContext);',
+    'codeCallContext', // 代码执行的上下文也就是this
+    'codeCallBack', // 代码执行的回调函数
+    'dirtyCallContext', // 进行渲染函数的调用上下文
+    'dirtyCallBack', // 执行渲染的回调函数
+    'codeCallBack.call(codeCallContext);dirtyCallBack.call(dirtyCallContext);', // 连续调用codeCallContext，dirtyCallBack两个函数
   );
 
   const self = this;
@@ -282,3 +290,13 @@ export function cloneDeep(value, map = new Map()) {
  * noop - 空函数
  */
 export function noop() {}
+
+/**
+ * log - 输出
+ * @param argv
+ */
+export function log(...argv) {
+  if (IS_LOG_OUTPUT) {
+    console.log.apply(console, argv);
+  }
+}

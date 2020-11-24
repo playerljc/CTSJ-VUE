@@ -1,58 +1,61 @@
 import styles from './index.less';
-
+import { log } from '../../shared/util';
 export default {
   props: ['data'],
   template: `
       <div class="${styles.wrap}">
         <ul>
-          <li class="${styles.row}" v-for="(item,index) in data" v-bind:key="item.id">
-            <div class="${styles.auto}">
-               <div class="${styles.fixedWrap}">
-                 <input type="checkbox" v-on:change="$emit('onComplete',item.id)">
-               </div>
-               <div class="${styles.autoWrap}">
-                 <template v-if="item.active">
-                  <input type="text" v-bind:value="item.info"/>
-                 </template>
-                 
-                 <template v-else>
-                   <div class="${styles.info}">{{item.info}}</div>
-                 </template>
-               </div>
-            </div>
-            <div class="${styles.fixed}">
-            <span class="${styles.deleteBtn}" v-on:click="$emit('onProcessDelete',item.id)">-</span>
-            </div>
-          </li>
+          <ToDoProcessItem 
+            v-for="(item,index) in data" 
+            v-bind:key="item.id" 
+            v-bind:data="item"
+            v-on:onProcessDelete="onProcessDelete"
+            v-on:onComplete="onComplete"
+            v-on:onActive="onActive"
+            v-on:onUnActive="onUnActive"
+          ></ToDoProcessItem>
         </ul>
       </div>
     `,
   data: () => ({}),
-  methods: {},
+  methods: {
+    onComplete(id) {
+      this.$emit('onComplete', id);
+    },
+    onProcessDelete(id) {
+      this.$emit('onProcessDelete', id);
+    },
+    onActive(id) {
+      this.$emit('onActive', id);
+    },
+    onUnActive(data) {
+      this.$emit('onUnActive', data);
+    },
+  },
   computed: {},
   watch: {},
   beforeCreate() {
-    console.log('ToDoProcessingList', 'beforeCreate');
+    log('ToDoProcessingList', 'beforeCreate');
   },
   created() {
-    console.log('ToDoProcessingList', 'created');
+    log('ToDoProcessingList', 'created');
   },
   beforeMount() {
-    console.log('ToDoProcessingList', 'beforeMount');
+    log('ToDoProcessingList', 'beforeMount');
   },
   mounted() {
-    console.log('ToDoProcessingList', 'mounted');
+    log('ToDoProcessingList', 'mounted');
   },
   beforeUpdate() {
-    console.log('ToDoProcessingList', 'beforeUpdate');
+    log('ToDoProcessingList', 'beforeUpdate');
   },
   updated() {
-    console.log('ToDoProcessingList', 'updated');
+    log('ToDoProcessingList', 'updated');
   },
   beforeDestroy() {
-    console.log('ToDoProcessingList', 'beforeDestroy');
+    log('ToDoProcessingList', 'beforeDestroy');
   },
   destroyed() {
-    console.log('ToDoProcessingList', 'destroyed');
+    log('ToDoProcessingList', 'destroyed');
   },
 };

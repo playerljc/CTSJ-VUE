@@ -84,7 +84,7 @@ class Vue {
     // 获取Vue配置中的el实际对象，el可以是HtmlElement或String
     this.$config.el = getEl(this.$config.el);
 
-    // 纯净的data数据，没有进行代理的
+    // 纯净的data数据，没有进行代理的，在watch中使用
     this.$noProxySrcData = cloneDeep(isFunction(this.$config.data) ? this.$config.data() : {});
 
     // 将data混入到this中
@@ -128,7 +128,7 @@ class Vue {
 
   /**
    * $refresh - 指定VNode刷新
-   * @param VNode
+   * @param VNode - VNode 这个VNode应该是一个组件的VNode
    */
   $refresh(VNode) {
     // this.$preVNode

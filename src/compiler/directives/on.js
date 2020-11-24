@@ -2,7 +2,7 @@ import { isFormTag } from './model';
 import { execExpression, createExecutionContext } from '../../shared/util';
 import { createContext } from '../../core/proxy';
 import { hasVAttr, getDirectiveEntry } from './util';
-
+import { log } from '../../shared/util';
 import { DIRECT_PREFIX } from '../../shared/constants';
 
 /**
@@ -179,7 +179,7 @@ export function parseVOn({ context, el, tagName, vAttrNames, VNode }) {
       // <div v-on:click.self="doThat">...</div>
 
       const startTime = new Date().getTime();
-      console.log('on开始执行');
+      log('on开始执行');
       // 标识符
       if (entry.modifiers) {
         if (entry.modifiers.stop) {
@@ -196,8 +196,8 @@ export function parseVOn({ context, el, tagName, vAttrNames, VNode }) {
       // 3.display(a + $event) -> methods函数调用形式
       executeExecutionContextVOn.call(self, { context, entry, e });
       const endTime = new Date().getTime();
-      console.log(`on所执行的时间${(endTime - startTime) / 1000}m`);
-      console.log('on执行结束');
+      log(`on所执行的时间${(endTime - startTime) / 1000}m`);
+      log('on执行结束');
       // if (entry.expression in self.$config.methods) {
       //   // 函数名形式 直接调用
       //   this[entry.expression]();

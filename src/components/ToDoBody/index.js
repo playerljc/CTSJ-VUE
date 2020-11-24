@@ -1,4 +1,5 @@
 import styles from './index.less';
+import { log } from '../../shared/util';
 
 export default {
   props: ['processingList', 'completedList'],
@@ -12,7 +13,10 @@ export default {
           <ToDoProcessingList 
             v-bind:data="processingList" 
             v-on:onComplete="onComplete" 
-            v-on:onProcessDelete="onProcessDelete"></ToDoProcessingList>
+            v-on:onProcessDelete="onProcessDelete"
+            v-on:onActive="onActive"
+            v-on:onUnActive="onUnActive"
+            ></ToDoProcessingList>
         </div>
         
         <div class="${styles.block}">
@@ -42,31 +46,37 @@ export default {
     onCompleteDelete(id) {
       this.$emit('onCompleteDelete', id);
     },
+    onActive(id) {
+      this.$emit('onActive', id);
+    },
+    onUnActive(data) {
+      this.$emit('onUnActive', data);
+    },
   },
   computed: {},
   watch: {},
   beforeCreate() {
-    console.log('ToDoBody', 'beforeCreate');
+    log('ToDoBody', 'beforeCreate');
   },
   created() {
-    console.log('ToDoBody', 'created');
+    log('ToDoBody', 'created');
   },
   beforeMount() {
-    console.log('ToDoBody', 'beforeMount');
+    log('ToDoBody', 'beforeMount');
   },
   mounted() {
-    console.log('ToDoBody', 'mounted');
+    log('ToDoBody', 'mounted');
   },
   beforeUpdate() {
-    console.log('ToDoBody', 'beforeUpdate');
+    log('ToDoBody', 'beforeUpdate');
   },
   updated() {
-    console.log('ToDoBody', 'updated');
+    log('ToDoBody', 'updated');
   },
   beforeDestroy() {
-    console.log('ToDoBody', 'beforeDestroy');
+    log('ToDoBody', 'beforeDestroy');
   },
   destroyed() {
-    console.log('ToDoBody', 'destroyed');
+    log('ToDoBody', 'destroyed');
   },
 };

@@ -15,7 +15,7 @@ import {
   CREATE_PROXY_EXCLUDE_SUFFIX,
   PATH_SYMBOLS,
 } from '../shared/constants';
-
+import { log } from '../shared/util';
 /**
  * createContext - 创建上下文(主要是在v-for的时候需要重新创建一个新的上下文)
  * @param srcContext - Object 原始的srcContext对象
@@ -39,7 +39,7 @@ export function createContext(srcContext, argv = {}) {
 /**
  * createProxy - 创建对象的代理(对data和computed的响应式创建，支持Object和Array)
  * @param srcObj - Object | Array 要代理的对象
- * @param depth - boolean 是否深度创建
+ * @param depth - boolean 是否深度创建代理
  * @param renderHandler - Function 渲染的句柄函数
  * @return Proxy
  */
@@ -105,40 +105,52 @@ function createProxy(srcObj, depth, renderHandler) {
 
       // 是数组
       if (isArray(target)) {
+        // 数组的原始长度
         const srcLength = target.length;
 
         let result = Reflect.set(target, key, value, receiver);
 
+        // 数组在data中的访问表达式
         const propertyAccessStr = getPropertyVisitPathStr(target, key);
 
+        // 对原始对象赋值
         eval(`self.$noProxySrcData.${propertyAccessStr} = cloneDeepRef(target)`);
 
+        // 数组的当前长度
         const targetLength = target.length;
 
         // watch监听
         if (self.$config.watch && isObject(self.$config.watch)) {
           const handler = self.$config.watch[propertyAccessStr];
           if (handler) {
+            // 在执行上下文中执行watch的回调
             createExecutionContext.call(self, self, function () {
               handler.call(self, key, value);
             });
           }
         }
 
+        // 数组是删除
         if (targetLength < srcLength) {
-          console.log('删除', `key:${key}`, `value:${value}`);
-        } else if (targetLength > srcLength) {
-          console.log('添加', `key:${key}`, `value:${value}`);
+          log('删除', `key:${key}`, `value:${value}`);
+        }
+        // 数组是添加
+        else if (targetLength > srcLength) {
+          log('添加', `key:${key}`, `value:${value}`);
 
+          // 如果可以则会给value继续创建代理
           if ((isObject(value) || isArray(value)) && !(PATH_SYMBOLS[0] in value)) {
             value = createProxy.call(self, value, depth, renderHandler);
             value[PATH_SYMBOLS[0]] = key;
             value[PATH_SYMBOLS[1]] = target;
             result = Reflect.set(target, key, value, receiver);
           }
-        } else {
-          console.log('修改', `key:${key}`, `value:${value}`);
+        }
+        // 数组修改
+        else {
+          log('修改', `key:${key}`, `value:${value}`);
 
+          // 如果可以则会给value继续创建代理
           if ((isObject(value) || isArray(value)) && !(PATH_SYMBOLS[0] in value)) {
             value = createProxy.call(self, value, depth, renderHandler);
             value[PATH_SYMBOLS[0]] = key;
@@ -147,6 +159,7 @@ function createProxy(srcObj, depth, renderHandler) {
           }
         }
 
+        // 变更入栈
         push(renderHandler, value);
 
         return result;
@@ -207,9 +220,12 @@ function createProxy(srcObj, depth, renderHandler) {
         // 例如修改的是a.b
 
         // 回写原始数据
-        eval('if(!cloneValue) {cloneValue = cloneDeepRef(value);}');
-        // 其他则直接更新
-        eval(`self.$noProxySrcData.${propertyAccessStr} = cloneValue`);
+        eval(`
+           if(!cloneValue) {
+              cloneValue = cloneDeepRef(value);
+           } 
+           self.$noProxySrcData.${propertyAccessStr} = cloneValue;
+        `);
 
         // 如果不是私有属性且是对象或数组继续loop，给value进行代理
         if ((isObject(value) || isArray(value)) && !(PATH_SYMBOLS[0] in value)) {
@@ -223,6 +239,7 @@ function createProxy(srcObj, depth, renderHandler) {
         // 先进行计算
         const result = Reflect.set(target, key, value, receiver);
 
+        // 变更入栈
         push(renderHandler, value);
         // -----------------------------------end
 
@@ -242,6 +259,7 @@ function createProxy(srcObj, depth, renderHandler) {
         return Reflect.deleteProperty(target, property);
       }
 
+      // 不处理数组的删除
       if (isArray(target)) {
         return Reflect.deleteProperty(target, property);
       }
@@ -269,12 +287,14 @@ function createProxy(srcObj, depth, renderHandler) {
       // 先进行计算
       const result = Reflect.deleteProperty(target, property);
 
+      // 变更入栈
       push(renderHandler, property);
 
       return result;
     },
   });
 
+  // 如果是深度创建代理
   if (depth) {
     /**
      * 继续进行迭代，迭代srcObj的所有属性，为srcObj的所有属性都进行代理
@@ -297,14 +317,15 @@ function createProxy(srcObj, depth, renderHandler) {
 }
 
 /**
- * createVueProxy - Component实例创建代理
+ * createVueProxy - Vue实例创建代理
  * @param srcObj - Object | Array 被代理的对象
- * @param depth - boolean 是否深度创建
+ * @param depth - boolean 是否深度创建代理
  * @return {Proxy} - 代理对象
  */
 export function createVueProxy(srcObj, depth = true) {
+  // 调用实际创建代理的方法
   return createProxy.call(this, srcObj, depth, function () {
-    // 调用渲染句柄
+    // 调用渲染句柄，有执行上下文来调用
     render.call(this, this.$config.el, false);
   });
 }
@@ -312,15 +333,19 @@ export function createVueProxy(srcObj, depth = true) {
 /**
  * createComponentProxy - 组件实例创建代理
  * @param srcObj - Object | Array 被代理的对象
- * @param depth - boolean 是否深度创建
+ * @param depth - boolean 是否深度创建代理
  * @return {Proxy} - 代理对象
  */
 export function createComponentProxy(srcObj, depth = true) {
   return createProxy.call(this, srcObj, depth, function () {
     // 组件自身更新
     const VNode = renderComponent.call(this);
+
     VNode.key = this.$key;
+
     this.$assignClassAndStyle(VNode);
+
+    // $top是vue实例对象
     if (this.$top && isFunction(this.$top.$refresh)) {
       this.$top.$refresh(VNode);
     }

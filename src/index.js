@@ -1,6 +1,6 @@
-import _ from 'lodash';
+// import _ from 'lodash';
 import styles from './index.less';
-
+import { log } from './shared/util';
 import Vue from './core';
 import uuid from './shared/uuid';
 
@@ -8,13 +8,17 @@ import ToDoHeader from './components/ToDoHeader';
 import ToDoBody from './components/ToDoBody';
 import ToDoProcessingList from './components/ToDoProcessingList';
 import ToDoCompletedList from './components/ToDoCompletedList';
-import DB from './components/DB';
+import ToDoProcessItem from './components/ToDoProcessItem';
+import ToDoCompleteItem from './components/ToDoCompleteItem';
 import { clone } from './shared/util';
+import DB from './components/DB';
 
 Vue.component('ToDoHeader', ToDoHeader);
 Vue.component('ToDoBody', ToDoBody);
 Vue.component('ToDoProcessingList', ToDoProcessingList);
 Vue.component('ToDoCompletedList', ToDoCompletedList);
+Vue.component('ToDoProcessItem', ToDoProcessItem);
+Vue.component('ToDoCompleteItem', ToDoCompleteItem);
 
 window.onload = () => {
   const todoApp = new Vue({
@@ -33,6 +37,8 @@ window.onload = () => {
 
             v-on:onProcess="onProcess"
             v-on:onCompleteDelete="onCompleteDelete"
+            v-on:onActive="onActive"
+            v-on:onUnActive="onUnActive"
             ></ToDoBody>
         </div>
       </div>
@@ -159,33 +165,53 @@ window.onload = () => {
 
         DB.save(data);
       },
+      onActive(id) {
+        const data = DB.getData();
+
+        const index = data.processingList.findIndex((t) => t.id === id);
+        data.processingList[index].active = true;
+
+        this.processingList = data.processingList;
+
+        DB.save(data);
+      },
+      onUnActive({ id, value }) {
+        const data = DB.getData();
+
+        const index = data.processingList.findIndex((t) => t.id === id);
+        data.processingList[index].active = false;
+        data.processingList[index].info = value;
+        this.processingList = data.processingList;
+
+        DB.save(data);
+      },
     },
     computed: {},
     watch: {},
     beforeCreate() {
-      console.log('Vue', 'beforeCreate');
+      log('Vue', 'beforeCreate');
     },
     created() {
-      console.log('Vue', 'created');
+      log('Vue', 'created');
     },
     beforeMount() {
-      console.log('Vue', 'beforeMount');
+      log('Vue', 'beforeMount');
     },
     mounted() {
-      console.log('Vue', 'mounted');
+      log('Vue', 'mounted');
       this.loadData();
     },
     beforeUpdate() {
-      console.log('Vue', 'beforeUpdate');
+      log('Vue', 'beforeUpdate');
     },
     updated() {
-      console.log('Vue', 'updated');
+      log('Vue', 'updated');
     },
     beforeDestroy() {
-      console.log('Vue', 'beforeDestroy');
+      log('Vue', 'beforeDestroy');
     },
     destroyed() {
-      console.log('Vue', 'destroyed');
+      log('Vue', 'destroyed');
     },
   });
 };

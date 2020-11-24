@@ -1,52 +1,53 @@
 import styles from './index.less';
-
+import { log } from '../../shared/util';
 export default {
   props: ['data'],
   template: `
       <div class="${styles.wrap}">
         <ul>
-          <li class="${styles.row}" v-for="(item,index) in data" v-bind:key="item.id">
-            <div class="${styles.auto}">
-               <div class="${styles.fixedWrap}">
-                <input type="checkbox" v-on:change="$emit('onProcess',item.id)">
-               </div>
-               <div class="${styles.autoWrap}">
-                 <div class="${styles.info}">{{item.info}}</div>
-               </div>
-            </div>
-            <div class="${styles.fixed}">
-              <span class="${styles.deleteBtn}" v-on:click="$emit('onCompleteDelete',item.id)">-</span>
-            </div>
-          </li>
+          <ToDoCompleteItem
+           v-for="item in data" 
+           v-bind:key="item.id" 
+           v-bind:data="item"
+           v-on:onCompleteDelete="onCompleteDelete"
+           v-on:onProcess="onProcess"
+           ></ToDoCompleteItem>
         </ul>
       </div>
     `,
   data: () => ({}),
-  methods: {},
+  methods: {
+    onProcess(id) {
+      this.$emit('onProcess', id);
+    },
+    onCompleteDelete(id) {
+      this.$emit('onCompleteDelete', id);
+    },
+  },
   computed: {},
   watch: {},
   beforeCreate() {
-    console.log('ToDoCompletedList', 'beforeCreate');
+    log('ToDoCompletedList', 'beforeCreate');
   },
   created() {
-    console.log('ToDoCompletedList', 'created');
+    log('ToDoCompletedList', 'created');
   },
   beforeMount() {
-    console.log('ToDoCompletedList', 'beforeMount');
+    log('ToDoCompletedList', 'beforeMount');
   },
   mounted() {
-    console.log('ToDoCompletedList', 'mounted');
+    log('ToDoCompletedList', 'mounted');
   },
   beforeUpdate() {
-    console.log('ToDoCompletedList', 'beforeUpdate');
+    log('ToDoCompletedList', 'beforeUpdate');
   },
   updated() {
-    console.log('ToDoCompletedList', 'updated');
+    log('ToDoCompletedList', 'updated');
   },
   beforeDestroy() {
-    console.log('ToDoCompletedList', 'beforeDestroy');
+    log('ToDoCompletedList', 'beforeDestroy');
   },
   destroyed() {
-    console.log('ToDoCompletedList', 'destroyed');
+    log('ToDoCompletedList', 'destroyed');
   },
 };

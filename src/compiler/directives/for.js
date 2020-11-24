@@ -167,23 +167,41 @@ export function iteratorVFor({ context, el, parentVNode, itItemStr, itItemObj, r
   // 元素有key属性
   // 如果元素有key属性则需要对key属性进行一个全局唯一标识的处理
   // 处理的方式就是给key加上groupName的前缀
+  // if (attrNames.indexOf(`${DIRECT_PREFIX}bind:key`) !== -1) {
+  //   const key = `${DIRECT_PREFIX}bind:key`;
+  //   const value = el.getAttribute(key);
+  //   const expressVal = execExpression.call(this, context, value);
+  //   if (!this.componentsMap.has(expressVal)) {
+  //     // 给key加入groupName前缀使之全局唯一
+  //     el.setAttribute(key, `'${groupName}' + '(${expressVal})'`);
+  //   }
+  // } else if (attrNames.indexOf('key')) {
+  //   const key = 'key';
+  //   const value = el.getAttribute(key);
+  //   if (!this.componentsMap.has(value)) {
+  //     // 给key加入groupName前缀使之全局唯一
+  //     el.setAttribute(key, `${groupName}(${value})`);
+  //   }
+  // } else {
+  //   // 如果v-for没写key则用索引作为key
+  //   el.setAttribute('key', `${groupName}${index}`);
+  // }
+
+  // 对v-for元素进行克隆,克隆之后cloneEl会有groupName属性
+  const cloneEl = el.cloneNode(true);
+
   if (attrNames.indexOf(`${DIRECT_PREFIX}bind:key`) !== -1) {
     const key = `${DIRECT_PREFIX}bind:key`;
-    const value = el.getAttribute(key);
-    // 给key加入groupName前缀使之全局唯一
-    el.setAttribute(key, `'${groupName}' + '(${execExpression.call(this, context, value)})'`);
+    const value = cloneEl.getAttribute(key);
+    const expressVal = execExpression.call(this, context, value);
+    cloneEl.setAttribute(key, `'${groupName}' + '(${expressVal})'`);
   } else if (attrNames.indexOf('key')) {
     const key = 'key';
-    const value = el.getAttribute(key);
-    // 给key加入groupName前缀使之全局唯一
-    el.setAttribute(key, `${groupName}(${value})`);
+    const value = cloneEl.getAttribute(key);
+    cloneEl.setAttribute(key, `${groupName}(${value})`);
   } else {
-    // 如果v-for没写key则用索引作为key
-    el.setAttribute('key', `${groupName}${index}`);
+    cloneEl.setAttribute('key', `${groupName}${index}`);
   }
-
-  // 对v-for元素进行克隆
-  const cloneEl = el.cloneNode(true);
 
   // 删除v-for属性
   cloneEl.removeAttribute(`${DIRECT_PREFIX}for`);
