@@ -1,13 +1,15 @@
 import styles from './index.less';
-
+import { log } from '../../shared/util';
 export default {
   template: `
       <div class="${styles.wrap}">
-        <div class="${styles.fixed}">ToDoList</div>
+        <div class="${styles.fixed}" v-on:click="title = 'ToDoListUpdate'">{{title}}</div>
         <div class="${styles.auto}"><input type="text" placeholder="添加ToDo" v-on:keydown="onKeyDown($event)" /></div>
       </div>
     `,
-  data: () => ({}),
+  data: () => ({
+    title: 'ToDoList',
+  }),
   methods: {
     onKeyDown(e) {
       const { key, keyCode } = e;
@@ -21,27 +23,27 @@ export default {
   computed: {},
   watch: {},
   beforeCreate() {
-    console.log('ToDoHeader', 'beforeCreate');
+    log('ToDoHeader', 'beforeCreate');
   },
   created() {
-    console.log('ToDoHeader', 'created');
+    log('ToDoHeader', 'created');
   },
   beforeMount() {
-    console.log('ToDoHeader', 'beforeMount');
+    log('ToDoHeader', 'beforeMount');
   },
   mounted() {
-    console.log('ToDoHeader', 'mounted');
+    log('ToDoHeader', 'mounted');
   },
   beforeUpdate() {
-    console.log('ToDoHeader', 'beforeUpdate');
+    log('ToDoHeader', 'beforeUpdate');
   },
   updated() {
-    console.log('ToDoHeader', 'updated');
+    log('ToDoHeader', 'updated');
   },
   beforeDestroy() {
-    console.log('ToDoHeader', 'beforeDestroy');
+    log('ToDoHeader', 'beforeDestroy');
   },
   destroyed() {
-    console.log('ToDoHeader', 'destroyed');
+    log('ToDoHeader', 'destroyed');
   },
 };

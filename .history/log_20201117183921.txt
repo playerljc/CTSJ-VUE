@@ -31,6 +31,10 @@
 
 
 .对数组的操作上代理有问题，没有考虑到push,splice等一系列操作
+.现在是替换整个el节点
+.v-for迭代对象没有实现(value,name,index)
+.v-for没有实现of分隔符
+.v-for里面使用范围值
 .自定义指令
 .mixin
 .组件上v-model
