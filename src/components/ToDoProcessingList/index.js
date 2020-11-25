@@ -1,5 +1,6 @@
 import styles from './index.less';
 import { log } from '../../shared/util';
+
 export default {
   props: ['data'],
   template: `

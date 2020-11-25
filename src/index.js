@@ -1,6 +1,6 @@
 // import _ from 'lodash';
 import styles from './index.less';
-import { log } from './shared/util';
+import { log, clone } from './shared/util';
 import Vue from './core';
 import uuid from './shared/uuid';
 
@@ -10,7 +10,6 @@ import ToDoProcessingList from './components/ToDoProcessingList';
 import ToDoCompletedList from './components/ToDoCompletedList';
 import ToDoProcessItem from './components/ToDoProcessItem';
 import ToDoCompleteItem from './components/ToDoCompleteItem';
-import { clone } from './shared/util';
 import DB from './components/DB';
 
 Vue.component('ToDoHeader', ToDoHeader);
@@ -71,7 +70,7 @@ window.onload = () => {
         // });
 
         const data = DB.getData();
-        data.processingList.push({
+        data.processingList.unshift({
           active: false,
           id: uuid(),
           info: value,

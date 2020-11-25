@@ -48,6 +48,15 @@ export function isArray(obj) {
 }
 
 /**
+ * isNumber - 判断是否是number
+ * @param val
+ * @return {boolean}
+ */
+export function isNumber(val) {
+  return !isObject(val) && !isArray(val) && !isFunction(val) && typeof val === 'number';
+}
+
+/**
  * isFunction - 判断函数
  * @param obj
  * @return {boolean}
