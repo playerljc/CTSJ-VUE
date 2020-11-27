@@ -23,12 +23,13 @@ window.onload = () => {
   const todoApp = new Vue({
     el: '#app',
     template: `
-      <div class="${styles.wrap}">
-        <div class="${styles.fixed}">
-          <ToDoHeader v-on:onKeyDown="onKeyDown"></ToDoHeader>
+      <div class="${styles.wrap}" ref="wrap">
+        <div class="${styles.fixed}" ref="fixed">
+          <ToDoHeader v-on:onKeyDown="onKeyDown" ref="ToDoHeader"></ToDoHeader>
         </div>
         <div class="${styles.auto}">
           <ToDoBody 
+            ref="ToDoBody"
             v-bind:processing-list="processingList"
             v-bind:completed-list="completedList"
             v-on:onComplete="onComplete"

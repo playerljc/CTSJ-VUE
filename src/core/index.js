@@ -84,6 +84,9 @@ class Vue {
     // 获取Vue配置中的el实际对象，el可以是HtmlElement或String
     this.$config.el = getEl(this.$config.el);
 
+    // 存放所有ref的数据
+    this.$refs = {};
+
     // 纯净的data数据，没有进行代理的，在watch中使用
     this.$noProxySrcData = cloneDeep(isFunction(this.$config.data) ? this.$config.data() : {});
 

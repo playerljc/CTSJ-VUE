@@ -87,7 +87,7 @@ function createProxy(srcObj, depth, renderHandler) {
     },
     /**
      * set 陷阱的函数
-     * 一般都是在生命周期hooks或者事件处理函数中对data的值进行修改，会触发set
+     * 一般都是在生命周期hook或者事件处理函数中对data的值进行修改，会触发set
      * @param target
      * @param key
      * @param value
@@ -346,8 +346,8 @@ export function createComponentProxy(srcObj, depth = true) {
     this.$assignClassAndStyle(VNode);
 
     // $top是vue实例对象
-    if (this.$top && isFunction(this.$top.$refresh)) {
-      this.$top.$refresh(VNode);
+    if (this.$root && isFunction(this.$root.$refresh)) {
+      this.$root.$refresh(VNode);
     }
   });
 }

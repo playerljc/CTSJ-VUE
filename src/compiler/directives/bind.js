@@ -103,12 +103,32 @@ export function getVBindEntrys({ context, el, vAttrNames }) {
  * @return {Object}
  */
 export function parseVBind({ context, el, vAttrNames, VNode }) {
+  const self = this;
+
   const entrys = getVBindEntrys.call(this, { context, el, vAttrNames });
 
   entrys.forEach((entry) => {
+    // key属性
     if (entry.arg === 'key') {
       VNode.key = entry.value;
-    } else if (entry.arg === 'class') {
+    }
+    // ref属性
+    if (entry.arg === 'ref') {
+      // ref属性不放入到VNode中
+      // 创建当前VNode的hook
+      Object.assign(VNode.data.hook, {
+        /**
+         * insert - 元素已插入DOM
+         * @param vnode
+         */
+        insert: (vnode) => {
+          // 保存HtmlElement的el到$refs中
+          self.$refs[entry.value] = vnode.elm;
+        },
+      });
+    }
+    // class属性
+    else if (entry.arg === 'class') {
       const value = {};
       Object.keys(entry.value).forEach((key) => {
         if (isProxyProperty(key)) {
@@ -116,11 +136,17 @@ export function parseVBind({ context, el, vAttrNames, VNode }) {
         }
       });
       Object.assign(VNode.data.class, value);
-    } else if (entry.arg === 'style') {
+    }
+    // style属性
+    else if (entry.arg === 'style') {
       Object.assign(VNode.data.style, entry.value);
-    } else if (entry.arg.startsWith('data-')) {
+    }
+    // data-*属性
+    else if (entry.arg.startsWith('data-')) {
       VNode.data.dataset[toCamelCase(entry.arg.substring('data-'.length))] = entry.value;
-    } else {
+    }
+    // 其他的属性
+    else {
       VNode.data.props[entry.arg] = entry.value;
     }
   });

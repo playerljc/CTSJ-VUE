@@ -119,18 +119,21 @@ class Component {
    * }
    * @param key - 组件的key
    * @param el - 组件的el元素
-   * @param top - vue实例
+   * @param root - vue实例
    * @param parent - 父对象(可能是Vue实例，也肯能是Component实例)
    */
-  constructor(config, { key, el, top, parent }) {
+  constructor(config, { key, el, root, parent }) {
     this.$el = el;
-    this.$top = top;
+    this.$root = root;
     this.$parent = parent;
     this.$key = key;
     this.$config = this.$getConfig();
     this.$argConfig = config;
     // 创建组件的$emit实例
     this.$emit = createEmit.call(this);
+
+    // 存放所有ref的数据
+    this.$refs = {};
 
     // 获取父亲传递过来的props和attrs
     const { props, attrs } = getPropsAndAttrs.call(this);
@@ -290,7 +293,7 @@ class Component {
    *  1.父容器更新导致组件的更新(props)
    *    父容器的更新需要调用update方法只返回VNode即可
    *  2.组件内部的更新(data)
-   *    组件内部的更新需要调用$top的refresh来执行虚拟Dom的path操作
+   *    组件内部的更新需要调用$root的refresh来执行虚拟Dom的path操作
    * @return {VNode}
    */
   $update() {

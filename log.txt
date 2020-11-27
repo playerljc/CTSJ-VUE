@@ -31,6 +31,7 @@
 .v-for没有实现of分隔符 ok
 .v-for迭代对象没有实现(value,name,index) ok
 .v-for里面使用范围值 ok
+.$root,$parent,$refs的处理 ok
 
 .对数组的操作上代理有问题，没有考虑到push,splice等一系列操作
 .现在是替换整个el节点

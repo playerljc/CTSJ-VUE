@@ -73,13 +73,13 @@ export function pascalCaseToKebabCase(name) {
  * @param events - Object 所有events的k/v数据
  * @param parentContext - Object 父亲的上下文对象
  * @param parent - Vue | Component 父亲是Vue实例或者Component实例
- * @param top - Vue Vue实例
+ * @param root - Vue Vue实例
  * @param el - HtmlElement 元素
  * @param key - string 组件的key
  * @return Component
  */
-export function createComponent({ attrs, events, parentContext, parent, top, el, key }) {
-  return new Component({ attrs, events, parentContext }, { key, el, top, parent });
+export function createComponent({ attrs, events, parentContext, parent, root, el, key }) {
+  return new Component({ attrs, events, parentContext }, { key, el, root, parent });
 }
 
 /**

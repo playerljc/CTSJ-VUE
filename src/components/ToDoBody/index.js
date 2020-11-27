@@ -5,12 +5,13 @@ export default {
   props: ['processingList', 'completedList'],
   template: `
       <div class="${styles.wrap}">
-        <div class="${styles.block}">
+        <div class="${styles.block}" ref="block">
           <div class="${styles.header}">
             <span class="${styles.text}">正在进行</span>
             <span class="${styles.count}">{{processingList.length}}</span>
           </div>
           <ToDoProcessingList 
+            ref="ToDoProcessingList"
             v-bind:data="processingList" 
             v-on:onComplete="onComplete" 
             v-on:onProcessDelete="onProcessDelete"
@@ -25,6 +26,7 @@ export default {
             <span class="${styles.count}">{{completedList.length}}</span>
           </div>
           <ToDoCompletedList 
+            ref="ToDoCompletedList"
             v-bind:data="completedList"
             v-on:onProcess="onProcess" 
             v-on:onCompleteDelete="onCompleteDelete"

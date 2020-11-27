@@ -7,24 +7,24 @@ import { createContext, isProxyProperty } from '../../core/proxy';
 
 const ITERATOR_CHAIN = [
   {
-    condition: function (obj) {
-      return isObject(obj);
-    },
+    condition: (obj) => isObject(obj),
     handler: iteratorObj,
   },
   {
-    condition: function (obj) {
-      return isArray(obj);
-    },
+    condition: (obj) => isArray(obj),
     handler: iteratorArray,
   },
   {
-    condition: function (val) {
-      return isNumber(val);
-    },
+    condition: (val) => isNumber(val),
     handler: iteratorNumber,
   },
 ];
+
+/**
+ * <div ref="aaa">
+ *   <my-component ref="bbb"></my-component>
+ * </div>
+ */
 
 /**
  * iteratorObj - 迭代对象
@@ -266,7 +266,7 @@ export function iteratorVFor(
       // 从context中获取迭代项数据
       context[itItemArr[0].trim()] = itItemObj;
       // 如果是迭代对象则是属性名，否则是索引
-      context[itItemArr[1].trim()] = property ? property : index;
+      context[itItemArr[1].trim()] = property || index;
 
       // 是索引
       if (itItemArr.length >= 3) {

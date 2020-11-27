@@ -11,6 +11,7 @@ import {
   isSlotNode,
   isDynamicComponentNode,
   toCamelCase,
+  log,
 } from '../shared/util';
 import {
   isComponentInstance,
@@ -54,7 +55,7 @@ import {
   DIRECT_PREFIX,
   LIFECYCLE_HOOKS,
 } from '../shared/constants';
-import { log } from '../shared/util';
+
 /**
  * render - Vue实例的渲染
  * @param el - HtmlElement
@@ -78,7 +79,7 @@ export function render(el, isMount) {
   if (!vnode) return false;
 
   // vnode的hook设置
-  vnode.data.hook = {
+  Object.assign(vnode.data.hook, {
     /**
      * 一个vnode已添加
      * @param vnode
@@ -133,7 +134,7 @@ export function render(el, isMount) {
         triggerLifecycle.call(self, LIFECYCLE_HOOKS[7]);
       }
     },
-  };
+  });
 
   if (isMount) {
     // 需要赋值$preVNode
@@ -172,7 +173,7 @@ export function renderComponent() {
   if (!vnode) return null;
 
   // vnode的hook设置
-  vnode.data.hook = {
+  Object.assign(vnode.data.hook, {
     /**
      * 一个vnode已添加
      * @param vnode
@@ -228,7 +229,7 @@ export function renderComponent() {
         triggerLifecycle.call(self, LIFECYCLE_HOOKS[7]);
       }
     },
-  };
+  });
 
   return vnode;
 }
@@ -498,21 +499,47 @@ function renderVAttr({ el, parentVNode, parentElement, context, renderFun }) {
  * @param VNode - VNode
  */
 function renderAttr({ el, VNode }) {
+  const self = this;
+
   const attrNames = getAttrNames(el);
 
   if (attrNames.length) {
     attrNames.forEach((attrName) => {
       const val = el.getAttribute(attrName);
 
+      // key属性
       if (attrName === 'key') {
         VNode.key = val;
-      } else if (attrName.startsWith('data-')) {
-        VNode.data.dataset[toCamelCase(attrName.substring('data-'.length))] = val;
-      } else if (attrName === 'style') {
+      }
+      // ref属性
+      else if (attrName === 'ref') {
+        // ref属性不放入到VNode中
+        // 创建当前VNode的hook
+        Object.assign(VNode.data.hook, {
+          /**
+           * insert - 元素已插入DOM
+           * @param vnode
+           */
+          insert: (vnode) => {
+            // 保存HtmlElement的el到$refs中
+            self.$refs[val] = vnode.elm;
+          },
+        });
+      }
+      // style属性
+      else if (attrName === 'style') {
         VNode.data.style[attrName] = val;
-      } else if (attrName === 'class') {
+      }
+      // class属性
+      else if (attrName === 'class') {
         VNode.data.class[val] = true;
-      } else {
+      }
+      // data-*属性
+      else if (attrName.startsWith('data-')) {
+        VNode.data.dataset[toCamelCase(attrName.substring('data-'.length))] = val;
+      }
+      // 其他的属性
+      else {
         VNode.data.attrs[attrName] = val;
       }
     });
@@ -1160,6 +1187,11 @@ export function renderComponentNode({ context, el, parentVNode, parentElement })
   // 根据key获取组件实例
   let component = self.componentsMap.get(key);
 
+  const refVal = attrs.ref;
+  if ('ref' in attrs && attrs.ref) {
+    delete attrs.ref;
+  }
+
   // 没有创建组件
   if (!component) {
     // 用key创建组件
@@ -1168,13 +1200,22 @@ export function renderComponentNode({ context, el, parentVNode, parentElement })
       events,
       parentContext: context,
       parent: self,
-      top: isVueInstance(self) ? self : self.$top,
+      root: isVueInstance(self) ? self : self.$root,
       el,
       key,
     });
+    // 处理ref
+    if (refVal) {
+      self.$refs[refVal] = component;
+    }
+
     self.componentsMap.set(key, component);
     // 调用组件的render方法返回VNode
     return component.$render();
+  }
+
+  if (refVal) {
+    self.$refs[refVal] = component;
   }
 
   // 不是第一次而是更新
