@@ -1,6 +1,6 @@
 import uuid from '../../shared/uuid';
 import { hasVAttr } from './util';
-import { EMPTY_SPLIT } from '../../shared/regexp';
+import { EMPTY_SPLIT, COMMA_SPLIT } from '../../shared/regexp';
 import { DIRECT_PREFIX, GROUP_KEY_NAME } from '../../shared/constants';
 import { execExpression, isObject, isArray, isNumber } from '../../shared/util';
 import { createContext, isProxyProperty } from '../../core/proxy';
@@ -262,7 +262,8 @@ export function iteratorVFor(
     itItemStr = itItemStr.substring(1, itItemStr.length - 1).trim();
     // 如果内容中包含','
     if (itItemStr.indexOf(',') !== -1) {
-      const itItemArr = itItemStr.split(',').map((t) => t.trim());
+      console.log(itItemStr.split(COMMA_SPLIT));
+      const itItemArr = itItemStr.split(COMMA_SPLIT).map((t) => t.trim());
       // 从context中获取迭代项数据
       context[itItemArr[0].trim()] = itItemObj;
       // 如果是迭代对象则是属性名，否则是索引
