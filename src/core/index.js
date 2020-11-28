@@ -6,7 +6,13 @@ import { LIFECYCLE_HOOKS } from '../shared/constants';
 import { mergeData, mergeComputed, mergeMethods } from './merge';
 import { triggerLifecycle, getEl, mixinConfig } from './util';
 import { createVueProxy } from './proxy';
-import { createElement, isFunction, cloneDeep, createExecutionContext } from '../shared/util';
+import {
+  createElement,
+  isFunction,
+  cloneDeep,
+  createExecutionContext,
+  isObject,
+} from '../shared/util';
 
 /**
  * findVNodeParentByKey - 查询key的Parent
@@ -41,6 +47,9 @@ function findVNodeParentByKey(VNode, key) {
 
 // 全局的配置对象
 let _globalConfig = {};
+
+// 存放所有注册的插件
+const _plugins = [];
 
 /**
  * getGlobalConfig - 获取全局的配置对象
@@ -91,6 +100,37 @@ class Vue {
    */
   static mixin(globalConfig) {
     _globalConfig = globalConfig;
+  }
+
+  /**
+   * use - 注册全局插件
+   * @param plugin Object | Function
+   * @return boolean
+   */
+  static use(plugin) {
+    if (!plugin) return false;
+
+    // 已经注册鼓了
+    if (_plugins.indexOf(plugin) !== -1) return false;
+
+    // 如果plugin是对象
+    if (isObject(plugin)) {
+      if ('install' in plugin && isFunction(plugin.install)) {
+        plugin.install(Vue);
+        _plugins.push(plugin);
+        return true;
+      }
+
+      return false;
+    }
+    // 如果plugin是函数
+    else if (isFunction(plugin)) {
+      plugin(Vue);
+      _plugins.push(plugin);
+      return true;
+    }
+
+    return false;
   }
 
   // static extend() {}
