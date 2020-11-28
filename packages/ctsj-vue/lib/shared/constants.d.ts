@@ -1,3 +1,4 @@
+export const IS_LOG_OUTPUT: true;
 export const LIFECYCLE_HOOKS: string[];
 export const START_TAG: "{{";
 export const END_TAG: "}}";

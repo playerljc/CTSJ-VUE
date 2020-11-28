@@ -4,10 +4,22 @@
  * @return {*}
  */
 export function hasVModel(attrNames: any): any;
+/**
+ * getVModelEntrys
+ * @param el
+ * @param vAttrNames
+ * @return {{expression: *, arg: string, name: string, modifiers: {}|{}, value: string}|null}
+ */
 export function getVModelEntrys({ el, vAttrNames }: {
     el: any;
     vAttrNames: any;
-}): any;
+}): {
+    expression: any;
+    arg: string;
+    name: string;
+    modifiers: {} | {};
+    value: string;
+} | null;
 /**
  * parseVModel
  * @param context
@@ -24,6 +36,17 @@ export function parseVModel({ context, el, vAttrNames, tagName, VNode }: {
     tagName: any;
     VNode: any;
 }): any;
+/**
+ * parseOption - 解析option 主要是赋值
+ * @param context
+ * @param VNode
+ * @param parentElement
+ */
+export function parseOption({ context, VNode, parentElement }: {
+    context: any;
+    VNode: any;
+    parentElement: any;
+}): void;
 /**
  * isFormTag
  * @param tagName

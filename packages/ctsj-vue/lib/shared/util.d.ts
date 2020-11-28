@@ -25,6 +25,12 @@ export function isEmpty(value: any): boolean;
  */
 export function isArray(obj: any): boolean;
 /**
+ * isNumber - 判断是否是number
+ * @param val
+ * @return {boolean}
+ */
+export function isNumber(val: any): boolean;
+/**
  * isFunction - 判断函数
  * @param obj
  * @return {boolean}
@@ -80,7 +86,8 @@ export function createElement(htmlStr: any): Element;
  */
 export function execExpression(context: any, expressionStr: any): any;
 /**
- * createExecutionContext
+ * createExecutionContext - 创建一个执行上下文的调用
+ * 其实就是创建一个函数，然后调用这个函数，在这个函数的最后会去调用render或者是renderComponent进行render的操作
  * @param codeCallContext - Object 调用上下文
  * @param codeCallBack - Function 回调的函数
  */
@@ -101,3 +108,8 @@ export function cloneDeep(value: any, map?: Map<any, any>): any;
  * noop - 空函数
  */
 export function noop(): void;
+/**
+ * log - 输出
+ * @param argv
+ */
+export function log(...argv: any[]): void;

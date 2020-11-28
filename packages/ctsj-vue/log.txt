@@ -24,16 +24,34 @@
  3.watch处理函数(在事件处理函数中在调用其他方法)
  现在应该可是实现同步的函数，但是异步函数无法实现(除非提供一个创建这样函数的方法可以实现此功能)
 .Vue实例现在VNode替换了el元素，而我们想实现的是作为孩子 ok
+.v-model select赋值需要创建一个template进行计算 ok
+.v-if ok
+.v-else-if ok
+.v-else ok
+.v-for没有实现of分隔符 ok
+.v-for迭代对象没有实现(value,name,index) ok
+.v-for里面使用范围值 ok
+.$root,$parent,$refs的处理 ok
+.mixin ok
+ 生命周期函数会合并在一起
+ 其他都是替换
+ mixins属性是一个数组
+ 全局混入Vue.mixin
+.插件 ok
 
 .自定义指令
-.mixin
-
-.keep-alive标签
+.对数组的操作上代理有问题，没有考虑到push,splice等一系列操作
+.现在是替换整个el节点
+.指令的简写模式
+.组件上v-model
+.v-model的节流
 .computed(不需要)
  get
  set
 .filter (很难)
  自定义filter
+
+
 
 // components集合的键应该用元素的key
 // 每一个组件元素没有key都要随机生成一个key

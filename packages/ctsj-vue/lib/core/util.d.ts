@@ -15,7 +15,7 @@ export function triggerLifecycle(hookName: any): void;
  * @param elConfig - HtmlElement | String
  * @return HTMLElement
  */
-export function getEl(elConfig: any): HTMLDivElement | null;
+export function getEl(elConfig: any): Element | null | undefined;
 /**
  * isVueInstance - ins是否是一个Vue实例
  * @param ins - 一个实例对象
@@ -29,3 +29,18 @@ export function isVueInstance(ins: any): boolean;
  * @return boolean
  */
 export function isComputedProperty(ins: any, key: any): boolean;
+/**
+ * mixinConfig 配置对象的混入
+ * @param globalConfig Object 全局配置对象
+ * @param mixins Array 实例(vue或component)的mixin
+ * @param config Object 实例的配置对象本身
+ * @return Object 实际的配置对象
+ * 注：
+ * .生命周期函数会放在一个数组里，按照目标->mixin->全局的顺序输出
+ * .其他都是替换 替换的顺序是 ~ 组件->mixin->全局
+ */
+export function mixinConfig({ globalConfig, mixins, config }: {
+    globalConfig?: {} | undefined;
+    mixins?: any[] | undefined;
+    config?: {} | undefined;
+}): any;

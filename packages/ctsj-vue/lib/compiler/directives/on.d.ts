@@ -15,7 +15,20 @@ export function getVOnEntrys({ el, vAttrNames }: {
     vAttrNames: any;
 }): any[];
 /**
- * executeVOn - 执行v-on内部的逻辑
+ * executeVOn - 执行v-on内部的逻辑 带执行上下文
+ * @param context - Object 上下文对象
+ * @param entry - Object v-on实体对象
+ * @param e - Event Html事件的对象
+ * @param argv - Array 调用函数的参数
+ */
+export function executeExecutionContextVOn({ context, entry, e, argv }: {
+    context: any;
+    entry: any;
+    e: any;
+    argv?: any[] | undefined;
+}): void;
+/**
+ * executeVOn - 执行v-on内部的逻辑 不带执行上下文
  * @param context - Object 上下文对象
  * @param entry - Object v-on实体对象
  * @param e - Event Html事件的对象
