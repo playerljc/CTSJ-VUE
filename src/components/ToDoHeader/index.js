@@ -1,6 +1,13 @@
 import styles from './index.less';
 import { log } from '../../shared/util';
 export default {
+  mixins: [
+    {
+      created() {
+        console.log('ToDoHeaderMixin', 'created');
+      },
+    },
+  ],
   template: `
       <div class="${styles.wrap}">
         <div class="${styles.fixed}" v-on:click="title = 'ToDoListUpdate'">{{title}}</div>

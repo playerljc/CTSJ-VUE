@@ -32,12 +32,12 @@
 .v-for迭代对象没有实现(value,name,index) ok
 .v-for里面使用范围值 ok
 .$root,$parent,$refs的处理 ok
-
-.mixin
+.mixin ok
  生命周期函数会合并在一起
  其他都是替换
  mixins属性是一个数组
  全局混入Vue.mixin
+
 .自定义指令
 .插件
 .对数组的操作上代理有问题，没有考虑到push,splice等一系列操作

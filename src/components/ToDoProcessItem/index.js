@@ -2,6 +2,13 @@ import styles from './index.less';
 import { log } from '../../shared/util';
 
 export default {
+  mixins: [
+    {
+      created() {
+        console.log('ToDoProcessItemMixin', 'created');
+      },
+    },
+  ],
   props: ['data'],
   template: `
       <li class="${styles.row}">
