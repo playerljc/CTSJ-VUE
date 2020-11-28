@@ -1,4 +1,4 @@
-import { executeVOn } from '../../compiler/directives/on';
+import { executeExecutionContextVOn } from '../../compiler/directives/on';
 import { renderComponent } from '../../compiler/render';
 import { createComponentProxy, createPropsProxy } from '../proxy';
 import {
@@ -11,7 +11,9 @@ import {
 } from '../../shared/util';
 import { getComponentConfig, isKebabCase, isPascalCase, pascalCaseToKebabCase } from './util';
 import { mergeComputed, mergeData, mergeMethods, mergeProps } from '../merge';
-import { triggerLifecycle } from '../util';
+import { resetComputed, triggerLifecycle } from '../util';
+import { getGlobalConfig } from '../../core/index';
+import { mixinConfig } from '../util';
 
 import { LIFECYCLE_HOOKS } from '../../shared/constants';
 
@@ -24,7 +26,7 @@ function getPropsAndAttrs() {
   const { attrs } = this.$argConfig;
 
   // 配置定义的
-  let props = cloneDeep(this.$config.props);
+  let props = cloneDeep(this.$config.props) || [];
   const prop = {};
   const attr = {};
 
@@ -80,21 +82,26 @@ function createEmit() {
    * @param eventName string - 事件名称
    * @param argv Array - 事件的参数
    */
-  return function (eventName, ...argv) {
+  return function (eventName) {
     const { events } = self.$argConfig;
+
+    const argv = [];
+    for (let i = 0; i < arguments.length; i++) {
+      // arguments.length
+      if (i === 0 && eventName) continue;
+      argv.push(arguments[i]);
+    }
 
     const eventNameFormat = eventName.toLowerCase();
 
     if (!(eventNameFormat in events)) return false;
 
-    createExecutionContext.call(self, self, function () {
-      executeVOn.call(self.$parent, {
-        context: self.$parent.$dataProxy,
-        entry: {
-          expression: events[eventNameFormat],
-        },
-        argv,
-      });
+    executeExecutionContextVOn.call(self.$parent, {
+      context: {},
+      entry: {
+        expression: events[eventNameFormat],
+      },
+      argv,
     });
   };
 }
@@ -114,22 +121,38 @@ class Component {
    * }
    * @param key - 组件的key
    * @param el - 组件的el元素
-   * @param top - vue实例
+   * @param root - vue实例
    * @param parent - 父对象(可能是Vue实例，也肯能是Component实例)
    */
-  constructor(config, { key, el, top, parent }) {
+  constructor(config, { key, el, root, parent }) {
     this.$el = el;
-    this.$top = top;
+
+    // Vue实例对象
+    this.$root = root;
+
+    // 父对象
     this.$parent = parent;
+
+    // 标签中的key属性值
     this.$key = key;
-    this.$config = this.getConfig();
+
+    // 组件的配置对象
+    this.$config = this.$getConfig();
+
+    // 构造函数的配置
     this.$argConfig = config;
+
     // 创建组件的$emit实例
     this.$emit = createEmit.call(this);
 
+    // 存放所有ref的数据
+    this.$refs = {};
+
     // 获取父亲传递过来的props和attrs
     const { props, attrs } = getPropsAndAttrs.call(this);
+
     this.$attes = attrs;
+
     this.$props = cloneDeep(props);
 
     // 创建props的代理
@@ -167,10 +190,10 @@ class Component {
   }
 
   /**
-   * assignClassAndStyle - 混入class和style
+   * $assignClassAndStyle - 混入class和style
    * @param VNode
    */
-  assignClassAndStyle(VNode) {
+  $assignClassAndStyle(VNode) {
     const { attrs } = this.$argConfig;
     if (attrs.class) {
       if (isObject(attrs.class)) {
@@ -195,27 +218,33 @@ class Component {
   }
 
   /**
-   * setParams
+   * $setParams
    * @param config
    */
-  setParams(config) {
+  $setParams(config) {
     this.$argConfig = config;
   }
 
   /**
-   * 获取组件配置
+   * $getConfig- 获取组件配置
    * @return Object
    */
-  getConfig() {
-    return getComponentConfig(this.$parent, this.$el.tagName.toLowerCase());
+  $getConfig() {
+    const config = getComponentConfig(this.$parent, this.$el.tagName.toLowerCase());
+    // 这块需要判断是否进行mixin
+    return mixinConfig({
+      globalConfig: getGlobalConfig(),
+      mixins: config.mixins || [],
+      config,
+    });
   }
 
   /**
-   * 获取组件components的配置
+   * $getComponentsConfig - 获取组件components的配置
    * @return Object
    */
-  getComponentsConfig() {
-    const config = this.getConfig();
+  $getComponentsConfig() {
+    const config = this.$getConfig();
 
     if (!config || !('components' in config) || !config.components) return {};
 
@@ -239,18 +268,30 @@ class Component {
   }
 
   /**
-   * getParentContext - 获取父亲的上下文对象
+   * $getParentContext - 获取父亲的上下文对象
    * @return Object
    */
-  getParentContext() {
+  $getParentContext() {
     return this.$argConfig.parentContext;
   }
 
   /**
-   * compiler - 编译这个Component返回这个Component的VNode
+   * $createAsyncExecContext - 创建一个异步的执行上下文
+   * @param callBack - Function 回调的函数
+   * @return Function
+   */
+  $createAsyncExecContext(callBack) {
+    const self = this;
+    return function () {
+      createExecutionContext.call(self, self, callBack);
+    };
+  }
+
+  /**
+   * $render - 编译这个Component返回这个Component的VNode
    * @return {VNode}
    */
-  render() {
+  $render() {
     // 渲染
     // beforeMount
     // render
@@ -260,7 +301,7 @@ class Component {
     const VNode = renderComponent.call(this);
 
     // class和style的处理
-    this.assignClassAndStyle(VNode);
+    this.$assignClassAndStyle(VNode);
 
     VNode.key = this.$key;
 
@@ -268,15 +309,15 @@ class Component {
   }
 
   /**
-   * update - 更新这个Component返回这个Component的VNode
+   * $update - 更新这个Component返回这个Component的VNode
    * 更新分为2中
    *  1.父容器更新导致组件的更新(props)
    *    父容器的更新需要调用update方法只返回VNode即可
    *  2.组件内部的更新(data)
-   *    组件内部的更新需要调用$top的refresh来执行虚拟Dom的path操作
+   *    组件内部的更新需要调用$root的refresh来执行虚拟Dom的path操作
    * @return {VNode}
    */
-  update() {
+  $update() {
     // 父容器更新
     const { props, attrs } = getPropsAndAttrs.call(this);
     this.$attes = attrs;
@@ -312,10 +353,11 @@ class Component {
     // 把之前的props删除，混入现在的props
     mergeMethods.call(this);
 
+    resetComputed.call(this);
     const VNode = renderComponent.call(this);
 
     // class和style的处理
-    this.assignClassAndStyle(VNode);
+    this.$assignClassAndStyle(VNode);
 
     VNode.key = this.$key;
 

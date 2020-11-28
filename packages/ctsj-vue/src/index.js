@@ -1,455 +1,230 @@
+// import _ from 'lodash';
+import styles from './index.less';
+import { log, clone } from './shared/util';
 import Vue from './core';
+import uuid from './shared/uuid';
 
-import MyComponent from './components/myComponent';
-import MyComponentInner from './components/myComponentInner';
-import ForComponent from './components/forComponent';
-import MyComponentSlot from './components/myComponentSlot';
+import ToDoHeader from './components/ToDoHeader';
+import ToDoBody from './components/ToDoBody';
+import ToDoProcessingList from './components/ToDoProcessingList';
+import ToDoCompletedList from './components/ToDoCompletedList';
+import ToDoProcessItem from './components/ToDoProcessItem';
+import ToDoCompleteItem from './components/ToDoCompleteItem';
+import DB from './components/DB';
 
-// 注册的componentName是 MyComponent my-component
-Vue.component('my-component', MyComponent);
-Vue.component('MyComponentInner', MyComponentInner);
-Vue.component('for-component', ForComponent);
-Vue.component('MyComponentSlot', MyComponentSlot);
+Vue.component('ToDoHeader', ToDoHeader);
+Vue.component('ToDoBody', ToDoBody);
+Vue.component('ToDoProcessingList', ToDoProcessingList);
+Vue.component('ToDoCompletedList', ToDoCompletedList);
+Vue.component('ToDoProcessItem', ToDoProcessItem);
+Vue.component('ToDoCompleteItem', ToDoCompleteItem);
 
-// v-bind 指令名称 v-bind:id id是指令的参数 v-bind:id="123" 123是指令的值  v-bind.a.b:id="" .a.b是指令的modifiers
+Vue.mixin({
+  created() {
+    console.log('Global', 'created');
+  },
+});
+
 window.onload = () => {
-  // v-bind:class="{active: isActive, 'text-danger': hasError}"
-
-  const vm2 = new Vue({
-    el: '#container2', // document.getElementById('container2'),
+  const todoApp = new Vue({
+    mixins: [
+      {
+        created() {
+          console.log('VueMixin', 'created');
+        },
+      },
+    ],
+    el: '#app',
     template: `
-<!--      		<div -->
-<!--      		  v-bind:id="id + '我' + [1,2,3].join(',') + reversedMessage"-->
-<!--            v-bind:class="[activeClass, errorClass]"-->
-<!--      		  v-bind:style="{color:activeColor,fontSize: fontSize + 'px'}"-->
-<!--      		  v-bind:data-ent-id="name"-->
-<!--      		  name="playerljc"-->
-<!--      		>-->
-<!--      			<p v-show="true" v-on:click="sum(name,sex,age,$event,'1' + '2')">我的名字叫"{{name + new Date().getTime() + [1,2,3] + Math.random() + (2 > 3 ? 'aaa' : 'bbb')}}~{{display()}}",我的性别是"{{sex}}"性,我家住在"{{address}}"地方</p>-->
-<!--      			<p v-on:click="sum(name,sex,age,$event,'1' + '2')">display{{display()}}是display</p>-->
-<!--      			<p>{{items[0].name}}</p>-->
-<!--      			<p>{{items[0].hobby.hobby1}}</p>-->
-<!--      			<p>{{'你' + '是   &nbsp;' + '谁'}}</p>-->
-<!--      			<p>{{reversedMessage}}</p>-->
-<!--      			<ul>-->
-<!--      				<li v-for="(item,index) in data">-->
-<!--      					<div>{{item.name}}:{{index}}</div>-->
-<!--      					<ul>-->
-<!--      						<li v-for="(item2,index1) in item.data">-->
-<!--      							<div>{{item2.name}}:{{index + index1}}</div>-->
-<!--      							<ul>-->
-<!--      								<li v-for="(item3,index2) in item2.data" v-if="item2.data.length !== 0">{{item3.name}}:{{index + index1 + index2}}</li>-->
-<!--										</ul>-->
-<!--      						</li>-->
-<!--								</ul>-->
-<!--      				</li>-->
-<!--      				<div>{{sex}}</div>-->
-<!--            </ul>-->
-<!--            <div v-html="htmlStr"></div>-->
-<!--      		</div>-->
-          <div>
-          
-          
-<!--            <p v-if="checkbox">{{name}}</p>-->
-            
-            
-            
-<!--            <p key="1" data-a="1">{{a.b.c.d}}</p>-->
-<!--            <p key="2" v-bind:data-a="name">{{reversedMessage}}</p>-->
-<!--            <p>{{name}}</p>-->
-<!--            <p>{{checkbox}}</p>-->
+      <div class="${styles.wrap}" ref="wrap">
+        <div class="${styles.fixed}" ref="fixed">
+          <ToDoHeader v-on:onKeyDown="onKeyDown" ref="ToDoHeader"></ToDoHeader>
+        </div>
+        <div class="${styles.auto}">
+          <ToDoBody 
+            ref="ToDoBody"
+            v-bind:processing-list="processingList"
+            v-bind:completed-list="completedList"
+            v-on:onComplete="onComplete"
+            v-on:onProcessDelete="onProcessDelete"
 
-
-            <!--<my-component
-              v-on:onChange="onChange"
-              v-model="selected"
-              v-bind="obj"
-              v-bind:list="list" 
-              v-bind:class="[activeClass, errorClass]"
-      		    v-bind:style="{color:activeColor,fontSize: fontSize + 'px'}"
-      		    name="myComponent" 
-             ></my-component>-->
-             
-             
-<!--             <for-component v-for="(item,index) in list" v-bind:key="index" v-bind:list="[item.name]"></for-component>-->
-            
-            
-<!--            <select v-model="selected">-->
-<!--              <option v-for="option in options" v-bind:key="option.value" v-bind:value="option.value">-->
-<!--                {{ option.text }}-->
-<!--              </option>-->
-<!--            </select>-->
-<!--            <span>Selected: {{ selected }}</span>-->
-            
-            
-            
-<!--            <input v-bind:type="type" v-model="input">-->
-<!--            <div>{{input}}</div>-->
-
-              <!--<template v-for="(item,index) in list">
-                <div>111</div>
-                <my-component
-                  v-on:onChange="onChange"
-                  v-model="selected"
-                  v-bind="obj"
-                  v-bind:list="list" 
-                  v-bind:class="[activeClass, errorClass]"
-                  v-bind:style="{color:activeColor,fontSize: fontSize + 'px'}"
-                  name="myComponent" 
-                 ></my-component>
-              </template>-->
-              
-              <!--<MyComponentSlot>
-                &lt;!&ndash;<template v-slot:default>
-                  <div>{{obj.cloneNode.a}}</div>
-                  <div>{{obj.textNode}}</div>
-                  <div>{{obj.nodeValue}}</div>
-                  <template>
-                    <div>222</div>
-                  </template>
-                  <template v-for="(item,index) in list">
-                    <div>111</div>
-                    <my-component
-                      v-on:onChange="onChange"
-                      v-model="selected"
-                      v-bind="obj"
-                      v-bind:list="list" 
-                      v-bind:class="[activeClass, errorClass]"
-                      v-bind:style="{color:activeColor,fontSize: fontSize + 'px'}"
-                      name="myComponent" 
-                     ></my-component>
-                  </template>
-                </template>&ndash;&gt;
-                
-                &lt;!&ndash;<template v-slot:head="headProps">
-                  <div>{{headProps.user.name}}</div>
-                  <div>{{headProps.user.sex}}</div>
-                  <div>{{headProps.user.age}}</div>
-                </template>
-                
-                <template v-slot:body="bodyProps">
-                  <div>{{bodyProps.car.name}}</div>
-                  <div>{{bodyProps.car.size}}</div>
-                </template>&ndash;&gt;
-                
-&lt;!&ndash;                <template v-slot:footer="goodsProps">&ndash;&gt;
-&lt;!&ndash;                  <div>{{goodsProps.goods.name}}</div>&ndash;&gt;
-&lt;!&ndash;                  <div>{{goodsProps.goods.size}}</div>&ndash;&gt;
-&lt;!&ndash;                </template>&ndash;&gt;
-                
-              </MyComponentSlot>-->
-              
-              <!--<component 
-                is="for-component" 
-                v-for="(item,index) in list" 
-                v-bind:key="index" 
-                v-bind:list="[item.name]"
-      		    ></component>-->
-      		    
-      		    
-      		    <!--<component 
-                is="my-component" 
-                v-on:onChange="onChange"
-                v-model="selected"
-                v-bind="obj"
-                v-bind:list="list" 
-                v-bind:class="[activeClass, errorClass]"
-                v-bind:style="{color:activeColor,fontSize: fontSize + 'px'}"
-                name="myComponent" 
-      		    ></component>-->
-      		    
-      		    <p>{{name}}</p>
-      		    <p>{{age}}</p>
-      		    <p>{{address}}</p>
-      		    <button v-on:click="update">修改</button>
-          </div>
-      	`,
+            v-on:onProcess="onProcess"
+            v-on:onCompleteDelete="onCompleteDelete"
+            v-on:onActive="onActive"
+            v-on:onUnActive="onUnActive"
+            ></ToDoBody>
+        </div>
+      </div>
+    `,
     data: () => ({
-      obj: {
-        cloneNode: { a: 1 },
-        textNode: 'textNode',
-        nodeValue: 'nodeValue',
-      },
-      list: [
-        {
-          name: '张三',
-          age: 20,
-          height: 1.8,
-          hometown: '沈阳',
-          city: '沈阳',
-        },
-        {
-          name: '李四',
-          age: 20,
-          height: 1.8,
-          hometown: '沈阳',
-          city: '沈阳',
-        },
-        {
-          name: '王五',
-          age: 20,
-          height: 1.8,
-          hometown: '沈阳',
-          city: '沈阳',
-        },
-      ],
-      selected: 'A',
-      options: [
-        { text: 'One', value: 'A' },
-        { text: 'Two', value: 'B' },
-        { text: 'Three', value: 'C' },
-      ],
-
-      books: ['java'],
-      type: 'text',
-      input: '',
-
-      checkbox: false,
-      name: 'playerljc',
-      // sex: '女',
-      age: '666',
-      address: '不知道',
-
-      activeColor: 'red',
-      fontSize: 30,
-      activeClass: 'active',
-      errorClass: 'text-danger',
-
-      items: [
-        {
-          name: 'name2222',
-          sex: '女',
-          age: '666',
-          address: '不知道',
-          hobby: {
-            hobby1: '篮球1',
-            hobby2: '足球2',
-            hobby3: '乒乓球3',
-          },
-        },
-      ],
-      message: '1,2,3,4,5,6',
-      id: '111111',
-      isActive: true,
-      hasError: true,
-      data: [
-        {
-          name: 'name1',
-          data: [
-            {
-              name: 'name11',
-              data: [
-                {
-                  name: 'name111',
-                },
-              ],
-            },
-            {
-              name: 'name22',
-            },
-          ],
-        },
-        {
-          name: 'name2',
-          data: [
-            {
-              name: 'name11',
-            },
-            {
-              name: 'name22',
-            },
-          ],
-        },
-        {
-          name: 'name3',
-          data: [
-            {
-              name: 'name11',
-            },
-            {
-              name: 'name22',
-            },
-          ],
-        },
-      ],
-      htmlStr: `<p>我是谁666</p>`,
-      a: {
-        b: {
-          c: {
-            d: 100,
-          },
-        },
-      },
+      processingList: [],
+      completedList: [],
     }),
     methods: {
-      onInput(e) {
-        console.log(e.target.checked);
-      },
-      display() {
-        return `${this.name}\r\n${this.sex}\r\n${this.age}\r\n${this.address}`;
-      },
-      show() {
-        alert('666');
-      },
-      sum(name, sex, age, $event, str) {
-        // alert(name);
-        // alert(sex);
-        // alert(age);
-        // alert($event);
-        // alert(str);
-        alert(this.reversedMessage);
-      },
-      onChange(argv) {
-        this.obj.cloneNode = { a: 3 };
-        this.obj.textNode = 'textNode1';
-        this.obj.nodeValue = 'nodeValue1';
-      },
-      update() {
+      loadData() {
         setTimeout(
-          this.createAsyncExecContext(function () {
-            this.name = 'lzq';
-            this.age = '6';
-            this.address = 'q';
+          this.$createAsyncExecContext(function () {
+            const data = DB.getData();
+            this.processingList = data.processingList;
+            this.completedList = data.completedList;
           }),
-          2000,
+          500,
         );
       },
-    },
-    computed: {
-      reversedMessage() {
-        return this.message.split(',').reverse().join(',');
+      onKeyDown(value) {
+        // this.processingList.push({
+        //   active: false,
+        //   id: uuid(),
+        //   info: value,
+        // });
+        //
+        // DB.save({
+        //   processingList: this.processingList,
+        //   completedList: this.completedList,
+        // });
+
+        const data = DB.getData();
+        data.processingList.unshift({
+          active: false,
+          id: uuid(),
+          info: value,
+        });
+
+        this.processingList = data.processingList;
+
+        DB.save(data);
+      },
+      onComplete(id) {
+        // const index = this.processingList.findIndex((t) => t.id === id);
+        // const item = this.processingList[index];
+        //
+        // this.completedList.push(clone(item));
+        // this.processingList.splice(index, 1);
+        //
+        // DB.save({
+        //   processingList: this.processingList,
+        //   completedList: this.completedList,
+        // });
+
+        const data = DB.getData();
+
+        const index = data.processingList.findIndex((t) => t.id === id);
+        const item = data.processingList[index];
+
+        data.completedList.push(clone(item));
+        data.processingList.splice(index, 1);
+
+        this.processingList = data.processingList;
+        this.completedList = data.completedList;
+
+        DB.save(data);
+      },
+      onProcessDelete(id) {
+        // const index = this.processingList.findIndex((t) => t.id === id);
+        // this.processingList.splice(index, 1);
+        // DB.save({
+        //   processingList: this.processingList,
+        //   completedList: this.completedList,
+        // });
+
+        const data = DB.getData();
+        const index = data.processingList.findIndex((t) => t.id === id);
+        data.processingList.splice(index, 1);
+
+        this.processingList = data.processingList;
+        this.completedList = data.completedList;
+
+        DB.save(data);
+      },
+
+      onProcess(id) {
+        // const index = this.completedList.findIndex((t) => t.id === id);
+        // const item = this.completedList[index];
+        //
+        // this.processingList.push(clone(item));
+        // this.completedList.splice(index, 1);
+        //
+        // DB.save({
+        //   processingList: this.processingList,
+        //   completedList: this.completedList,
+        // });
+
+        const data = DB.getData();
+        const index = data.completedList.findIndex((t) => t.id === id);
+        const item = data.completedList[index];
+
+        data.processingList.push(clone(item));
+        data.completedList.splice(index, 1);
+
+        this.processingList = data.processingList;
+        this.completedList = data.completedList;
+
+        DB.save(data);
+      },
+      onCompleteDelete(id) {
+        // const index = this.completedList.findIndex((t) => t.id === id);
+        // this.completedList.splice(index, 1);
+        // DB.save({
+        //   processingList: this.processingList,
+        //   completedList: this.completedList,
+        // });
+
+        const data = DB.getData();
+
+        const index = data.completedList.findIndex((t) => t.id === id);
+        data.completedList.splice(index, 1);
+
+        this.completedList = data.completedList;
+
+        DB.save(data);
+      },
+      onActive(id) {
+        const data = DB.getData();
+
+        const index = data.processingList.findIndex((t) => t.id === id);
+        data.processingList[index].active = true;
+
+        this.processingList = data.processingList;
+
+        DB.save(data);
+      },
+      onUnActive({ id, value }) {
+        const data = DB.getData();
+
+        const index = data.processingList.findIndex((t) => t.id === id);
+        data.processingList[index].active = false;
+        data.processingList[index].info = value;
+        this.processingList = data.processingList;
+
+        DB.save(data);
       },
     },
-    watch: {
-      a(oldVal, newVal) {
-        console.log(oldVal, newVal);
-      },
-      'a.b.c': function (oldVal, newVal) {
-        console.log(oldVal, newVal);
-        this.name = 'playerljc6';
-      },
-      'a.b.c.d': function (oldVal, newVal) {
-        console.log(oldVal, newVal);
-      },
-      items(oldVal, newVal) {
-        console.log(oldVal, newVal);
-      },
-      // name() {
-      //   this.age = 6;
-      //   this.address = 'h';
-      // },
-    },
+    computed: {},
+    watch: {},
     beforeCreate() {
-      console.log('Vue', 'beforeCreate');
+      log('Vue', 'beforeCreate');
     },
     created() {
-      console.log('Vue', 'created');
+      log('Vue', 'created');
     },
     beforeMount() {
-      console.log('Vue', 'beforeMount');
+      log('Vue', 'beforeMount');
     },
     mounted() {
-      console.log('Vue', 'mounted');
-      // setTimeout(() => {
-      // this.name = 'playerljc';
-      // this.items[0].name = 'name2';
-      // // this.items[0].hobby.hobby1 = '游泳啊';
-      // this.items[0].hobby = {
-      //   hobby1: '设计啊'
-      // }
-      // this.name = 'hello';
-      // this.sex = '男';
-      // this.message = '6,6,6,6,6,6';
-      // this.data.push({
-      // 	name:'name4',
-      // });
-      // this.message = '1,2,3';
-      // this.items.push({
-      //   name: 'sdasdasdasdasd1',
-      // });
-      // this.items[0] = {
-      //   name: '111111',
-      // };
-      // this.items.pop();
-      // this.items[0].name = '111';
-      // this.a = {
-      //   b: {
-      //     c: {
-      //       d: 6,
-      //     },
-      //   },
-      // };
-      // setTimeout(() => {
-      //   this.a.b.c.d = 8;
-      //
-      //   setTimeout(() => {
-      //     this.a = {
-      //       b: {
-      //         c: {
-      //           d: 5,
-      //         },
-      //       },
-      //     };
-      //
-      //     setTimeout(() => {
-      //       this.a.b.c = {
-      //         d: 20,
-      //       };
-      //     }, 2000);
-      //   }, 2000);
-      // }, 2000);
-      // this.options = [
-      //   { text: 'One1', value: 'A1' },
-      //   { text: 'Two1', value: 'B1' },
-      //   { text: 'Three1', value: 'C1' },
-      // ];
-      // this.list = [
-      //   {
-      //     name: '赵六',
-      //     age: 20,
-      //     height: 1.8,
-      //     hometown: '沈阳',
-      //     city: '沈阳',
-      //   },
-      //   {
-      //     name: '王七',
-      //     age: 20,
-      //     height: 1.8,
-      //     hometown: '沈阳',
-      //     city: '沈阳',
-      //   },
-      //   {
-      //     name: '刘八',
-      //     age: 20,
-      //     height: 1.8,
-      //     hometown: '沈阳',
-      //     city: '沈阳',
-      //   },
-      //   {
-      //     name: '赵九',
-      //     age: 20,
-      //     height: 1.8,
-      //     hometown: '沈阳',
-      //     city: '沈阳',
-      //   },
-      // ];
-
-      // this.name = 'lzq';
-      // this.age = 6;
-      // this.address = 'h';
-      // }, 2000);
+      log('Vue', 'mounted');
+      this.loadData();
     },
     beforeUpdate() {
-      console.log('Vue', 'beforeUpdate');
+      log('Vue', 'beforeUpdate');
     },
     updated() {
-      console.log('Vue', 'updated');
+      log('Vue', 'updated');
     },
     beforeDestroy() {
-      console.log('Vue', 'beforeDestroy');
+      log('Vue', 'beforeDestroy');
     },
     destroyed() {
-      console.log('Vue', 'destroyed');
+      log('Vue', 'destroyed');
     },
   });
 };

@@ -2,7 +2,7 @@ import { isFormTag } from './model';
 import { execExpression, createExecutionContext } from '../../shared/util';
 import { createContext } from '../../core/proxy';
 import { hasVAttr, getDirectiveEntry } from './util';
-
+import { log } from '../../shared/util';
 import { DIRECT_PREFIX } from '../../shared/constants';
 
 /**
@@ -29,7 +29,50 @@ export function getVOnEntrys({ el, vAttrNames }) {
 }
 
 /**
- * executeVOn - 执行v-on内部的逻辑
+ * executeVOn - 执行v-on内部的逻辑 带执行上下文
+ * @param context - Object 上下文对象
+ * @param entry - Object v-on实体对象
+ * @param e - Event Html事件的对象
+ * @param argv - Array 调用函数的参数
+ */
+export function executeExecutionContextVOn({ context, entry, e, argv = [] }) {
+  const self = this;
+  // 下面的代码是执行v-on:click="" 里面代码具体的逻辑
+  // 1.a + 1 -> 表达式方式
+  // 2.display -> methods函数形式
+  // 3.display(a + $event) -> methods函数调用形式
+
+  // 函数名形式
+  // TODO: HTML的事件处理函数
+  if (entry.expression in (self.$config.methods || {})) {
+    createExecutionContext.call(this, this, function () {
+      // 函数名形式 直接调用
+      this[entry.expression].call(this.$dataProxy, e || (argv && argv.length ? argv[0] : null));
+    });
+  }
+  // 其他的形式
+  else {
+    // 表达式(1 + 1)
+    //
+    // item(item1,$event,3)
+    //
+    // 这个地方会创建新的context避免set陷阱函数执行
+    createExecutionContext.call(this, this, function () {
+      execExpression.call(
+        this,
+        e
+          ? createContext(context, { $event: e })
+          : argv && argv.length
+          ? createContext(context, { $event: argv[0] })
+          : context,
+        entry.expression,
+      );
+    });
+  }
+}
+
+/**
+ * executeVOn - 执行v-on内部的逻辑 不带执行上下文
  * @param context - Object 上下文对象
  * @param entry - Object v-on实体对象
  * @param e - Event Html事件的对象
@@ -45,10 +88,8 @@ export function executeVOn({ context, entry, e, argv = [] }) {
   // 函数名形式
   // TODO: HTML的事件处理函数
   if (entry.expression in self.$config.methods) {
-    createExecutionContext.call(this, this, function () {
-      // 函数名形式 直接调用
-      this[entry.expression].apply(context, argv);
-    });
+    // 函数名形式 直接调用
+    this[entry.expression].apply(this.$dataProxy, e || (argv && argv.length ? argv[0] : null));
   }
   // 其他的形式
   else {
@@ -57,19 +98,17 @@ export function executeVOn({ context, entry, e, argv = [] }) {
     // item(item1,$event,3)
     //
     // 这个地方会创建新的context避免set陷阱函数执行
-    createExecutionContext.call(this, this, function () {
-      execExpression(
-        e
-          ? context === self.$dataProxy
-            ? createContext(self.$dataProxy, { $event: e })
-            : context
-          : context,
-        entry.expression,
-      );
-    });
+    execExpression.call(
+      this,
+      e
+        ? createContext(context, { $event: e })
+        : argv && argv.length
+        ? createContext(context, { $event: argv[0] })
+        : context,
+      entry.expression,
+    );
   }
 }
-
 /**
  * parseVOn
  * @param context
@@ -139,6 +178,8 @@ export function parseVOn({ context, el, tagName, vAttrNames, VNode }) {
       // 即事件不是从内部元素触发的
       // <div v-on:click.self="doThat">...</div>
 
+      const startTime = new Date().getTime();
+      log('on开始执行');
       // 标识符
       if (entry.modifiers) {
         if (entry.modifiers.stop) {
@@ -153,7 +194,10 @@ export function parseVOn({ context, el, tagName, vAttrNames, VNode }) {
       // 1.a + 1 -> 表达式方式
       // 2.display -> methods函数形式
       // 3.display(a + $event) -> methods函数调用形式
-      executeVOn.call(self, { context, entry, e });
+      executeExecutionContextVOn.call(self, { context, entry, e });
+      const endTime = new Date().getTime();
+      log(`on所执行的时间${(endTime - startTime) / 1000}m`);
+      log('on执行结束');
       // if (entry.expression in self.$config.methods) {
       //   // 函数名形式 直接调用
       //   this[entry.expression]();

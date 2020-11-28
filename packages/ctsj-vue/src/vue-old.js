@@ -546,7 +546,7 @@ function renderElementNode(context, el) {
 
     if (hasVShow(vAttrNames)) {
       // parse v-show
-      const display = parseVShow(context, el, vAttrNames);
+      const display = parseVShow.call(this, context, el, vAttrNames);
       VNode.data.style.display = display ? '' : 'none';
     }
 

@@ -1,8 +1,7 @@
-// import lodashCloneDeep from 'lodash/cloneDeep';
-// import { render } from 'src/compiler/render';
-import { resetComputed /* triggerLifecycle */ } from '../core/util';
-import { clear, isEmpty as dirtyStackIsEmpty, getRenderHandler } from '../compiler/dirtyStack';
-import { DIRECT_DIVIDING_SYMBOL /* lifecycle_hooks */ } from './constants';
+import lodashCloneDeep from 'lodash/cloneDeep';
+import { resetComputed } from '../core/util';
+import { clear, isEmpty as dirtyStackIsEmpty, getRenderHandler } from '../compiler/proxyDirtyStack';
+import { DIRECT_DIVIDING_SYMBOL, IS_LOG_OUTPUT } from './constants';
 
 /**
  * toCamelCase - 用连接符链接的字符串转换成驼峰写法
@@ -46,6 +45,15 @@ export function isEmpty(value) {
  */
 export function isArray(obj) {
   return Array.isArray(obj);
+}
+
+/**
+ * isNumber - 判断是否是number
+ * @param val
+ * @return {boolean}
+ */
+export function isNumber(val) {
+  return !isObject(val) && !isArray(val) && !isFunction(val) && typeof val === 'number';
 }
 
 /**
@@ -129,30 +137,57 @@ export function createElement(htmlStr) {
  * @return {any}
  */
 export function execExpression(context, expressionStr) {
-  return eval(`with(context){${expressionStr}}`);
+  // return eval(`with(context){${expressionStr}}`);
+
+  // 实参列表，调用函数传递的参数
+  const argv = [this.$dataProxy];
+
+  // 形参列表，函数声明的参数列表
+  const parameters = ['context'];
+
+  // 迭代context
+  for (const p in context) {
+    // 拼凑其他实参
+    argv.push(context[p]);
+    // 拼凑其他形参
+    parameters.push(p);
+  }
+
+  // 创建函数并调用
+  return eval(
+    `
+    const fun = new Function(
+      \`${parameters.join(',')}\`,
+      \`return eval("with(context){${expressionStr}}")\`,
+    );
+  
+    fun.apply(window, argv);
+  `,
+  );
+
   /* replaceWith(context, expressionStr); */
   // const fun = new Function('context','expressionStr',`return with(context){${expressionStr}}`);
   // return fun(context, expressionStr);
 }
 
 /**
- * createExecutionContext
+ * createExecutionContext - 创建一个执行上下文的调用
+ * 其实就是创建一个函数，然后调用这个函数，在这个函数的最后会去调用render或者是renderComponent进行render的操作
  * @param codeCallContext - Object 调用上下文
  * @param codeCallBack - Function 回调的函数
  */
 export function createExecutionContext(codeCallContext, codeCallBack) {
   const executionContext = new Function(
-    'codeCallContext',
-    'codeCallBack',
-    'dirtyCallContext',
-    'dirtyCallBack',
-    'codeCallBack.call(codeCallContext);dirtyCallBack.call(dirtyCallContext);',
+    'codeCallContext', // 代码执行的上下文也就是this
+    'codeCallBack', // 代码执行的回调函数
+    'dirtyCallContext', // 进行渲染函数的调用上下文
+    'dirtyCallBack', // 执行渲染的回调函数
+    'codeCallBack.call(codeCallContext);dirtyCallBack.call(dirtyCallContext);', // 连续调用codeCallContext，dirtyCallBack两个函数
   );
 
   const self = this;
 
   executionContext(codeCallContext, codeCallBack, this, function () {
-    debugger;
     // 判断是否有数据的修改，如果有执行render或者
     if (dirtyStackIsEmpty()) return false;
 
@@ -207,60 +242,70 @@ export function clone(value) {
  * @return Object | Array
  */
 export function cloneDeep(value, map = new Map()) {
-  // return lodashCloneDeep(value);
+  return lodashCloneDeep(value);
 
-  if (!isObject(value) && !isArray(value)) return value;
-
-  if (isObject(value)) {
-    // 新的引用
-    const cloneValue = {};
-
-    if (map.get(value)) {
-      return map.get(value);
-    }
-
-    map.set(value, cloneValue);
-
-    Object.keys(value).forEach((key) => {
-      if (value.hasOwnProperty(key)) {
-        const itemValue = value[key];
-        if (isObject(itemValue) || isArray(itemValue)) {
-          cloneValue[key] = cloneDeep(itemValue, map);
-        } else {
-          cloneValue[key] = value[key];
-        }
-      } else {
-        // 如果itemValue不是对象或者数组则直接赋值就可以(例如: primary 类型，和Function类型)
-        cloneValue[key] = value[key];
-      }
-    });
-
-    return cloneValue;
-  }
-
-  if (isArray(value)) {
-    const cloneValue = [];
-
-    if (map.get(value)) {
-      return map.get(value);
-    }
-    map.set(value, cloneValue);
-
-    value.forEach((itemValue) => {
-      if (isObject(itemValue) || isArray(itemValue)) {
-        cloneValue.push(cloneDeep(itemValue, map));
-      } else {
-        // 如果itemValue不是对象或者数组则直接赋值就可以(例如: primary 类型，和Function类型)
-        cloneValue.push(itemValue);
-      }
-    });
-    return cloneValue;
-  }
-
-  return value;
+  // if (!isObject(value) && !isArray(value)) return value;
+  //
+  // if (isObject(value)) {
+  //   // 新的引用
+  //   const cloneValue = {};
+  //
+  //   if (map.get(value)) {
+  //     return map.get(value);
+  //   }
+  //
+  //   map.set(value, cloneValue);
+  //
+  //   Object.keys(value).forEach((key) => {
+  //     if (value.hasOwnProperty(key)) {
+  //       const itemValue = value[key];
+  //       if (isObject(itemValue) || isArray(itemValue)) {
+  //         cloneValue[key] = cloneDeep(itemValue, map);
+  //       } else {
+  //         cloneValue[key] = value[key];
+  //       }
+  //     } else {
+  //       // 如果itemValue不是对象或者数组则直接赋值就可以(例如: primary 类型，和Function类型)
+  //       cloneValue[key] = value[key];
+  //     }
+  //   });
+  //
+  //   return cloneValue;
+  // }
+  //
+  // if (isArray(value)) {
+  //   const cloneValue = [];
+  //
+  //   if (map.get(value)) {
+  //     return map.get(value);
+  //   }
+  //   map.set(value, cloneValue);
+  //
+  //   value.forEach((itemValue) => {
+  //     if (isObject(itemValue) || isArray(itemValue)) {
+  //       cloneValue.push(cloneDeep(itemValue, map));
+  //     } else {
+  //       // 如果itemValue不是对象或者数组则直接赋值就可以(例如: primary 类型，和Function类型)
+  //       cloneValue.push(itemValue);
+  //     }
+  //   });
+  //   return cloneValue;
+  // }
+  //
+  // return value;
 }
 
 /**
  * noop - 空函数
  */
 export function noop() {}
+
+/**
+ * log - 输出
+ * @param argv
+ */
+export function log(...argv) {
+  if (IS_LOG_OUTPUT) {
+    console.log.apply(console, argv);
+  }
+}

@@ -12,14 +12,15 @@ export function hasVIf(attrNames) {
 }
 
 /**
- * parseVIf
- * @param context
- * @param el
- * @param vAttrNames
- * @return {*}
+ * parseVIf - 解析v-if标签
+ * @param context - Object 上下文对象
+ * @param el - HtmlElement 元素
+ * @param vAttrNames - Array 指令标签的集合
+ * @return {string}
  */
 export function parseVIf({ context, el, vAttrNames }) {
-  return execExpression(
+  return execExpression.call(
+    this,
     context,
     el.getAttribute(vAttrNames.find((n) => n.indexOf(`${DIRECT_PREFIX}if`) !== -1)),
   );

@@ -11,6 +11,7 @@ import {
   isSlotNode,
   isDynamicComponentNode,
   toCamelCase,
+  log,
 } from '../shared/util';
 import {
   isComponentInstance,
@@ -27,14 +28,23 @@ import {
   getKey,
   getAttribute,
   getAttributeName,
+  hasAttr,
 } from './directives/util';
 import { hasVHtml, parseVHtml } from './directives/html';
 import { hasVIf, parseVIf } from './directives/if';
+import { hasVElse, parseVElse } from './directives/else';
+import { hasVElseIf, parseVElseIf } from './directives/else-if';
 import { hasVOn, parseVOn, getVOnEntrys } from './directives/on';
 import { hasVBind, parseVBind, getVBindEntrys } from './directives/bind';
 import { hasVShow, parseVShow } from './directives/show';
 import { hasVFor, parseVFor } from './directives/for';
-import { hasVModel, parseVModel, isFormTag, getVModelEntrys } from './directives/model';
+import {
+  hasVModel,
+  parseVModel,
+  parseOption,
+  isFormTag,
+  getVModelEntrys,
+} from './directives/model';
 import { patch, createVNode, createTextVNode } from '../core/vdom';
 import uuid from '../shared/uuid';
 
@@ -52,67 +62,97 @@ import {
  * @param isMount - boolean 是否是挂载阶段
  */
 export function render(el, isMount) {
-  console.log('render');
   const self = this;
 
   // 进行loopRender
   // vue实例代表的vnode
-  const vnode = renderLoop.call(this, this.$dataProxy, this.templateEl);
+  const startTime = new Date().getTime();
+  const vnode = renderLoop.call(this, {
+    context: {},
+    el: this.templateEl,
+    parentVNode: null,
+    parentElement: null,
+  });
+  const endTime = new Date().getTime();
+  log(`render所用时间${(endTime - startTime) / 1000}m`);
+
+  if (!vnode) return false;
 
   // vnode的hook设置
-  vnode.data.hook = {
+  Object.assign(vnode.data.hook, {
     /**
      * 一个vnode已添加
      * @param vnode
      */
-    init: (vnode) => {
-      triggerLifecycle.call(self, LIFECYCLE_HOOKS[1]);
+    init: (curVNode) => {
+      if (curVNode === vnode) {
+        triggerLifecycle.call(self, LIFECYCLE_HOOKS[1]);
+      }
     },
     /**
      * 已基于vnode创建了一个DOM元素
      * @param emptyVnode
      * @param vnode
      */
-    create: (emptyVnode, vnode) => {
-      triggerLifecycle.call(self, LIFECYCLE_HOOKS[2]);
+    create: (emptyVnode, curVNode) => {
+      if (curVNode === vnode) {
+        triggerLifecycle.call(self, LIFECYCLE_HOOKS[2]);
+      }
     },
-    /**
-     * insert - 元素已插入DOM
-     * @param vnode
-     */
-    insert: (vnode) => {
-      // ------ mount
-      triggerLifecycle.call(self, LIFECYCLE_HOOKS[3]);
-    },
+    // /**
+    //  * insert - 元素已插入DOM
+    //  * @param vnode
+    //  */
+    // insert: (vnode) => {
+    //   // ------ mount
+    //   log(33333333333);
+    //   triggerLifecycle.call(self, LIFECYCLE_HOOKS[3]);
+    // },
     /**
      * 元素即将被修补
      */
-    prepatch: () => {
-      // beforeUpdate
-      triggerLifecycle.call(self, LIFECYCLE_HOOKS[4]);
+    prepatch: (oldVNode, newVNode) => {
+      if (newVNode === vnode) {
+        // beforeUpdate
+        triggerLifecycle.call(self, LIFECYCLE_HOOKS[4]);
+      }
     },
     /**
      * 元素已被修补
      */
-    postpatch: () => {
-      // update
-      triggerLifecycle.call(self, LIFECYCLE_HOOKS[5]);
+    postpatch: (oldVNode, newVNode) => {
+      if (newVNode === vnode) {
+        // update
+        triggerLifecycle.call(self, LIFECYCLE_HOOKS[5]);
+      }
     },
     /**
      * 一个元素被直接或间接删除
      */
-    destroy: () => {
-      triggerLifecycle.call(self, LIFECYCLE_HOOKS[7]);
+    destroy: (curVNode) => {
+      if (curVNode === vnode) {
+        triggerLifecycle.call(self, LIFECYCLE_HOOKS[7]);
+      }
     },
-  };
+  });
 
   if (isMount) {
     // 需要赋值$preVNode
-    this.$preVNode = vnode;
+    // this.$preVNode = vnode;
     this.$preVNode = patch(el, vnode);
+    // ------ mount
+    triggerLifecycle.call(self, LIFECYCLE_HOOKS[3]);
   } else {
+    if (!this.$preVNode) {
+      this.$preVNode = vnode;
+    }
+    const startTime = new Date().getTime();
     this.$preVNode = patch(this.$preVNode, vnode);
+    const endTime = new Date().getTime();
+    log(`patch所用时间${(endTime - startTime) / 1000}m`);
   }
+
+  return true;
 }
 
 /**
@@ -123,54 +163,73 @@ export function renderComponent() {
   const self = this;
 
   // 组件实例代表的vnode
-  const vnode = renderLoop.call(this, this.$dataProxy, this.templateEl);
+  const vnode = renderLoop.call(this, {
+    context: {},
+    el: this.templateEl,
+    parentVNode: null,
+    parentElement: null,
+  });
+
+  if (!vnode) return null;
 
   // vnode的hook设置
-  vnode.data.hook = {
+  Object.assign(vnode.data.hook, {
     /**
      * 一个vnode已添加
      * @param vnode
      */
-    init: (vnode) => {
-      triggerLifecycle.call(self, LIFECYCLE_HOOKS[1]);
+    init: (curVNode) => {
+      if (curVNode === vnode) {
+        triggerLifecycle.call(self, LIFECYCLE_HOOKS[1]);
+      }
     },
     /**
      * 已基于vnode创建了一个DOM元素
      * @param emptyVnode
      * @param vnode
      */
-    create: (emptyVnode, vnode) => {
-      triggerLifecycle.call(self, LIFECYCLE_HOOKS[2]);
+    create: (emptyVnode, curVNode) => {
+      if (curVNode === vnode) {
+        triggerLifecycle.call(self, LIFECYCLE_HOOKS[2]);
+      }
     },
     /**
      * insert - 元素已插入DOM
      * @param vnode
      */
-    insert: (vnode) => {
-      // ------ mount
-      triggerLifecycle.call(self, LIFECYCLE_HOOKS[3]);
+    insert: (curVNode) => {
+      if (curVNode === vnode) {
+        // ------ mount
+        triggerLifecycle.call(self, LIFECYCLE_HOOKS[3]);
+      }
     },
     /**
      * 元素即将被修补
      */
-    prepatch: () => {
-      // beforeUpdate
-      triggerLifecycle.call(self, LIFECYCLE_HOOKS[4]);
+    prepatch: (oldVNode, newVNode) => {
+      if (newVNode === vnode) {
+        // beforeUpdate
+        triggerLifecycle.call(self, LIFECYCLE_HOOKS[4]);
+      }
     },
     /**
      * 元素已被修补
      */
-    postpatch: () => {
-      // update
-      triggerLifecycle.call(self, LIFECYCLE_HOOKS[5]);
+    postpatch: (oldVNode, newVNode) => {
+      if (newVNode === vnode) {
+        // update
+        triggerLifecycle.call(self, LIFECYCLE_HOOKS[5]);
+      }
     },
     /**
      * 一个元素被直接或间接删除
      */
-    destroy: () => {
-      triggerLifecycle.call(self, LIFECYCLE_HOOKS[7]);
+    destroy: (curVNode) => {
+      if (curVNode === vnode) {
+        triggerLifecycle.call(self, LIFECYCLE_HOOKS[7]);
+      }
     },
-  };
+  });
 
   return vnode;
 }
@@ -179,13 +238,15 @@ export function renderComponent() {
  * renderLoop - 进行递归的渲染
  * @param context - 上下文对象
  * @param el - HtmlElement 当前节点的el
+ * @param parentVNode - VNode 父节点VNode
+ * @param parentElement - HtmlElement 父元素
  * @return {VNode | Array<VNode>}
  */
-export function renderLoop(context, el) {
+export function renderLoop({ context, el, parentVNode, parentElement }) {
   // 文本节点
   if (isTextNode(el)) {
     // 文本节点的渲染
-    return renderTextNode.call(this, context, el);
+    return renderTextNode.call(this, { context, el });
   }
 
   let isComponent = false;
@@ -202,7 +263,7 @@ export function renderLoop(context, el) {
     // this是否是component实例
     if (isComponentIns) {
       // 在component实例下判断是否是组件节点
-      isComponent = isComponentNodeByComponent(el, this.getComponentsConfig());
+      isComponent = isComponentNodeByComponent(el, this.$getComponentsConfig());
     }
     // this既不是vue实例也不是component实例
     else {
@@ -213,22 +274,22 @@ export function renderLoop(context, el) {
   if (!isComponent) {
     // 如果是template元素
     if (isTemplateNode(el)) {
-      return renderTemplateNode.call(this, context, el);
+      return renderTemplateNode.call(this, { context, el, parentVNode, parentElement });
     }
 
     // 如果是slot元素 vue实例没有slot元素
     if (!isVueIns && isSlotNode(el)) {
-      return renderSlotNode.call(this, context, el);
+      return renderSlotNode.call(this, { context, el, parentVNode, parentElement });
     }
 
     // 如果是component元素
     if (isDynamicComponentNode(el)) {
-      return renderDynamicComponentNode.call(this, context, el);
+      return renderDynamicComponentNode.call(this, { context, el, parentVNode, parentElement });
     }
 
     if (isElementNode(el)) {
       // 是元素不是组件节点
-      return renderElementNode.call(this, context, el);
+      return renderElementNode.call(this, { context, el, parentVNode, parentElement });
     }
   } else {
     // 自定义节点(Component)
@@ -238,7 +299,7 @@ export function renderLoop(context, el) {
     //    <my-component v-bind:id="id" name="name" v-show="flag" v-if="display" v-on=""></my-component>
     //  </div>
     // </div>
-    return renderComponentNode.call(this, context, el);
+    return renderComponentNode.call(this, { context, el, parentVNode, parentElement });
   }
 
   return null;
@@ -250,7 +311,7 @@ export function renderLoop(context, el) {
  * @param el - HtmlElement
  * @return {TextVNode}
  */
-export function renderTextNode(context, el) {
+export function renderTextNode({ context, el }) {
   // 表达式
   const expression = el.textContent.trim();
   let index = 0;
@@ -278,11 +339,13 @@ export function renderTextNode(context, el) {
 /**
  * renderVAttr - 解析指令属性
  * @param el - HtmlElement 元素的el
+ * @param parentVNode - VNode 父元素VNode
+ * @param parentElement - HtmlElement 父元素
  * @param context - Object 上下文对象
  * @param renderFun - Function 渲染函数
  * @return {VNode | Array<VNode>}
  */
-function renderVAttr({ el, context, renderFun }) {
+function renderVAttr({ el, parentVNode, parentElement, context, renderFun }) {
   /**
    * for(item in items)   (new)context -> item
    *  for(item1 in items)        context -> item1
@@ -310,25 +373,67 @@ function renderVAttr({ el, context, renderFun }) {
     // parse v-for
     return {
       Continue: false,
-      VNode: parseVFor.call(
-        this,
-        // 如果context是this.$dataProxy则需要重新创建新的context(上下文)，因为一个v-for就是一个新的上下文环境，因为v-for会有新的变量放入到this中
-        {
-          context: context === this.$dataProxy ? createContext(this.$dataProxy) : context,
-          el,
-          vAttrNames,
-          renderFun,
-        },
-      ),
+      // 如果没有父元素是不能使用v-for的所以返回null
+      VNode: parentVNode
+        ? parseVFor.call(
+            this,
+            // 如果context是this.$dataProxy则需要重新创建新的context(上下文)，因为一个v-for就是一个新的上下文环境，因为v-for会有新的变量放入到this中
+            {
+              context,
+              // context === this.$dataProxy ? createContext.call(self, this.$dataProxy) : context,
+              el,
+              parentVNode,
+              vAttrNames,
+              renderFun,
+            },
+          )
+        : null,
     };
   }
 
   // 解析v-if
   if (hasVIf(vAttrNames)) {
     // parse v-if
-    const display = parseVIf({ context, el, vAttrNames });
+    const display = parseVIf.call(this, { context, el, vAttrNames });
     // 如果不显示则返回null
     if (!display) {
+      return {
+        Continue: false,
+        VNode: null,
+      };
+    }
+  }
+
+  if (hasVElse(vAttrNames)) {
+    // 合理性判断
+    // 如果合理则进行计算
+    const entry = parseVElse.call(this, { context, el, parentElement });
+    if (!entry.valid) {
+      return {
+        Continue: false,
+        VNode: null,
+      };
+    }
+    if (!entry.result) {
+      return {
+        Continue: false,
+        VNode: null,
+      };
+    }
+  }
+
+  // 解析v-else-if
+  if (hasVElseIf(vAttrNames)) {
+    // 合理性判断
+    // 如果合理则进行计算
+    const entry = parseVElseIf.call(this, { context, el, parentElement });
+    if (!entry.valid) {
+      return {
+        Continue: false,
+        VNode: null,
+      };
+    }
+    if (!entry.result) {
       return {
         Continue: false,
         VNode: null,
@@ -345,13 +450,13 @@ function renderVAttr({ el, context, renderFun }) {
   // 解析v-show
   if (hasVShow(vAttrNames)) {
     // parse v-show
-    parseVShow({ context, el, vAttrNames, VNode });
+    parseVShow.call(this, { context, el, vAttrNames, VNode });
   }
 
   // 解析v-bind
   if (hasVBind(vAttrNames)) {
     // parse v-bind
-    parseVBind({ context, el, vAttrNames, VNode });
+    parseVBind.call(this, { context, el, vAttrNames, VNode });
   }
 
   // 解析v-model
@@ -377,7 +482,7 @@ function renderVAttr({ el, context, renderFun }) {
   // 非表单标签的时候 && 是否是表单控件元素
   if (!isFormTag(tagName) && hasVHtml(vAttrNames)) {
     // parse v-html
-    parseVHtml({ context, el, vAttrNames, VNode });
+    parseVHtml.call(this, { context, el, vAttrNames, VNode });
     // v-html在最后解析，因为v-html的children就是一个文本节点，不需要在进行children的loop
     // return VNode;
   }
@@ -394,17 +499,47 @@ function renderVAttr({ el, context, renderFun }) {
  * @param VNode - VNode
  */
 function renderAttr({ el, VNode }) {
+  const self = this;
+
   const attrNames = getAttrNames(el);
 
   if (attrNames.length) {
     attrNames.forEach((attrName) => {
       const val = el.getAttribute(attrName);
 
+      // key属性
       if (attrName === 'key') {
         VNode.key = val;
-      } else if (attrName.startsWith('data-')) {
+      }
+      // ref属性
+      else if (attrName === 'ref') {
+        // ref属性不放入到VNode中
+        // 创建当前VNode的hook
+        Object.assign(VNode.data.hook, {
+          /**
+           * insert - 元素已插入DOM
+           * @param vnode
+           */
+          insert: (vnode) => {
+            // 保存HtmlElement的el到$refs中
+            self.$refs[val] = vnode.elm;
+          },
+        });
+      }
+      // style属性
+      else if (attrName === 'style') {
+        VNode.data.style[attrName] = val;
+      }
+      // class属性
+      else if (attrName === 'class') {
+        VNode.data.class[val] = true;
+      }
+      // data-*属性
+      else if (attrName.startsWith('data-')) {
         VNode.data.dataset[toCamelCase(attrName.substring('data-'.length))] = val;
-      } else {
+      }
+      // 其他的属性
+      else {
         VNode.data.attrs[attrName] = val;
       }
     });
@@ -415,14 +550,22 @@ function renderAttr({ el, VNode }) {
  * renderElementNode - 渲染元素节点
  * @param context - Object 上下文对象
  * @param el - HtmlElement el元素
+ * @param parentVNode - VNode 父元素VNode
+ * @param parentElement - HtmlElement 父元素
  * @return {VNode | Array<VNode>}
  */
-export function renderElementNode(context, el) {
+export function renderElementNode({ context, el, parentVNode, parentElement }) {
   // 合并多个文本节点为一个文本节点
   el.normalize();
 
   // 解析指令属性
-  let { Continue, VNode } = renderVAttr.call(this, { el, context, renderFun: renderElementNode });
+  let { Continue, VNode } = renderVAttr.call(this, {
+    el,
+    parentVNode,
+    parentElement,
+    context,
+    renderFun: renderElementNode,
+  });
   if (!Continue) return VNode;
 
   // 如果没有VNode，创建一个
@@ -433,9 +576,19 @@ export function renderElementNode(context, el) {
   // 解析非指令属性
   renderAttr.call(this, { el, VNode });
 
+  // 处理一下option这种情况
+  if (el.tagName.toLowerCase() === 'option' && parentVNode && parentElement) {
+    parseOption.call(this, { context, VNode, parentElement });
+  }
+
   // loop children
   for (let i = 0, len = el.childNodes.length; i < len; i++) {
-    const VNodes = renderLoop.call(this, context, el.childNodes[i]);
+    const VNodes = renderLoop.call(this, {
+      context,
+      el: el.childNodes[i],
+      parentVNode: VNode,
+      parentElement: el,
+    });
     if (!VNodes) continue;
 
     // v-for返回的
@@ -455,13 +608,16 @@ export function renderElementNode(context, el) {
  * renderTemplateNode - 渲染template元素
  * @param context - Object 上下文对象
  * @param el - HtmlElement el元素
+ * @param parentVNode - VNode 父元素VNode
+ * @param parentElement - HtmlElement 父元素
  *
  * 1.<template></template> -> 什么都没有
  * 2.<template v-if="xxx"></template> -> 有v-if
  * 3.<template v-for="item in list|obj"></template> -> 有v-for
  * 4.<template v-slot:default></template> -> 有v-slot
+ * @return VNode | Array | null
  */
-export function renderTemplateNode(context, el) {
+export function renderTemplateNode({ context, el, parentVNode, parentElement }) {
   const vAttrNames = getVAttrNames(el);
 
   if (vAttrNames.length) {
@@ -472,8 +628,10 @@ export function renderTemplateNode(context, el) {
         this,
         // 如果context是this.$dataProxy则需要重新创建新的context(上下文)，因为一个v-for就是一个新的上下文环境，因为v-for会有新的变量放入到this中
         {
-          context: context === this.$dataProxy ? createContext(this.$dataProxy) : context,
+          context,
+          // context === this.$dataProxy ? createContext.call(this, this.$dataProxy) : context,
           el,
+          parentVNode,
           vAttrNames,
           renderFun: renderTemplateNode,
         },
@@ -483,23 +641,46 @@ export function renderTemplateNode(context, el) {
     // 解析v-if
     if (hasVIf(vAttrNames)) {
       // parse v-if
-      const display = parseVIf({ context, el, vAttrNames });
+      const display = parseVIf.call(this, { context, el, vAttrNames });
       // 如果不显示则返回null
       if (!display) {
         return null;
       }
+    }
+
+    // 解析v-else
+    if (hasVElse(vAttrNames)) {
+      // 合理性判断
+      // 如果合理则进行计算
+      const entry = parseVElse.call(this, { context, el, parentElement });
+      if (!entry.valid) return null;
+      if (!entry.result) return null;
+    }
+
+    // 解析v-else-if
+    if (hasVElseIf(vAttrNames)) {
+      // 合理性判断
+      // 如果合理则进行计算
+      const entry = parseVElseIf.call(this, { context, el, parentElement });
+      if (!entry.valid) return null;
+      if (!entry.result) return null;
     }
   }
 
   // loop template的children
   let result = [];
   for (let i = 0, len = el.content.childNodes.length; i < len; i++) {
-    const VNodes = renderLoop.call(this, context, el.content.childNodes[i]);
+    const VNodes = renderLoop.call(this, {
+      context,
+      el: el.content.childNodes[i],
+      parentVNode,
+      parentElement: el,
+    });
     if (!VNodes) continue;
 
     // v-for返回的
     if (isArray(VNodes)) {
-      result = result.concat(VNodes);
+      result = result.concat(VNodes.filter((n) => n));
     } else if (isObject(VNodes)) {
       result.push(VNodes);
     }
@@ -512,6 +693,8 @@ export function renderTemplateNode(context, el) {
  * renderSlotNode - 渲染slot元素
  * @param context - Object 上下文对象
  * @param el - HtmlElement el元素
+ * @param parentVNode - VNode 父元素VNode
+ * @param parentElement - HtmlElement 父元素
  * @return VNode | VNodes
  *
  * --------------------下面是列举的一个例子---------------------
@@ -564,7 +747,7 @@ export function renderTemplateNode(context, el) {
  *   </ul>
  * </div>
  */
-export function renderSlotNode(context, el) {
+export function renderSlotNode({ context, el, parentVNode, parentElement }) {
   // this是my-component的实例
   // this.$parent是Vue实例或者是Component实例，应该用this.getParentContext()获取父亲的上下文对象作为调用renderTemplateNode的上下文参数
   // el<slot></slot>的el this.$el是$parent的template中<my-component></my-component>这个el
@@ -574,16 +757,16 @@ export function renderSlotNode(context, el) {
   let contextType = 'parent';
 
   // 判断slot中是否存在name属性
-  if (el.hasAttribute('name')) {
+  if (hasAttr('name', el)) {
     // slot有name属性
-    name = el.getAttribute('name');
+    name = getAttribute.call(this, { context, attrName: 'name', el });
   }
 
   let bindEntrys;
   // el可能会有多个v-bind,如果有则是作用域插槽
   const vAttrNames = getVAttrNames(el);
   if (hasVBind(vAttrNames)) {
-    bindEntrys = getVBindEntrys({ context, el, vAttrNames });
+    bindEntrys = getVBindEntrys.call(this, { context, el, vAttrNames });
   }
 
   // 在父亲中寻找指定的<template v-slot:name></template>元素
@@ -633,7 +816,7 @@ export function renderSlotNode(context, el) {
 
   if (contextType === 'parent') {
     // 此处需要对parentContext进行克隆
-    curContext = createContext(this.getParentContext());
+    curContext = createContext(this.$getParentContext());
 
     // 判断<template v-slot:名字=""></template>是否有v-slot:名字=""
     const slotTemplateAttrValue = slotTemplateEl.getAttribute(`${DIRECT_PREFIX}slot:${name}`);
@@ -651,19 +834,26 @@ export function renderSlotNode(context, el) {
   }
 
   // 调用renderTemplateNode方法进行渲染
-  return renderTemplateNode.call(this.$parent, curContext, slotTemplateEl);
+  return renderTemplateNode.call(this.$parent, {
+    context: curContext,
+    el: slotTemplateEl,
+    parentVNode,
+    parentElement: this.$el,
+  });
 }
 
 /**
  * renderDynamicComponent - 渲染动态组件节点
  * @param context - Object 上下文对象
  * @param el - HtmlElement el元素
+ * @param parentVNode - VNode 父元素VNode
+ * @param parentElement - HtmlElement 父元素
  * @return VNode | VNodes
  *
  * 如果<component></component>含有v-for和v-if则不用处理key
  *
  */
-export function renderDynamicComponentNode(context, el) {
+export function renderDynamicComponentNode({ context, el, parentVNode, parentElement }) {
   const vAttrNames = getVAttrNames(el);
 
   let key;
@@ -676,8 +866,10 @@ export function renderDynamicComponentNode(context, el) {
         this,
         // 如果context是this.$dataProxy则需要重新创建新的context(上下文)，因为一个v-for就是一个新的上下文环境，因为v-for会有新的变量放入到this中
         {
-          context: context === this.$dataProxy ? createContext(this.$dataProxy) : context,
+          context,
+          // context === this.$dataProxy ? createContext.call(this, this.$dataProxy) : context,
           el,
+          parentVNode,
           vAttrNames,
           renderFun: renderDynamicComponentNode,
         },
@@ -685,14 +877,56 @@ export function renderDynamicComponentNode(context, el) {
     }
 
     // 这个key属性可能是v-bind:key=，也可能是key=
-    key = getKey({ context, el });
+    key = getKey.call(this, { context, el });
 
     // 解析v-if
     if (hasVIf(vAttrNames)) {
       // parse v-if
-      const display = parseVIf({ context, el, vAttrNames });
+      const display = parseVIf.call(this, { context, el, vAttrNames });
       if (!display) {
         // 不显示这个节点
+        if (key) {
+          // 有key属性则在componentsMap中删除这个组件的引用
+          this.componentsMap.delete(key);
+        }
+        return null;
+      }
+    }
+
+    // 解析v-else
+    if (hasVElse(vAttrNames)) {
+      // 合理性判断
+      // 如果合理则进行计算
+      const entry = parseVElse.call(this, { context, el, parentElement });
+      if (!entry.valid) {
+        if (key) {
+          // 有key属性则在componentsMap中删除这个组件的引用
+          this.componentsMap.delete(key);
+        }
+        return null;
+      }
+      if (!entry.result) {
+        if (key) {
+          // 有key属性则在componentsMap中删除这个组件的引用
+          this.componentsMap.delete(key);
+        }
+        return null;
+      }
+    }
+
+    // 解析v-else-if
+    if (hasVElseIf(vAttrNames)) {
+      // 合理性判断
+      // 如果合理则进行计算
+      const entry = parseVElseIf.call(this, { context, el, parentElement });
+      if (!entry.valid) {
+        if (key) {
+          // 有key属性则在componentsMap中删除这个组件的引用
+          this.componentsMap.delete(key);
+        }
+        return null;
+      }
+      if (!entry.result) {
         if (key) {
           // 有key属性则在componentsMap中删除这个组件的引用
           this.componentsMap.delete(key);
@@ -703,12 +937,12 @@ export function renderDynamicComponentNode(context, el) {
   }
 
   // 这个key属性可能是v-bind:key=，也可能是key=
-  key = getKey({ context, el });
+  key = getKey.call({ context, el });
 
   // 获取is属性的值
   // is属性的值就是组件的标签的名称
 
-  const componentTagName = getAttribute({ context, attrName: 'is', el });
+  const componentTagName = getAttribute.call(this, { context, attrName: 'is', el });
   // 如果没有is属性
   if (!componentTagName) return null;
 
@@ -728,7 +962,7 @@ export function renderDynamicComponentNode(context, el) {
     // this是否是component实例
     if (isComponentIns) {
       // 在component实例下判断是否是组件节点
-      isComponent = isComponentNodeByComponent(componentEl, this.getComponentsConfig());
+      isComponent = isComponentNodeByComponent(componentEl, this.$getComponentsConfig());
     }
     // this既不是vue实例也不是component实例
     else {
@@ -772,7 +1006,12 @@ export function renderDynamicComponentNode(context, el) {
   entry = this.componentsMap.get(key);
   componentEl.setAttribute('key', entry.key);
 
-  return renderComponentNode.call(this, context, componentEl);
+  return renderComponentNode.call(this, {
+    context,
+    el: componentEl,
+    parentVNode,
+    parentElement,
+  });
 
   // 主要是需要create一个组件元素节点，这个节点的key属性的值需要斟酌一下
 
@@ -784,9 +1023,11 @@ export function renderDynamicComponentNode(context, el) {
  * renderComponentNode - 渲染组件节点
  * @param context - Object 上下文对象
  * @param el - HtmlElement el元素
+ * @param parentVNode - VNode 父元素VNode
+ * @param parentElement - HtmlElement 父元素
  * @return VNode | Array<VNode>
  */
-export function renderComponentNode(context, el) {
+export function renderComponentNode({ context, el, parentVNode, parentElement }) {
   // 合并多个文本节点为一个文本节点
   el.normalize();
 
@@ -817,8 +1058,9 @@ export function renderComponentNode(context, el) {
   if (hasVFor(vAttrNames)) {
     // parse v-for
     return parseVFor.call(this, {
-      context: context === this.$dataProxy ? createContext(this.$dataProxy) : context,
+      context, // : context === this.$dataProxy ? createContext.call(this, this.$dataProxy) : context,
       el,
+      parentVNode,
       vAttrNames,
       renderFun: renderComponentNode,
     });
@@ -826,14 +1068,55 @@ export function renderComponentNode(context, el) {
 
   // 获取el元素key属性的值
   // 这个key属性可能是v-bind:key=，也可能是key=
-  let key = getKey({ context, el });
+  let key = getKey.call(this, { context, el });
 
   // 解析v-if
   if (hasVIf(vAttrNames)) {
     // parse v-if
-    const display = parseVIf({ context, el, vAttrNames });
+    const display = parseVIf.call(this, { context, el, vAttrNames });
     if (!display) {
       // 不显示这个节点
+      if (key) {
+        // 有key属性则在componentsMap中删除这个组件的引用
+        this.componentsMap.delete(key);
+      }
+      return null;
+    }
+  }
+
+  if (hasVElse(vAttrNames)) {
+    // 合理性判断
+    // 如果合理则进行计算
+    const entry = parseVElse.call(this, { context, el, parentElement });
+    if (!entry.valid) {
+      if (key) {
+        // 有key属性则在componentsMap中删除这个组件的引用
+        this.componentsMap.delete(key);
+      }
+      return null;
+    }
+    if (!entry.result) {
+      if (key) {
+        // 有key属性则在componentsMap中删除这个组件的引用
+        this.componentsMap.delete(key);
+      }
+      return null;
+    }
+  }
+
+  // 解析v-else-if
+  if (hasVElseIf(vAttrNames)) {
+    // 合理性判断
+    // 如果合理则进行计算
+    const entry = parseVElseIf.call(this, { context, el, parentElement });
+    if (!entry.valid) {
+      if (key) {
+        // 有key属性则在componentsMap中删除这个组件的引用
+        this.componentsMap.delete(key);
+      }
+      return null;
+    }
+    if (!entry.result) {
       if (key) {
         // 有key属性则在componentsMap中删除这个组件的引用
         this.componentsMap.delete(key);
@@ -856,7 +1139,7 @@ export function renderComponentNode(context, el) {
   // 解析v-bind
   if (hasVBind(vAttrNames)) {
     // parse v-bind 都是属性
-    const entrys = getVBindEntrys({ context, el, vAttrNames });
+    const entrys = getVBindEntrys.call(self, { context, el, vAttrNames });
     entrys.forEach(({ arg, value }) => {
       attrs[arg] = value;
     });
@@ -873,7 +1156,7 @@ export function renderComponentNode(context, el) {
   if (hasVModel(vAttrNames)) {
     const entry = getVModelEntrys({ el, vAttrNames });
     // 这个地方需要获取组件的配置对象，看是否配置了model选项
-    attrs.value = execExpression(context, entry.expression);
+    attrs.value = execExpression.call(this, context, entry.expression);
   }
 
   // 解析v-on
@@ -904,6 +1187,11 @@ export function renderComponentNode(context, el) {
   // 根据key获取组件实例
   let component = self.componentsMap.get(key);
 
+  const refVal = attrs.ref;
+  if ('ref' in attrs && attrs.ref) {
+    delete attrs.ref;
+  }
+
   // 没有创建组件
   if (!component) {
     // 用key创建组件
@@ -912,18 +1200,29 @@ export function renderComponentNode(context, el) {
       events,
       parentContext: context,
       parent: self,
-      top: isVueInstance(self) ? self : self.$top,
+      root: isVueInstance(self) ? self : self.$root,
       el,
       key,
     });
+    // 处理ref
+    if (refVal) {
+      self.$refs[refVal] = component;
+    }
+
     self.componentsMap.set(key, component);
     // 调用组件的render方法返回VNode
-    return component.render();
+    return component.$render();
+  }
+
+  // 处理ref
+  if (refVal) {
+    self.$refs[refVal] = component;
   }
 
   // 不是第一次而是更新
-  component.setParams({ attrs, events, parentContext: context });
+  component.$setParams({ attrs, events, parentContext: context });
 
+  console.log('componentUpdate', 'update');
   // 调用组件的update方法返回VNode
-  return component.update();
+  return component.$update();
 }

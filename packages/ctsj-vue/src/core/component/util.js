@@ -73,13 +73,13 @@ export function pascalCaseToKebabCase(name) {
  * @param events - Object 所有events的k/v数据
  * @param parentContext - Object 父亲的上下文对象
  * @param parent - Vue | Component 父亲是Vue实例或者Component实例
- * @param top - Vue Vue实例
+ * @param root - Vue Vue实例
  * @param el - HtmlElement 元素
  * @param key - string 组件的key
  * @return Component
  */
-export function createComponent({ attrs, events, parentContext, parent, top, el, key }) {
-  return new Component({ attrs, events, parentContext }, { key, el, top, parent });
+export function createComponent({ attrs, events, parentContext, parent, root, el, key }) {
+  return new Component({ attrs, events, parentContext }, { key, el, root, parent });
 }
 
 /**
@@ -93,12 +93,13 @@ export function createComponent({ attrs, events, parentContext, parent, top, el,
 export function getComponentConfig(ins, componentName) {
   // 如果是Vue实例
   if (isVueInstance(ins)) {
+    // 需要判断是否有mixin
     return getConfig(componentName);
   }
 
   // 如果是组件实例
   if (isComponentInstance(ins)) {
-    const components = ins.getComponentsConfig();
+    const components = ins.$getComponentsConfig();
 
     // 如果组件的components中定义了
     if (components[componentName]) {
@@ -106,6 +107,7 @@ export function getComponentConfig(ins, componentName) {
     }
 
     // 如果组件的components没有定义则去全局寻找
+    // 需要判断是否有mixin
     return getConfig(componentName);
   }
 

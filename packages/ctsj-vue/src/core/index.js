@@ -4,9 +4,15 @@ import { register } from './component/register';
 import { render } from '../compiler/render';
 import { LIFECYCLE_HOOKS } from '../shared/constants';
 import { mergeData, mergeComputed, mergeMethods } from './merge';
-import { triggerLifecycle, getEl } from './util';
+import { triggerLifecycle, getEl, mixinConfig } from './util';
 import { createVueProxy } from './proxy';
-import { createElement, isFunction, cloneDeep, createExecutionContext } from '../shared/util';
+import {
+  createElement,
+  isFunction,
+  cloneDeep,
+  createExecutionContext,
+  isObject,
+} from '../shared/util';
 
 /**
  * findVNodeParentByKey - 查询key的Parent
@@ -15,7 +21,7 @@ import { createElement, isFunction, cloneDeep, createExecutionContext } from '..
  * @return {VNode}
  */
 function findVNodeParentByKey(VNode, key) {
-  if (VNode.key === key) {
+  if (!VNode || VNode.key === key) {
     return null;
   }
 
@@ -25,6 +31,7 @@ function findVNodeParentByKey(VNode, key) {
 
   for (let i = 0; i < VNode.children.length; i++) {
     const curVNode = VNode.children[i];
+    if (!curVNode) continue;
 
     if (curVNode.key === key) {
       parent = VNode;
@@ -36,6 +43,20 @@ function findVNodeParentByKey(VNode, key) {
   }
 
   return parent;
+}
+
+// 全局的配置对象
+let _globalConfig = {};
+
+// 存放所有注册的插件
+const _plugins = [];
+
+/**
+ * getGlobalConfig - 获取全局的配置对象
+ * @return {Object}
+ */
+export function getGlobalConfig() {
+  return { ..._globalConfig };
 }
 
 /**
@@ -73,17 +94,67 @@ class Vue {
   }
 
   /**
+   * mixin - 全局配置的混入
+   * 之后创建的所有Vue实例和Component实例都会进行全局的混入
+   * @param Object - globalConfig 全局的混入对象
+   */
+  static mixin(globalConfig) {
+    _globalConfig = globalConfig;
+  }
+
+  /**
+   * use - 注册全局插件
+   * @param plugin Object | Function
+   * @return boolean
+   */
+  static use(plugin) {
+    if (!plugin) return false;
+
+    // 已经注册鼓了
+    if (_plugins.indexOf(plugin) !== -1) return false;
+
+    // 如果plugin是对象
+    if (isObject(plugin)) {
+      if ('install' in plugin && isFunction(plugin.install)) {
+        plugin.install(Vue);
+        _plugins.push(plugin);
+        return true;
+      }
+
+      return false;
+    }
+    // 如果plugin是函数
+    else if (isFunction(plugin)) {
+      plugin(Vue);
+      _plugins.push(plugin);
+      return true;
+    }
+
+    return false;
+  }
+
+  // static extend() {}
+
+  /**
    * constructor
    * @param config - Object
    */
   constructor(config) {
     // $config - Vue的配置对象
-    this.$config = config;
+    // 这块需要判断是否进行mixin
+    this.$config = mixinConfig({
+      globalConfig: getGlobalConfig(),
+      mixins: config.mixins || [],
+      config,
+    });
 
     // 获取Vue配置中的el实际对象，el可以是HtmlElement或String
     this.$config.el = getEl(this.$config.el);
 
-    // 纯净的data数据，没有进行代理的
+    // 存放所有ref的数据
+    this.$refs = {};
+
+    // 纯净的data数据，没有进行代理的，在watch中使用
     this.$noProxySrcData = cloneDeep(isFunction(this.$config.data) ? this.$config.data() : {});
 
     // 将data混入到this中
@@ -114,11 +185,11 @@ class Vue {
   }
 
   /**
-   * createAsyncExecContext - 创建一个异步的执行上下文
+   * $createAsyncExecContext - 创建一个异步的执行上下文
    * @param callBack - Function 回调的函数
    * @return Function
    */
-  createAsyncExecContext(callBack) {
+  $createAsyncExecContext(callBack) {
     const self = this;
     return function () {
       createExecutionContext.call(self, self, callBack);
@@ -126,10 +197,10 @@ class Vue {
   }
 
   /**
-   * refresh - 指定VNode刷新
-   * @param VNode
+   * $refresh - 指定VNode刷新
+   * @param VNode - VNode 这个VNode应该是一个组件的VNode
    */
-  refresh(VNode) {
+  $refresh(VNode) {
     // this.$preVNode
     const cloneNode = cloneDeep(this.$preVNode);
     const parent = findVNodeParentByKey.call(this, cloneNode, VNode.key);

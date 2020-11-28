@@ -1,3 +1,6 @@
+// 日志是否输出
+export const IS_LOG_OUTPUT = true;
+
 // 生命周期钩子
 export const LIFECYCLE_HOOKS = [
   'beforeCreate',

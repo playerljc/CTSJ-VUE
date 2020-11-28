@@ -36,6 +36,7 @@ export function createVNode(tagName) {
       dataset: {},
       style: {},
       on: {},
+      hook: {},
       // hook: {
       //   init: (vnode) => {
       //     // console.log('init:', vnode.sel);
