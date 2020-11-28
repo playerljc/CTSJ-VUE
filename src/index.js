@@ -19,8 +19,21 @@ Vue.component('ToDoCompletedList', ToDoCompletedList);
 Vue.component('ToDoProcessItem', ToDoProcessItem);
 Vue.component('ToDoCompleteItem', ToDoCompleteItem);
 
+Vue.mixin({
+  created() {
+    console.log('Global', 'created');
+  },
+});
+
 window.onload = () => {
   const todoApp = new Vue({
+    mixins: [
+      {
+        created() {
+          console.log('VueMixin', 'created');
+        },
+      },
+    ],
     el: '#app',
     template: `
       <div class="${styles.wrap}" ref="wrap">

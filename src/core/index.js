@@ -4,7 +4,7 @@ import { register } from './component/register';
 import { render } from '../compiler/render';
 import { LIFECYCLE_HOOKS } from '../shared/constants';
 import { mergeData, mergeComputed, mergeMethods } from './merge';
-import { triggerLifecycle, getEl } from './util';
+import { triggerLifecycle, getEl, mixinConfig } from './util';
 import { createVueProxy } from './proxy';
 import { createElement, isFunction, cloneDeep, createExecutionContext } from '../shared/util';
 
@@ -37,6 +37,17 @@ function findVNodeParentByKey(VNode, key) {
   }
 
   return parent;
+}
+
+// 全局的配置对象
+let _globalConfig = {};
+
+/**
+ * getGlobalConfig - 获取全局的配置对象
+ * @return {Object}
+ */
+export function getGlobalConfig() {
+  return { ..._globalConfig };
 }
 
 /**
@@ -74,12 +85,28 @@ class Vue {
   }
 
   /**
+   * mixin - 全局配置的混入
+   * 之后创建的所有Vue实例和Component实例都会进行全局的混入
+   * @param Object - globalConfig 全局的混入对象
+   */
+  static mixin(globalConfig) {
+    _globalConfig = globalConfig;
+  }
+
+  // static extend() {}
+
+  /**
    * constructor
    * @param config - Object
    */
   constructor(config) {
     // $config - Vue的配置对象
-    this.$config = config;
+    // 这块需要判断是否进行mixin
+    this.$config = mixinConfig({
+      globalConfig: getGlobalConfig(),
+      mixins: config.mixins || [],
+      config,
+    });
 
     // 获取Vue配置中的el实际对象，el可以是HtmlElement或String
     this.$config.el = getEl(this.$config.el);

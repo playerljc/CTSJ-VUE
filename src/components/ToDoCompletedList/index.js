@@ -1,6 +1,13 @@
 import styles from './index.less';
 import { log } from '../../shared/util';
 export default {
+  mixins: [
+    {
+      created() {
+        console.log('ToDoCompletedListMixin', 'created');
+      },
+    },
+  ],
   props: ['data'],
   template: `
       <div class="${styles.wrap}">

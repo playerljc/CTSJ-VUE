@@ -93,6 +93,7 @@ export function createComponent({ attrs, events, parentContext, parent, root, el
 export function getComponentConfig(ins, componentName) {
   // 如果是Vue实例
   if (isVueInstance(ins)) {
+    // 需要判断是否有mixin
     return getConfig(componentName);
   }
 
@@ -106,6 +107,7 @@ export function getComponentConfig(ins, componentName) {
     }
 
     // 如果组件的components没有定义则去全局寻找
+    // 需要判断是否有mixin
     return getConfig(componentName);
   }
 

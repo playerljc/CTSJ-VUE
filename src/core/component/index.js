@@ -12,6 +12,8 @@ import {
 import { getComponentConfig, isKebabCase, isPascalCase, pascalCaseToKebabCase } from './util';
 import { mergeComputed, mergeData, mergeMethods, mergeProps } from '../merge';
 import { resetComputed, triggerLifecycle } from '../util';
+import { getGlobalConfig } from '../../core/index';
+import { mixinConfig } from '../util';
 
 import { LIFECYCLE_HOOKS } from '../../shared/constants';
 
@@ -124,11 +126,22 @@ class Component {
    */
   constructor(config, { key, el, root, parent }) {
     this.$el = el;
+
+    // Vue实例对象
     this.$root = root;
+
+    // 父对象
     this.$parent = parent;
+
+    // 标签中的key属性值
     this.$key = key;
+
+    // 组件的配置对象
     this.$config = this.$getConfig();
+
+    // 构造函数的配置
     this.$argConfig = config;
+
     // 创建组件的$emit实例
     this.$emit = createEmit.call(this);
 
@@ -137,7 +150,9 @@ class Component {
 
     // 获取父亲传递过来的props和attrs
     const { props, attrs } = getPropsAndAttrs.call(this);
+
     this.$attes = attrs;
+
     this.$props = cloneDeep(props);
 
     // 创建props的代理
@@ -215,7 +230,13 @@ class Component {
    * @return Object
    */
   $getConfig() {
-    return getComponentConfig(this.$parent, this.$el.tagName.toLowerCase());
+    const config = getComponentConfig(this.$parent, this.$el.tagName.toLowerCase());
+    // 这块需要判断是否进行mixin
+    return mixinConfig({
+      globalConfig: getGlobalConfig(),
+      mixins: config.mixins || [],
+      config,
+    });
   }
 
   /**
