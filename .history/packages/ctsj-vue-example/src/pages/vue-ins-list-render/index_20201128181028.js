@@ -21,7 +21,7 @@ export default {
                  </thead>
 
                  <tbody>
-                  <tr v-for="(item , index) in list1">
+                  <tr v-for="(item, index) in list1">
                     <td>{{index + 1}}</td>
                     <td>{{item.name}}</td>
                     <td>{{item.sex}}</td>
@@ -32,24 +32,7 @@ export default {
                </table>
             </dd>
           </dl>
-          
-          <dl>
-            <dt><h3>列表</h3></dt>
-            <dd>
-               <ul>
-                 <li v-for="(item , index) of list2">
-                   <div>
-                    <img v-bind:src="item.icon"/>
-                   </div>
-                   <div>
-                    <div>{{item.title}}</div>
-                    <div>{{item.subTitle}}</div>
-                    <div>{{item.time}}</div>
-                   </div>
-                 </li>
-               </ul>
-            </dd>
-          </dl>
+
           
         </div>
       `,
@@ -60,28 +43,9 @@ export default {
             sex: '男',
             birthday: 'xxxx-xx-xx',
             jg:'shenyang'
-          },
-          {
-            name: 'playerljc2',
-            sex: '女',
-            birthday: 'xxxx-xx-xx',
-            jg:'shenyang'
-          },
-          {
-            name: 'playerljc3',
-            sex: '男',
-            birthday: 'xxxx-xx-xx',
-            jg:'shenyang'
           }
         ],
-        list2: [
-          {
-            icon: 'https://ss1.bdstatic.com/70cFvXSh_Q1YnxGkpoWK1HF6hhy/it/u=3922290090,3177876335&fm=26&gp=0.jpg',
-            title: 'xxxxxxxxxx',
-            subTitle:'xxxxx',
-            time:'xxxx-xx-xx',
-          }
-        ],
+        list2: [],
       }),
       methods: {},
       computed: {},
@@ -97,8 +61,6 @@ export default {
       },
       mounted() {
         console.log(id, 'mounted');
-        debugger
-        console.log(this.list1);
       },
       beforeUpdate() {
         console.log(id, 'beforeUpdate');

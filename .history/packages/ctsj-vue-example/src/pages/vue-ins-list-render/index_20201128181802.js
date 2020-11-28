@@ -21,7 +21,7 @@ export default {
                  </thead>
 
                  <tbody>
-                  <tr v-for="(item , index) in list1">
+                  <tr v-for="(item,index) in list1">
                     <td>{{index + 1}}</td>
                     <td>{{item.name}}</td>
                     <td>{{item.sex}}</td>
@@ -32,12 +32,13 @@ export default {
                </table>
             </dd>
           </dl>
+
           
           <dl>
             <dt><h3>列表</h3></dt>
             <dd>
                <ul>
-                 <li v-for="(item , index) of list2">
+                 <li v-for="(item,index) of list2">
                    <div>
                     <img v-bind:src="item.icon"/>
                    </div>
@@ -76,7 +77,7 @@ export default {
         ],
         list2: [
           {
-            icon: 'https://ss1.bdstatic.com/70cFvXSh_Q1YnxGkpoWK1HF6hhy/it/u=3922290090,3177876335&fm=26&gp=0.jpg',
+            icon: 'https://pics5.baidu.com/feed/b2de9c82d158ccbf7d9b7852e1b81439b135411f.jpeg?token=85b27cc18e080a13ce0ce140b972546a',
             title: 'xxxxxxxxxx',
             subTitle:'xxxxx',
             time:'xxxx-xx-xx',

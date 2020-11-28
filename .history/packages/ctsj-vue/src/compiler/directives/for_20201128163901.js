@@ -1,6 +1,6 @@
 import uuid from '../../shared/uuid';
 import { hasVAttr } from './util';
-import { EMPTY_SPLIT, COMMA_SPLIT } from '../../shared/regexp';
+import { EMPTY_SPLIT } from '../../shared/regexp';
 import { DIRECT_PREFIX, GROUP_KEY_NAME } from '../../shared/constants';
 import { execExpression, isObject, isArray, isNumber } from '../../shared/util';
 import { createContext, isProxyProperty } from '../../core/proxy';
@@ -261,7 +261,7 @@ export function iteratorVFor(
     // 截取出()中的值
     itItemStr = itItemStr.substring(1, itItemStr.length - 1).trim();
     // 如果内容中包含','
-    if (itItemStr.indexOf(COMMA_SPLIT) !== -1) {
+    if (itItemStr.indexOf(',') !== -1) {
       const itItemArr = itItemStr.split(',').map((t) => t.trim());
       // 从context中获取迭代项数据
       context[itItemArr[0].trim()] = itItemObj;

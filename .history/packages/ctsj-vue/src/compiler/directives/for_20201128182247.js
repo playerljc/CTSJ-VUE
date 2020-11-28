@@ -1,6 +1,6 @@
 import uuid from '../../shared/uuid';
 import { hasVAttr } from './util';
-import { EMPTY_SPLIT, COMMA_SPLIT } from '../../shared/regexp';
+import { EMPTY_SPLIT,COMMA_SPLIT } from '../../shared/regexp';
 import { DIRECT_PREFIX, GROUP_KEY_NAME } from '../../shared/constants';
 import { execExpression, isObject, isArray, isNumber } from '../../shared/util';
 import { createContext, isProxyProperty } from '../../core/proxy';
