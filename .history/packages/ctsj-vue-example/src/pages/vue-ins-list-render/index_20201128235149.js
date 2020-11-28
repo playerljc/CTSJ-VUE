@@ -37,7 +37,7 @@ export default {
             <dt><h3>列表</h3></dt>
             <dd>
                <ul>
-                 <li v-for="(item,index) in list2">
+                 <li v-for="(item, index) of list2">
                    <div>
                     <img v-bind:src="item.icon"/>
                    </div>
