@@ -33,11 +33,16 @@
 .v-for里面使用范围值 ok
 .$root,$parent,$refs的处理 ok
 
+.mixin
+ 生命周期函数会合并在一起
+ 其他都是替换
+ mixins属性是一个数组
+ 全局混入Vue.mixin
+.自定义指令
+.插件
 .对数组的操作上代理有问题，没有考虑到push,splice等一系列操作
 .现在是替换整个el节点
 .指令的简写模式
-.自定义指令
-.mixin
 .组件上v-model
 .v-model的节流
 .computed(不需要)
