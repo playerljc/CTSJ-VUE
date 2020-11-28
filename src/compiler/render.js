@@ -1214,6 +1214,7 @@ export function renderComponentNode({ context, el, parentVNode, parentElement })
     return component.$render();
   }
 
+  // 处理ref
   if (refVal) {
     self.$refs[refVal] = component;
   }
