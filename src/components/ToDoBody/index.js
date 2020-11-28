@@ -12,6 +12,7 @@ export default {
   props: ['processingList', 'completedList'],
   template: `
       <div class="${styles.wrap}">
+      
         <div class="${styles.block}" ref="block">
           <div class="${styles.header}">
             <span class="${styles.text}">正在进行</span>

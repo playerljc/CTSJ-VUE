@@ -13,7 +13,7 @@ export default {
       <div class="${styles.wrap}">
         <ul>
           <ToDoCompleteItem
-           v-for="item in data" 
+           v-for="(item , index) of data" 
            v-bind:key="item.id" 
            v-bind:data="item"
            v-on:onCompleteDelete="onCompleteDelete"
