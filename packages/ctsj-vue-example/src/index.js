@@ -55,9 +55,9 @@ function launch() {
   initMenu();
 
   const el = document.createElement('div');
-  
+
   bodyEl.appendChild(el);
-  
+
   MENU_IDS[0].handler.render('vue-ins-expression', el);
 }
 
