@@ -1,5 +1,5 @@
 import { executeExecutionContextVOn } from '../../compiler/directives/on';
-import { renderComponent } from '../../compiler/render';
+import { renderComponent } from '../../compiler/renderComponent';
 import { createComponentProxy, createPropsProxy } from '../proxy';
 import {
   createElement,
@@ -11,9 +11,8 @@ import {
 } from '../../shared/util';
 import { getComponentConfig, isKebabCase, isPascalCase, pascalCaseToKebabCase } from './util';
 import { mergeComputed, mergeData, mergeMethods, mergeProps } from '../merge';
-import { resetComputed, triggerLifecycle } from '../util';
-import { getGlobalConfig } from '../../core/index';
-import { mixinConfig } from '../util';
+import { resetComputed, triggerLifecycle, mixinConfig } from '../util';
+import { getGlobalConfig } from '../index';
 
 import { LIFECYCLE_HOOKS } from '../../shared/constants';
 

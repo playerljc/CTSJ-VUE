@@ -1,8 +1,8 @@
 import { isFormTag } from './model';
-import { execExpression, createExecutionContext } from '../../shared/util';
+import { execExpression, createExecutionContext, log } from '../../shared/util';
 import { createContext } from '../../core/proxy';
 import { hasVAttr, getDirectiveEntry } from './util';
-import { log } from '../../shared/util';
+
 import { DIRECT_PREFIX } from '../../shared/constants';
 
 /**

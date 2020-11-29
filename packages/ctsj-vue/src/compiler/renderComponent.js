@@ -1,33 +1,23 @@
-// render
 import { triggerLifecycle } from '../core/util';
-import { log } from '../shared/util';
 import { renderLoop } from './renderUtil';
-
-import { patch } from '../core/vdom';
-
 import { LIFECYCLE_HOOKS } from '../shared/constants';
 
 /**
- * render - Vue实例的渲染
- * @param el - HtmlElement
- * @param isMount - boolean 是否是挂载阶段
+ * renderComponent - 组件实例的渲染
+ * @return VNode | Array<VNode>
  */
-export function render(el, isMount) {
+export function renderComponent() {
   const self = this;
 
-  // 进行loopRender
-  // vue实例代表的vnode
-  const startTime = new Date().getTime();
+  // 组件实例代表的vnode
   const vnode = renderLoop.call(this, {
     context: {},
     el: this.templateEl,
     parentVNode: null,
     parentElement: null,
   });
-  const endTime = new Date().getTime();
-  log(`render所用时间${(endTime - startTime) / 1000}m`);
 
-  if (!vnode) return false;
+  if (!vnode) return null;
 
   // vnode的hook设置
   Object.assign(vnode.data.hook, {
@@ -50,15 +40,16 @@ export function render(el, isMount) {
         triggerLifecycle.call(self, LIFECYCLE_HOOKS[2]);
       }
     },
-    // /**
-    //  * insert - 元素已插入DOM
-    //  * @param vnode
-    //  */
-    // insert: (vnode) => {
-    //   // ------ mount
-    //   log(33333333333);
-    //   triggerLifecycle.call(self, LIFECYCLE_HOOKS[3]);
-    // },
+    /**
+     * insert - 元素已插入DOM
+     * @param vnode
+     */
+    insert: (curVNode) => {
+      if (curVNode === vnode) {
+        // ------ mount
+        triggerLifecycle.call(self, LIFECYCLE_HOOKS[3]);
+      }
+    },
     /**
      * 元素即将被修补
      */
@@ -87,21 +78,5 @@ export function render(el, isMount) {
     },
   });
 
-  if (isMount) {
-    // 需要赋值$preVNode
-    // this.$preVNode = vnode;
-    this.$preVNode = patch(el, vnode);
-    // ------ mount
-    triggerLifecycle.call(self, LIFECYCLE_HOOKS[3]);
-  } else {
-    if (!this.$preVNode) {
-      this.$preVNode = vnode;
-    }
-    const startTime = new Date().getTime();
-    this.$preVNode = patch(this.$preVNode, vnode);
-    const endTime = new Date().getTime();
-    log(`patch所用时间${(endTime - startTime) / 1000}m`);
-  }
-
-  return true;
+  return vnode;
 }

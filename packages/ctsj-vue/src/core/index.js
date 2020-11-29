@@ -124,7 +124,7 @@ class Vue {
       return false;
     }
     // 如果plugin是函数
-    else if (isFunction(plugin)) {
+    if (isFunction(plugin)) {
       plugin(Vue);
       _plugins.push(plugin);
       return true;

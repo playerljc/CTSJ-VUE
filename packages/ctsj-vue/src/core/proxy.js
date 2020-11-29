@@ -7,15 +7,17 @@ import {
   isObject,
   cloneDeep,
   createExecutionContext,
+  log,
 } from '../shared/util';
-import { render, renderComponent } from '../compiler/render';
+import { render } from '../compiler/render';
+import { renderComponent } from '../compiler/renderComponent';
 
 import {
   CREATE_PROXY_EXCLUDE_PREFIX,
   CREATE_PROXY_EXCLUDE_SUFFIX,
   PATH_SYMBOLS,
 } from '../shared/constants';
-import { log } from '../shared/util';
+
 /**
  * createContext - 创建上下文(主要是在v-for的时候需要重新创建一个新的上下文)
  * @param srcContext - Object 原始的srcContext对象

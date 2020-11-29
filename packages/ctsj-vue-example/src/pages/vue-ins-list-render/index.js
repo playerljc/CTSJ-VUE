@@ -21,7 +21,7 @@ export default {
                  </thead>
 
                  <tbody>
-                  <tr v-for="(item,index) in list1">
+                  <tr v-for="(item , index) in list1">
                     <td>{{index + 1}}</td>
                     <td>{{item.name}}</td>
                     <td>{{item.sex}}</td>
@@ -37,7 +37,7 @@ export default {
             <dt><h3>列表</h3></dt>
             <dd>
                <ul>
-                 <li v-for="(item,index) in list2">
+                 <li v-for="(item , index) of list2">
                    <div>
                     <img v-bind:src="item.icon"/>
                    </div>
@@ -48,6 +48,13 @@ export default {
                    </div>
                  </li>
                </ul>
+            </dd>
+          </dl>
+
+          <dl>
+            <dt><h3>列表嵌套</h3></dt>
+            <dd>
+              
             </dd>
           </dl>
           
@@ -75,6 +82,18 @@ export default {
           }
         ],
         list2: [
+          {
+            icon: 'https://ss1.bdstatic.com/70cFvXSh_Q1YnxGkpoWK1HF6hhy/it/u=3922290090,3177876335&fm=26&gp=0.jpg',
+            title: 'xxxxxxxxxx',
+            subTitle:'xxxxx',
+            time:'xxxx-xx-xx',
+          },
+          {
+            icon: 'https://ss1.bdstatic.com/70cFvXSh_Q1YnxGkpoWK1HF6hhy/it/u=3922290090,3177876335&fm=26&gp=0.jpg',
+            title: 'xxxxxxxxxx',
+            subTitle:'xxxxx',
+            time:'xxxx-xx-xx',
+          },
           {
             icon: 'https://ss1.bdstatic.com/70cFvXSh_Q1YnxGkpoWK1HF6hhy/it/u=3922290090,3177876335&fm=26&gp=0.jpg',
             title: 'xxxxxxxxxx',
