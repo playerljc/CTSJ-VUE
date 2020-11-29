@@ -43,6 +43,46 @@ export default {
               <p v-show="g4ShowMessage">{{g4Message}}</p>
             </dd>
           </dl>
+          
+          
+          <h1 v-if="awesome">Vue is awesome!</h1>
+          <h1 v-else>Oh no 😢</h1>
+          
+          <template v-if="ok">
+            <h1>Title</h1>
+            <p>Paragraph 1</p>
+            <p>Paragraph 2</p>
+          </template>
+          
+          <div v-if="Math.random() > 0.5">
+            Now you see me
+          </div>
+          <div v-else>
+            Now you don't
+          </div>
+          
+          <div v-if="type === 'A'">
+            A
+          </div>
+          <div v-else-if="type === 'B'">
+            B
+          </div>
+          <div v-else-if="type === 'C'">
+            C
+          </div>
+          <div v-else>
+            Not A/B/C
+          </div>
+          
+          <template v-if="loginType === 'username'">
+            <label>Username</label>
+            <input placeholder="Enter your username">
+          </template>
+          <template v-else>
+            <label>Email</label>
+            <input placeholder="Enter your email address">
+          </template>
+          <button v-on:click="loginType = loginType === 'username' ? '' : 'username'">Toggle login type</button>
         </div>
       `,
       data: () => ({
@@ -59,6 +99,11 @@ export default {
 
         g4ShowMessage: true,
         g4Message: 'g4Message',
+
+        awesome: true,
+        ok: true,
+        type: 'A',
+        loginType: 'username',
       }),
       methods: {},
       computed: {},
