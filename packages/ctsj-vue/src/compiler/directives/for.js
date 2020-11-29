@@ -167,6 +167,7 @@ export function hasVFor(attrNames) {
  * @return {Array<VNode>}
  */
 export function parseVFor({ context, el, parentVNode, vAttrNames, renderFun }) {
+  debugger;
   // 如果没有group属性则创建一个
   // group属性使用来给v-for进行分组的
   let groupName = el.getAttribute(GROUP_KEY_NAME);
@@ -261,8 +262,8 @@ export function iteratorVFor(
     // 截取出()中的值
     itItemStr = itItemStr.substring(1, itItemStr.length - 1).trim();
     // 如果内容中包含','
-    if (itItemStr.indexOf(COMMA_SPLIT) !== -1) {
-      const itItemArr = itItemStr.split(',').map((t) => t.trim());
+    if (itItemStr.indexOf(',') !== -1) {
+      const itItemArr = itItemStr.split(COMMA_SPLIT).map((t) => t.trim());
       // 从context中获取迭代项数据
       context[itItemArr[0].trim()] = itItemObj;
       // 如果是迭代对象则是属性名，否则是索引

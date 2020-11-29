@@ -54,7 +54,20 @@ export default {
           <dl>
             <dt><h3>列表嵌套</h3></dt>
             <dd>
-              
+              <ul>
+                <li v-for="(item , index) of list3">
+                  <div>
+                    <span>{{index + 1}}.</span>
+                    <span>{{item.title}}</span>
+                  </div>
+                  <ul>
+                    <li v-for="(item1, index1) of item.list">
+                      <span>{{index + 1}}-{{index1 + 1}}.</span>
+                      <span>{{item1.title}}</span>
+                    </li>
+                  </ul>
+                </li>
+              </ul>
             </dd>
           </dl>
           
@@ -66,40 +79,96 @@ export default {
             name: 'playerljc1',
             sex: '男',
             birthday: 'xxxx-xx-xx',
-            jg:'shenyang'
+            jg: 'shenyang',
           },
           {
             name: 'playerljc2',
             sex: '女',
             birthday: 'xxxx-xx-xx',
-            jg:'shenyang'
+            jg: 'shenyang',
           },
           {
             name: 'playerljc3',
             sex: '男',
             birthday: 'xxxx-xx-xx',
-            jg:'shenyang'
-          }
+            jg: 'shenyang',
+          },
         ],
         list2: [
           {
-            icon: 'https://ss1.bdstatic.com/70cFvXSh_Q1YnxGkpoWK1HF6hhy/it/u=3922290090,3177876335&fm=26&gp=0.jpg',
+            icon:
+              'https://ss1.bdstatic.com/70cFvXSh_Q1YnxGkpoWK1HF6hhy/it/u=3922290090,3177876335&fm=26&gp=0.jpg',
             title: 'xxxxxxxxxx',
-            subTitle:'xxxxx',
-            time:'xxxx-xx-xx',
+            subTitle: 'xxxxx',
+            time: 'xxxx-xx-xx',
           },
           {
-            icon: 'https://ss1.bdstatic.com/70cFvXSh_Q1YnxGkpoWK1HF6hhy/it/u=3922290090,3177876335&fm=26&gp=0.jpg',
+            icon:
+              'https://ss1.bdstatic.com/70cFvXSh_Q1YnxGkpoWK1HF6hhy/it/u=3922290090,3177876335&fm=26&gp=0.jpg',
             title: 'xxxxxxxxxx',
-            subTitle:'xxxxx',
-            time:'xxxx-xx-xx',
+            subTitle: 'xxxxx',
+            time: 'xxxx-xx-xx',
           },
           {
-            icon: 'https://ss1.bdstatic.com/70cFvXSh_Q1YnxGkpoWK1HF6hhy/it/u=3922290090,3177876335&fm=26&gp=0.jpg',
+            icon:
+              'https://ss1.bdstatic.com/70cFvXSh_Q1YnxGkpoWK1HF6hhy/it/u=3922290090,3177876335&fm=26&gp=0.jpg',
             title: 'xxxxxxxxxx',
-            subTitle:'xxxxx',
-            time:'xxxx-xx-xx',
-          }
+            subTitle: 'xxxxx',
+            time: 'xxxx-xx-xx',
+          },
+        ],
+        list3: [
+          {
+            title: 'xxx',
+            list: [
+              {
+                title: 'xxx',
+              },
+              {
+                title: 'xxx',
+              },
+              {
+                title: 'xxx',
+              },
+              {
+                title: 'xxx',
+              },
+            ],
+          },
+          {
+            title: 'xxx',
+            list: [
+              {
+                title: 'xxx',
+              },
+              {
+                title: 'xxx',
+              },
+              {
+                title: 'xxx',
+              },
+              {
+                title: 'xxx',
+              },
+            ],
+          },
+          {
+            title: 'xxx',
+            list: [
+              {
+                title: 'xxx',
+              },
+              {
+                title: 'xxx',
+              },
+              {
+                title: 'xxx',
+              },
+              {
+                title: 'xxx',
+              },
+            ],
+          },
         ],
       }),
       methods: {},
@@ -116,8 +185,6 @@ export default {
       },
       mounted() {
         console.log(id, 'mounted');
-        debugger
-        console.log(this.list1);
       },
       beforeUpdate() {
         console.log(id, 'beforeUpdate');
