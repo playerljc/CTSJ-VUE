@@ -3,6 +3,8 @@ import {
   isElementNode,
   isSlotNode,
   isTemplateNode,
+  isRouterLinkNode,
+  isRouterViewNode,
   isTextNode,
   toCamelCase,
 } from '../shared/util';
@@ -19,6 +21,8 @@ import { renderElementNode } from './renderElementNode';
 import { renderSlotNode } from './renderSlotNode';
 import { renderTemplateNode } from './renderTemplateNode';
 import { renderTextNode } from './renderTextNode';
+import { renderRouterLinkNode } from './renderRouterLinkNode';
+import { renderRouterViewNode } from './renderRouterViewNode';
 
 import { getAttrNames, getVAttrNames } from './directives/util';
 import { hasVFor, parseVFor } from './directives/for';
@@ -266,7 +270,9 @@ export function renderLoop({ context, el, parentVNode, parentElement }) {
   if (isVueIns) {
     // 在vue实例下判断是否是组件节点
     isComponent = isComponentNodeByVue(el);
-  } else {
+  }
+  // 其他的情况
+  else {
     const isComponentIns = isComponentInstance(this);
 
     // this是否是component实例
@@ -296,6 +302,17 @@ export function renderLoop({ context, el, parentVNode, parentElement }) {
       return renderDynamicComponentNode.call(this, { context, el, parentVNode, parentElement });
     }
 
+    // 如果是router-link元素
+    if (isRouterLinkNode(el)) {
+      return renderRouterLinkNode.call(this, { context, el, parentVNode, parentElement });
+    }
+
+    // 如果是router-view元素
+    if (isRouterViewNode(el)) {
+      return renderRouterViewNode.call(this, { context, el, parentVNode, parentElement });
+    }
+
+    // 如果是Html元素
     if (isElementNode(el)) {
       // 是元素不是组件节点
       return renderElementNode.call(this, { context, el, parentVNode, parentElement });

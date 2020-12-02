@@ -120,6 +120,24 @@ export function isDynamicComponentNode(el) {
 }
 
 /**
+ * isRouterLinkNode - 是否是router-link元素
+ * @param el - Element
+ * @return {boolean}
+ */
+export function isRouterLinkNode(el) {
+  return el.nodeName.toLowerCase() === 'router-link';
+}
+
+/**
+ * isRouterViewNode - 是否是router-view元素
+ * @param el - Element
+ * @return {boolean}
+ */
+export function isRouterViewNode(el) {
+  return el.nodeName.toLowerCase() === 'router-view';
+}
+
+/**
  * createElement - 根据html字符串创建dom
  * @param htmlStr - string
  * @return {Element}

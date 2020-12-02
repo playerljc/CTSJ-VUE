@@ -113,8 +113,8 @@ export function renderDynamicComponentNode({ context, el, parentVNode, parentEle
 
   // 获取is属性的值
   // is属性的值就是组件的标签的名称
-
   const componentTagName = getAttribute.call(this, { context, attrName: 'is', el });
+
   // 如果没有is属性
   if (!componentTagName) return null;
 
@@ -145,9 +145,10 @@ export function renderDynamicComponentNode({ context, el, parentVNode, parentEle
   // 如果is的值不是组件(没有注册过)
   if (!isComponent) return null;
 
-  // 获取到组件名称之后调用renderComponentNode方法
-  // 赋值component标签所有的属性给componentEl除了is属性
+  // 获取is属性的名字是is还是v-bind:is
   const isAttrName = getAttributeName({ attrName: 'is', el });
+
+  // 赋值component标签所有的属性给componentEl除了is属性
   el.getAttributeNames()
     .filter(
       (attrName) =>
@@ -165,6 +166,7 @@ export function renderDynamicComponentNode({ context, el, parentVNode, parentEle
   }
 
   let entry = this.componentsMap.get(key);
+
   if (isEmpty(entry)) {
     this.componentsMap.set(key, { componentName: componentTagName, key: uuid() });
   } else {
@@ -175,7 +177,9 @@ export function renderDynamicComponentNode({ context, el, parentVNode, parentEle
       entry.key = uuid();
     }
   }
+
   entry = this.componentsMap.get(key);
+
   componentEl.setAttribute('key', entry.key);
 
   return renderComponentNode.call(this, {

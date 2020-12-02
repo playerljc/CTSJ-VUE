@@ -4,7 +4,13 @@
  * @classdesc VueRouter
  */
 class VueRouter {
-  constructor() {}
+  /**
+   * constructor
+   * @param config
+   */
+  constructor(config) {
+    this.$config = config;
+  }
 }
 
 export default VueRouter;
