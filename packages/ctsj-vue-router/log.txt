@@ -1,0 +1,29 @@
+路由的配置
+ const routes = [
+   { path: '/', component: App },
+   { path: '/foo', component: Foo, children:[
+        {
+          path:'',
+
+        }
+    ]
+   },
+   { path: '/bar', component: Bar }
+ ]
+
+路径
+ http://localhost:8000/
+ http://localhost:8000/foo
+ http://localhost:8000/bar
+
+Vue实例
+  template:`
+    <div>
+       <div>111</div>
+       <p>222</p>
+       <router-view></router-view> -> Foo
+       <div>
+         <router-view></router-view> -> Bar
+       </div>
+    </div>
+  `
