@@ -1,17 +1,9 @@
+import { isArray, isFunction, isObject, cloneDeep } from '@ctsj/vue-util';
 import { isComputedProperty } from './util';
 import { push } from '../compiler/proxyDirtyStack';
-import {
-  execExpression,
-  isArray,
-  isFunction,
-  isObject,
-  cloneDeep,
-  createExecutionContext,
-  log,
-} from '../shared/util';
+import { execExpression, createExecutionContext, log } from '../shared/util';
 import { render } from '../compiler/render';
 import { renderComponent } from '../compiler/renderComponent';
-
 import {
   CREATE_PROXY_EXCLUDE_PREFIX,
   CREATE_PROXY_EXCLUDE_SUFFIX,

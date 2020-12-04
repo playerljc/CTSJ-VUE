@@ -6,8 +6,8 @@ import {
   isRouterLinkNode,
   isRouterViewNode,
   isTextNode,
-  toCamelCase,
-} from '../shared/util';
+} from '@ctsj/vue-util';
+import { toCamelCase } from '../shared/util';
 import { isVueInstance } from '../core/util';
 import {
   isComponentInstance,

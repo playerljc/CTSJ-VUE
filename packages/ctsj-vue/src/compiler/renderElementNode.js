@@ -1,6 +1,6 @@
+import { isArray, isObject } from '@ctsj/vue-util';
 import { createVNode } from '../core/vdom';
 import { parseOption } from './directives/model';
-import { isArray, isObject } from '../shared/util';
 import { renderLoop, renderVAttr, renderAttr } from './renderUtil';
 
 /**

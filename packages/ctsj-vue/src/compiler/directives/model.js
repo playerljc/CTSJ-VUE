@@ -1,4 +1,5 @@
-import { execExpression, isArray, createExecutionContext } from '../../shared/util';
+import { isArray } from '@ctsj/vue-util';
+import { execExpression, createExecutionContext } from '../../shared/util';
 import { getDirectiveEntry, hasVAttr } from './util';
 import {
   FORM_CONTROL_BINDING_TAG_NAMES,

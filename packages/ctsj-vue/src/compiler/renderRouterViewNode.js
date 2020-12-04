@@ -1,10 +1,11 @@
+import { isEmpty, uuid } from '@ctsj/vue-util';
 import { getKey, getVAttrNames } from './directives/util';
 import { hasVFor, parseVFor } from './directives/for';
 import { hasVIf, parseVIf } from './directives/if';
 import { hasVElse, parseVElse } from './directives/else';
 import { hasVElseIf, parseVElseIf } from './directives/else-if';
-import { isEmpty } from '../shared/util';
-import uuid from '../shared/uuid';
+import { isVueInstance } from '../core/util';
+import { isComponentInstance } from '../core/component/util';
 
 /**
  * renderRouterViewNode - 渲染router-view元素
@@ -102,6 +103,19 @@ export function renderRouterViewNode({ context, el, parentVNode, parentElement }
 
   // 根据路由配置获取component的组件，然后根据component反查tagName
   // 创建tagName的元素
+
+  // 如果是vue实例
+  if (isVueInstance(this)) {
+    //  得到routes的配置数据
+    //  在
+    this.$router.getComponent();
+    //  得到浏览器的pathname
+  }
+  // 如果是组件
+  else if (isComponentInstance(this)) {
+    //  得到浏览器的pathname
+    //  组件的实例中需要有路由的配置项信息(重点)
+  }
 
   // el没有key属性
   if (isEmpty(key)) {

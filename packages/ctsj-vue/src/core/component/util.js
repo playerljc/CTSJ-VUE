@@ -1,4 +1,4 @@
-import { isElementNode, isObject } from '../../shared/util';
+import { isElementNode, isObject } from '@ctsj/vue-util';
 import { existsComponentByGlobal, existsComponentByComponent, getConfig } from './register';
 import { isVueInstance } from '../util';
 

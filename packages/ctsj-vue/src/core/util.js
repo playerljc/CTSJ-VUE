@@ -1,5 +1,6 @@
+import { isArray, isObject } from '@ctsj/vue-util';
 import { isComponentInstance } from './component/util';
-import { isArray, isObject, createExecutionContext } from '../shared/util';
+import { createExecutionContext } from '../shared/util';
 import { LIFECYCLE_HOOKS } from '../shared/constants';
 import Vue from './index';
 

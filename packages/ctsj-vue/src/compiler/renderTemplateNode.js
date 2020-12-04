@@ -1,9 +1,9 @@
+import { isArray, isObject } from '@ctsj/vue-util';
 import { getVAttrNames } from './directives/util';
 import { hasVFor, parseVFor } from './directives/for';
 import { hasVIf, parseVIf } from './directives/if';
 import { hasVElse, parseVElse } from './directives/else';
 import { hasVElseIf, parseVElseIf } from './directives/else-if';
-import { isArray, isObject } from '../shared/util';
 import { renderLoop } from './renderUtil';
 
 /**

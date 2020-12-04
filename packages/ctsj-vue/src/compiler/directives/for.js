@@ -1,8 +1,8 @@
-import uuid from '../../shared/uuid';
+import { uuid, isObject, isArray, isNumber } from '@ctsj/vue-util';
 import { hasVAttr } from './util';
 import { EMPTY_SPLIT, COMMA_SPLIT } from '../../shared/regexp';
 import { DIRECT_PREFIX, GROUP_KEY_NAME } from '../../shared/constants';
-import { execExpression, isObject, isArray, isNumber } from '../../shared/util';
+import { execExpression } from '../../shared/util';
 import { createContext, isProxyProperty } from '../../core/proxy';
 
 const ITERATOR_CHAIN = [
@@ -167,7 +167,6 @@ export function hasVFor(attrNames) {
  * @return {Array<VNode>}
  */
 export function parseVFor({ context, el, parentVNode, vAttrNames, renderFun }) {
-  debugger;
   // 如果没有group属性则创建一个
   // group属性使用来给v-for进行分组的
   let groupName = el.getAttribute(GROUP_KEY_NAME);

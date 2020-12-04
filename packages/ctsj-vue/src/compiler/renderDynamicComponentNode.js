@@ -1,3 +1,4 @@
+import { isEmpty, uuid } from '@ctsj/vue-util';
 import { getAttribute, getAttributeName, getKey, getVAttrNames } from './directives/util';
 import { hasVFor, parseVFor } from './directives/for';
 import { hasVIf, parseVIf } from './directives/if';
@@ -10,8 +11,6 @@ import {
   isComponentNodeByVue,
 } from '../core/component/util';
 import { DIRECT_PREFIX } from '../shared/constants';
-import { isEmpty } from '../shared/util';
-import uuid from '../shared/uuid';
 import { renderComponentNode } from './renderComponentNode';
 
 /**

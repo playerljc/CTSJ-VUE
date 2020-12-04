@@ -3,13 +3,19 @@
    { path: '/', component: App },
    { path: '/foo', component: Foo, children:[
         {
-          path:'',
+          path:'abc',component: User, children:[
+            {
+              path:'def': component: User1
+            }
+          ]
 
         }
     ]
    },
    { path: '/bar', component: Bar }
  ]
+
+Vue实例寻找 path = '/'的节点
 
 路径
  http://localhost:8000/

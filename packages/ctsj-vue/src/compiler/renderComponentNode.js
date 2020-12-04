@@ -1,3 +1,4 @@
+import { isEmpty, uuid } from '@ctsj/vue-util';
 import { getAttrEntrys, getKey, getVAttrNames } from './directives/util';
 import { hasVFor, parseVFor } from './directives/for';
 import { hasVIf, parseVIf } from './directives/if';
@@ -5,9 +6,8 @@ import { hasVElse, parseVElse } from './directives/else';
 import { hasVElseIf, parseVElseIf } from './directives/else-if';
 import { getVBindEntrys, hasVBind } from './directives/bind';
 import { getVModelEntrys, hasVModel } from './directives/model';
-import { execExpression, isEmpty } from '../shared/util';
+import { execExpression } from '../shared/util';
 import { getVOnEntrys, hasVOn } from './directives/on';
-import uuid from '../shared/uuid';
 import { createComponent } from '../core/component/util';
 import { isVueInstance } from '../core/util';
 

@@ -39,6 +39,7 @@
     "@ctsj/build": "^3.0.2"
   },
   "dependencies": {
-    "@ctsj/vue": "^1.0.0"
+    "@ctsj/vue": "^1.0.0",
+    "@ctsj/vue-util": "^1.0.0"
   }
 }

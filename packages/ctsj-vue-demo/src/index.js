@@ -1,6 +1,6 @@
-import { log, clone } from '@ctsj/vue/lib/shared/util';
+import { log } from '@ctsj/vue/lib/shared/util';
 import Vue from '@ctsj/vue';
-import uuid from '@ctsj/vue/lib/shared/uuid';
+import { uuid, clone } from '@ctsj/vue-util';
 import styles from './index.less';
 
 import ToDoHeader from './components/ToDoHeader';

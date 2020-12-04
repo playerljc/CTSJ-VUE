@@ -1,6 +1,7 @@
+import { isElementNode, isTextNode } from '@ctsj/vue-util';
 import { getVAttrNames, hasVAttr } from './util';
 import { DIRECT_PREFIX, GROUP_KEY_NAME } from '../../shared/constants';
-import { execExpression, isElementNode, isTextNode } from '../../shared/util';
+import { execExpression } from '../../shared/util';
 
 /**
  * hasVElseIf - 是否有v-else-if属性

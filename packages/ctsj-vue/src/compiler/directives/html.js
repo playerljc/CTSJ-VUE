@@ -1,7 +1,8 @@
+import { createElement } from '@ctsj/vue-util';
 import { toVNode } from '../../core/vdom';
 import { hasVAttr } from './util';
 import { DIRECT_PREFIX } from '../../shared/constants';
-import { createElement, execExpression } from '../../shared/util';
+import { execExpression } from '../../shared/util';
 
 /**
  * hasVHtml - 是否存在v-html属性

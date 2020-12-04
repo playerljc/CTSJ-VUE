@@ -1,7 +1,7 @@
+import { isElementNode } from '@ctsj/vue-util';
 import { getAttribute, getVAttrNames, hasAttr } from './directives/util';
 import { getVBindEntrys, hasVBind } from './directives/bind';
 import { DIRECT_PREFIX } from '../shared/constants';
-import { isElementNode } from '../shared/util';
 import { createContext } from '../core/proxy';
 
 /**

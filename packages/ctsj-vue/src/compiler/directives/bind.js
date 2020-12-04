@@ -1,8 +1,9 @@
+import { isArray, isObject } from '@ctsj/vue-util';
 import { isProxyProperty } from '../../core/proxy';
 import { pascalCaseToKebabCase } from '../../core/component/util';
 import { hasVAttr, getDirectiveEntry } from './util';
 import { DIRECT_PREFIX } from '../../shared/constants';
-import { execExpression, isArray, isObject, toCamelCase } from '../../shared/util';
+import { execExpression, toCamelCase } from '../../shared/util';
 
 /**
  * hasVBind - 是否存在v-bind属性

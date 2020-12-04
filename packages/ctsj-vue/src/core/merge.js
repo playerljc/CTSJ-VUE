@@ -1,4 +1,4 @@
-import { isFunction, merge, cloneDeep } from '../shared/util';
+import { isFunction, merge, cloneDeep } from '@ctsj/vue-util';
 
 /**
  * mergeProps - 混入props到this中

@@ -1,14 +1,8 @@
+import { createElement, isArray, isFunction, isObject, cloneDeep } from '@ctsj/vue-util';
 import { executeExecutionContextVOn } from '../../compiler/directives/on';
 import { renderComponent } from '../../compiler/renderComponent';
 import { createComponentProxy, createPropsProxy } from '../proxy';
-import {
-  createElement,
-  isArray,
-  isFunction,
-  isObject,
-  cloneDeep,
-  createExecutionContext,
-} from '../../shared/util';
+import { createExecutionContext } from '../../shared/util';
 import { getComponentConfig, isKebabCase, isPascalCase, pascalCaseToKebabCase } from './util';
 import { mergeComputed, mergeData, mergeMethods, mergeProps } from '../merge';
 import { resetComputed, triggerLifecycle, mixinConfig } from '../util';

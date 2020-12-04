@@ -1,3 +1,4 @@
+import { createElement, isFunction, cloneDeep, isObject } from '@ctsj/vue-util';
 import { isKebabCase, isPascalCase, pascalCaseToKebabCase } from './component/util';
 import { patch } from './vdom';
 import { register } from './component/register';
@@ -6,13 +7,7 @@ import { LIFECYCLE_HOOKS } from '../shared/constants';
 import { mergeData, mergeComputed, mergeMethods } from './merge';
 import { triggerLifecycle, getEl, mixinConfig } from './util';
 import { createVueProxy } from './proxy';
-import {
-  createElement,
-  isFunction,
-  cloneDeep,
-  createExecutionContext,
-  isObject,
-} from '../shared/util';
+import { createExecutionContext } from '../shared/util';
 
 /**
  * findVNodeParentByKey - 查询key的Parent
