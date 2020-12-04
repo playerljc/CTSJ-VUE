@@ -116,8 +116,9 @@ class Component {
    * @param el - 组件的el元素
    * @param root - vue实例
    * @param parent - 父对象(可能是Vue实例，也肯能是Component实例)
+   * @param route - 匹配的路由配置
    */
-  constructor(config, { key, el, root, parent }) {
+  constructor(config, { key, el, root, parent, route }) {
     this.$el = el;
 
     // Vue实例对象
@@ -128,6 +129,12 @@ class Component {
 
     // 标签中的key属性值
     this.$key = key;
+
+    // 路由对象的引用
+    this.$router = this.$root.$router;
+
+    // 匹配的路由的信息
+    this.$matchRoute = route;
 
     // 组件的配置对象
     this.$config = this.$getConfig();

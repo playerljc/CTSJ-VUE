@@ -42,3 +42,30 @@ export function existsComponentByComponent(componentName, components) {
 export function getConfig(componentName) {
   return globalComponentsMap.get(componentName);
 }
+
+/**
+ * getNameByComponentInGlobal - 在全局注册下通过component获取组件的注册名称
+ * @param component - Component
+ * @return string
+ */
+export function getNameByComponentInGlobal(component) {
+  let result = '';
+
+  // 全局下获取所有组件注册的名字
+  const comNames = globalComponentsMap.keys();
+
+  // 迭代所有的组件
+  for (let i = 0; i < comNames.length; i++) {
+    const comName = comNames[i];
+
+    const com = globalComponentsMap.get(comName);
+
+    if (com === component) {
+      result = comName;
+
+      break;
+    }
+  }
+
+  return result;
+}

@@ -1,10 +1,30 @@
+import VueRouter from '@ctsj/vue-router';
 import Vue from './core';
+
+const MyComponent = {
+  data: () => ({}),
+  template: `
+    <div>我是一个路由组件</div>
+  `,
+};
+
+Vue.component('my-component', MyComponent);
+
+const router = new VueRouter({
+  routes: [
+    {
+      path: '/',
+      component: MyComponent,
+    },
+  ],
+});
 
 const ins = new Vue({
   el: document.getElementById('app'),
+  router,
   template: `
         <div>
-          <dl>
+          <!--<dl>
             <dt><h3>列表嵌套</h3></dt>
             <dd>
               <ul>
@@ -22,8 +42,10 @@ const ins = new Vue({
                 </li>
               </ul>
             </dd>
-          </dl>
+          </dl>-->
           
+          <div>普通的文本</div>
+          <router-view></router-view>
         </div>
       `,
   data: () => ({

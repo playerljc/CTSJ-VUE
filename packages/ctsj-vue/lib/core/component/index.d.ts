@@ -16,17 +16,21 @@ declare class Component {
      * @param el - 组件的el元素
      * @param root - vue实例
      * @param parent - 父对象(可能是Vue实例，也肯能是Component实例)
+     * @param route - 匹配的路由配置
      */
-    constructor(config: any, { key, el, root, parent }: {
+    constructor(config: any, { key, el, root, parent, route }: {
         key: any;
         el: any;
         root: any;
         parent: any;
+        route: any;
     });
     $el: any;
     $root: any;
     $parent: any;
     $key: any;
+    $router: any;
+    $matchRoute: any;
     $config: any;
     $argConfig: any;
     $emit: (eventName: any, ...args: any[]) => false | undefined;

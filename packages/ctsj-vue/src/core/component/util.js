@@ -76,10 +76,11 @@ export function pascalCaseToKebabCase(name) {
  * @param root - Vue Vue实例
  * @param el - HtmlElement 元素
  * @param key - string 组件的key
+ * @param route - Object 匹配的路由配置
  * @return Component
  */
-export function createComponent({ attrs, events, parentContext, parent, root, el, key }) {
-  return new Component({ attrs, events, parentContext }, { key, el, root, parent });
+export function createComponent({ attrs, events, parentContext, parent, root, el, key, route }) {
+  return new Component({ attrs, events, parentContext }, { key, el, root, parent, route });
 }
 
 /**

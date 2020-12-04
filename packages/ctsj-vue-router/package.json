@@ -41,6 +41,7 @@
     "typescript": "^3.8.2"
   },
   "dependencies": {
-    "@ctsj/vue-util": "^1.0.0"
+    "@ctsj/vue-util": "^1.0.0",
+    "path-to-regexp": "^6.2.0"
   }
 }

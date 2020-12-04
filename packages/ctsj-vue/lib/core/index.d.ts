@@ -44,6 +44,7 @@ declare class Vue {
     constructor(config: any);
     $config: any;
     $refs: {};
+    $router: any;
     $noProxySrcData: any;
     $dataProxy: ProxyConstructor;
     templateEl: Element;

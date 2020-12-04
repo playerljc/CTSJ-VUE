@@ -25,3 +25,9 @@ export function existsComponentByComponent(componentName: any, components: any):
  * @return {Object}
  */
 export function getConfig(componentName: any): any;
+/**
+ * getNameByComponentInGlobal - 在全局注册下通过component获取组件的注册名称
+ * @param component - Component
+ * @return string
+ */
+export function getNameByComponentInGlobal(component: any): string;

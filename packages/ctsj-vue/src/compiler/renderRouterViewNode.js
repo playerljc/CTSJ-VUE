@@ -6,6 +6,8 @@ import { hasVElse, parseVElse } from './directives/else';
 import { hasVElseIf, parseVElseIf } from './directives/else-if';
 import { isVueInstance } from '../core/util';
 import { isComponentInstance } from '../core/component/util';
+import { getNameByComponentInGlobal } from '../core/component/register';
+import { renderComponentNode } from './renderComponentNode';
 
 /**
  * renderRouterViewNode - 渲染router-view元素
@@ -104,22 +106,49 @@ export function renderRouterViewNode({ context, el, parentVNode, parentElement }
   // 根据路由配置获取component的组件，然后根据component反查tagName
   // 创建tagName的元素
 
+  let matchResult;
+
   // 如果是vue实例
   if (isVueInstance(this)) {
     //  得到routes的配置数据
-    //  在
-    this.$router.getComponent();
-    //  得到浏览器的pathname
+    matchResult = this.$router.$getComponentIsVueIns();
   }
   // 如果是组件
   else if (isComponentInstance(this)) {
     //  得到浏览器的pathname
     //  组件的实例中需要有路由的配置项信息(重点)
+    matchResult = this.$router.$getComponentIsComIns(this.$matchRoute);
   }
+
+  // 如果没有匹配的路由说明连*都没写
+  if (!matchResult) return null;
 
   // el没有key属性
   if (isEmpty(key)) {
     key = uuid();
     el.setAttribute('key', key);
   }
+
+  // 结构matchResult
+  const { component, detail, route } = matchResult;
+
+  // 初始化$route对象
+  this.$route = { ...detail };
+
+  // 根据component去全局注册中寻找组件的名字
+  const comName = getNameByComponentInGlobal(component);
+
+  // 根据注册的名字创建一个el元素并赋值key属性
+  const comEl = document.createElement(comName);
+
+  comEl.setAttribute('key', key);
+
+  // 调用renderComponentNode方法
+  return renderComponentNode.call(this, {
+    context,
+    el: comEl,
+    parentVNode,
+    parentElement,
+    route,
+  });
 }

@@ -21,4 +21,41 @@ declare class VueRouter {
      */
     constructor(config: any);
     $config: {};
+    /**
+     * $getComponentIsVueIns - 获取$config的routers第一级中路径匹配项的component属性值
+     * @return Object
+     */
+    $getComponentIsVueIns(): {
+        component: any;
+        detail: {
+            path: string;
+            params: any;
+            query: {};
+            hash: string;
+            fullPath: string;
+            matched: any;
+            name: string;
+            redirectedFrom: string;
+        };
+        route: any;
+    } | undefined;
+    /**
+     * $getComponentIsComIns - 获取组件所在的route中匹配的component属性值
+     * @param route Object - 组件所在的route
+     * @return Object
+     */
+    $getComponentIsComIns(route: any): {
+        component: any;
+        detail: {
+            path: string;
+            params: any;
+            query: {};
+            hash: string;
+            fullPath: string;
+            matched: any;
+            name: string;
+            redirectedFrom: string;
+        };
+        route: any;
+    } | undefined;
 }

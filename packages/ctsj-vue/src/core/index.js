@@ -149,6 +149,9 @@ class Vue {
     // 存放所有ref的数据
     this.$refs = {};
 
+    // 路由对象的引用
+    this.$router = this.$config.router;
+
     // 纯净的data数据，没有进行代理的，在watch中使用
     this.$noProxySrcData = cloneDeep(isFunction(this.$config.data) ? this.$config.data() : {});
 

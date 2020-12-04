@@ -17,9 +17,10 @@ import { isVueInstance } from '../core/util';
  * @param el - HtmlElement el元素
  * @param parentVNode - VNode 父元素VNode
  * @param parentElement - HtmlElement 父元素
+ * @param route - Object 如果是路由匹配，则是匹配路由的配置项
  * @return VNode | Array<VNode>
  */
-export function renderComponentNode({ context, el, parentVNode, parentElement }) {
+export function renderComponentNode({ context, el, parentVNode, parentElement, route }) {
   // 合并多个文本节点为一个文本节点
   el.normalize();
 
@@ -195,13 +196,16 @@ export function renderComponentNode({ context, el, parentVNode, parentElement })
       root: isVueInstance(self) ? self : self.$root,
       el,
       key,
+      route,
     });
+
     // 处理ref
     if (refVal) {
       self.$refs[refVal] = component;
     }
 
     self.componentsMap.set(key, component);
+
     // 调用组件的render方法返回VNode
     return component.$render();
   }
@@ -214,7 +218,11 @@ export function renderComponentNode({ context, el, parentVNode, parentElement })
   // 不是第一次而是更新
   component.$setParams({ attrs, events, parentContext: context });
 
+  // 重新赋值一下$matchRoute
+  component.$matchRoute = route;
+
   console.log('componentUpdate', 'update');
+
   // 调用组件的update方法返回VNode
   return component.$update();
 }
