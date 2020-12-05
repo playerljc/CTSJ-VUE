@@ -52,7 +52,7 @@ export function getNameByComponentInGlobal(component) {
   let result = '';
 
   // 全局下获取所有组件注册的名字
-  const comNames = globalComponentsMap.keys();
+  const comNames = Array.from(globalComponentsMap.keys());
 
   // 迭代所有的组件
   for (let i = 0; i < comNames.length; i++) {

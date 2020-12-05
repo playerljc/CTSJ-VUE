@@ -14,7 +14,7 @@ function getConfig(config) {
 
   for (const p in config) {
     Object.defineProperty(result, p, {
-      writable: false,
+      writable: true,
       value: config[p],
     });
   }
@@ -146,20 +146,20 @@ class VueRouter {
   }
 
   /**
-   * $getComponentIsVueIns - 获取$config的routers第一级中路径匹配项的component属性值
+   * $getComponentIsVueIns - 获取$config的routes第一级中路径匹配项的component属性值
    * @return Object
    */
   $getComponentIsVueIns() {
     // 获取地址栏的pathname
     const { pathname } = window.location;
 
-    // 获取$config.routers
-    const { routers } = this.$config;
+    // 获取$config.routes
+    const { routes } = this.$config;
 
     let result;
 
-    for (let i = 0, len = (routers || []).length; i < len; i++) {
-      const { path, component } = routers[i];
+    for (let i = 0, len = (routes || []).length; i < len; i++) {
+      const { path, component } = routes[i];
 
       const keys = [];
 
@@ -181,10 +181,10 @@ class VueRouter {
         result = {
           component,
           detail: createRoute({
-            route: routers[i],
+            route: routes[i],
             paramMap,
           }),
-          route: routers[i],
+          route: routes[i],
         };
 
         break;

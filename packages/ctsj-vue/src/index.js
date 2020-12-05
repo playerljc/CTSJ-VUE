@@ -4,17 +4,46 @@ import Vue from './core';
 const MyComponent = {
   data: () => ({}),
   template: `
-    <div>我是一个路由组件</div>
+    <div>
+      <p>我是一个路由组件</p>
+      <router-view></router-view>   
+    </div>
+  `,
+};
+
+const MyComponentChildren = {
+  data: () => ({}),
+  template: `
+    <div>我是路由组件的子组件</div>
+  `,
+};
+
+const LogonComponent = {
+  data: () => ({}),
+  template: `
+    <div>我是一个登陆组件</div>
   `,
 };
 
 Vue.component('my-component', MyComponent);
+Vue.component('my-children-component', MyComponentChildren);
+Vue.component('login-component', LogonComponent);
 
 const router = new VueRouter({
   routes: [
     {
       path: '/',
       component: MyComponent,
+      children: [
+        {
+          path: 'children',
+          component: MyComponentChildren,
+        },
+      ],
+    },
+    {
+      path: '/login',
+      component: LogonComponent,
     },
   ],
 });

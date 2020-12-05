@@ -108,7 +108,7 @@ export function renderDynamicComponentNode({ context, el, parentVNode, parentEle
   }
 
   // 这个key属性可能是v-bind:key=，也可能是key=
-  key = getKey.call({ context, el });
+  key = getKey.call(this, { context, el });
 
   // 获取is属性的值
   // is属性的值就是组件的标签的名称

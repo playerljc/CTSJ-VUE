@@ -18,6 +18,7 @@ import { renderComponentNode } from './renderComponentNode';
  * @return VNode
  */
 export function renderRouterViewNode({ context, el, parentVNode, parentElement }) {
+  debugger;
   const vAttrNames = getVAttrNames(el);
 
   let key;
@@ -101,7 +102,7 @@ export function renderRouterViewNode({ context, el, parentVNode, parentElement }
   }
 
   // 这个key属性可能是v-bind:key=，也可能是key=
-  key = getKey.call({ context, el });
+  key = getKey.call(this, { context, el });
 
   // 根据路由配置获取component的组件，然后根据component反查tagName
   // 创建tagName的元素
