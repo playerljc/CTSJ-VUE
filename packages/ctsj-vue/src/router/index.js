@@ -1,4 +1,4 @@
-import { pathToRegexp } from 'path-to-regexp';
+import pathToRegexp from 'path-to-regexp';
 
 import { cloneDeep } from '@ctsj/vue-util';
 
@@ -110,6 +110,18 @@ function getCurRoutePath(route) {
 }
 
 /**
+ * wrapPathByBase - 使用base包裹path
+ * @param base - String 项目的base
+ * @param path - String 路径
+ * @return string wrapPath
+ */
+function wrapPathByBase(base, path) {
+  if (path === '*') return path;
+
+  return `${base}/${path}`.replace(/\/{2,}/gim, '/');
+}
+
+/**
  * VueRouter - 路由
  * @class VueRouter
  * @classdesc VueRouter
@@ -130,7 +142,7 @@ class VueRouter {
    * }
    */
   constructor(config) {
-    this.$config = getConfig(config);
+    this.$config = getConfig({ base: '/', ...config });
 
     // 需要处理$config中routes这个属性，这个属性是一个树形结构，需要接入parent属性
     linkRoutes(this.$config.routes || []);
@@ -154,7 +166,7 @@ class VueRouter {
     const { pathname } = window.location;
 
     // 获取$config.routes
-    const { routes } = this.$config;
+    const { routes, base } = this.$config;
 
     let result;
 
@@ -163,10 +175,25 @@ class VueRouter {
 
       const keys = [];
 
-      const reg = pathToRegexp(path, keys);
+      // 通过路由中定义的path生成正则表达式
+      const reg = pathToRegexp(wrapPathByBase(base, path), keys, {
+        sensitive: false, // When true the route will be case sensitive. (default: false)
+        strict: false, // When false the trailing slash is optional. (default: false)
+        end: 'exact' in routes[i], // When false the path will match at the beginning. (default: true)
+        delimiter: '/', // Set the default delimiter for repeat parameters. (default: '/')
+      });
       // keys = [{ name: 'foo', prefix: '/', ... }, { name: 'bar', prefix: '/', ... }]
 
-      // 如果patchname匹配的path
+      // /children 全路径
+
+      // / ~ 正则 ~ 不能命中这个
+      // children ~ 正则 ~ 只能命中这个
+      // :id/:name
+
+      // window.location.pathname 是一个全的路径
+      // 而router中配置的嵌套路由则是pathname中的一部分
+
+      // 如果pathname匹配的path
       if (reg.test(pathname)) {
         const paramMap = {};
 
@@ -208,8 +235,10 @@ class VueRouter {
 
     let result;
 
+    const { base } = this.$config;
+
     // 获取route向上的完整路径
-    const parentFullPath = getCurRoutePath(route);
+    const parentFullPath = wrapPathByBase(base, getCurRoutePath(route));
 
     for (let i = 0, len = (children || []).length; i < len; i++) {
       const { path, component } = children[i];
@@ -226,7 +255,13 @@ class VueRouter {
         curPath = `${parentFullPath}/${path}`;
       }
 
-      const reg = pathToRegexp(curPath, keys);
+      //
+      const reg = pathToRegexp(curPath, keys, {
+        sensitive: false, // When true the route will be case sensitive. (default: false)
+        strict: false, // When false the trailing slash is optional. (default: false)
+        end: 'exact' in children[i], // When false the path will match at the beginning. (default: true)
+        delimiter: '/', // Set the default delimiter for repeat parameters. (default: '/')
+      });
       // keys = [{ name: 'foo', prefix: '/', ... }, { name: 'bar', prefix: '/', ... }]
 
       // 如果patchname匹配的path

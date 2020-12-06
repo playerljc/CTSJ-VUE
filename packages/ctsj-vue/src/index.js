@@ -25,6 +25,11 @@ const LogonComponent = {
   `,
 };
 
+const CommonComponent = {
+  template: `<div>我是Common组件</div>`,
+};
+
+Vue.component('common-component', CommonComponent);
 Vue.component('my-component', MyComponent);
 Vue.component('my-children-component', MyComponentChildren);
 Vue.component('login-component', LogonComponent);
@@ -32,9 +37,18 @@ Vue.component('login-component', LogonComponent);
 const router = new VueRouter({
   routes: [
     {
+      path: '/log',
+      exact: 'exact',
+      component: LogonComponent,
+    },
+    {
       path: '/',
       component: MyComponent,
       children: [
+        {
+          path: '',
+          component: MyComponentChildren,
+        },
         {
           path: 'children',
           component: MyComponentChildren,
@@ -42,8 +56,8 @@ const router = new VueRouter({
       ],
     },
     {
-      path: '/login',
-      component: LogonComponent,
+      path: '*',
+      component: CommonComponent,
     },
   ],
 });
@@ -73,7 +87,7 @@ const ins = new Vue({
             </dd>
           </dl>-->
           
-          <div>普通的文本</div>
+          <div>vue实例template的div</div>
           <router-view></router-view>
         </div>
       `,
