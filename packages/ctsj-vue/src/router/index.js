@@ -1,6 +1,14 @@
 import pathToRegexp from 'path-to-regexp';
 
-import { cloneDeep, isBoolean, isObject, isFunction, isString, isEmpty } from '@ctsj/vue-util';
+import {
+  cloneDeep,
+  isBoolean,
+  isObject,
+  isFunction,
+  isString,
+  isEmpty,
+  isArray,
+} from '@ctsj/vue-util';
 
 import { PATH_SPLIT, MULIT_SPLIT_REGEX } from './constants';
 
@@ -16,7 +24,7 @@ function getConfig(config) {
 
   for (const p in config) {
     Object.defineProperty(result, p, {
-      writable: true,
+      writable: false,
       value: config[p],
     });
   }
@@ -642,6 +650,86 @@ class VueRouter {
    */
   go(number) {
     window.history.go(number);
+  }
+
+  /**
+   * back - 和history一致
+   */
+  back() {
+    window.history.back();
+  }
+
+  /**
+   * forward - 和history一致
+   */
+  forward() {
+    window.history.forward();
+  }
+
+  /**
+   * insertRoute - 动态添加route
+   * @param curRoute - Route 当前要操作的Route 如果为空则向router的第一级配置中添加
+   * @param index - 插入的位置 如果是-1则是向头部添加，如果大于length，则也是向尾部添加
+   * @param route - [Route | Array[Route] ] 添加的Route数据
+   */
+  insertRoute({ curRoute, index, route }) {
+    const execRoute = curRoute || this.$config;
+
+    if ('children' in execRoute) {
+      if (isArray(execRoute.children)) {
+        if (index === -1) {
+          this.unshiftRoute({ curRoute, route });
+        } else if (index >= execRoute.children.length) {
+          this.pushRoute({ curRoute, route });
+        } else if (isArray(route)) {
+          execRoute.children.splice(index, 0, ...route);
+        } else {
+          execRoute.children.splice(index, 0, route);
+        }
+      }
+    }
+  }
+
+  /**
+   * pushRoute - 动态尾部添加Route
+   * @param curRoute - Route 当前要操作的Route 如果为空则向router的第一级配置中添加
+   * @param route - [Route | Array[Route] ] 添加的Route数据
+   */
+  pushRoute({ curRoute, route }) {
+    const execRoute = curRoute || this.$config;
+
+    if ('children' in execRoute) {
+      if (isArray(execRoute.children)) {
+        if (isObject(route)) {
+          execRoute.children.push(route);
+        }
+
+        if (isArray(route)) {
+          execRoute.children = execRoute.children.concat(route);
+        }
+      }
+    }
+  }
+
+  /**
+   * unshiftRoute - 动态头部添加Route
+   * @param curRoute - Route 当前要操作的Route 如果为空则向router的第一级配置中添加
+   * @param route - [Route | Array[Route] ] 添加的Route数据
+   */
+  unshiftRoute({ curRoute, route }) {
+    const execRoute = curRoute || this.$config;
+
+    if ('children' in execRoute) {
+      if (isArray(execRoute.children)) {
+        if (isObject(route)) {
+          execRoute.children.unshift(route);
+        }
+
+        if (isArray(route)) {
+          execRoute.children = route.concat(execRoute.children);
+        }
+      }
+    }
   }
 }
 
