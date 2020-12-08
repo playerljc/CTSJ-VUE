@@ -7,6 +7,7 @@ import { LIFECYCLE_HOOKS } from '../shared/constants';
  * @return VNode | Array<VNode>
  */
 export function renderComponent() {
+  // 组件的实例对象
   const self = this;
 
   // 组件实例代表的vnode
@@ -47,6 +48,12 @@ export function renderComponent() {
     insert: (curVNode) => {
       if (curVNode === vnode) {
         // ------ mount
+
+        // 如果组件的配置中含有$vmCallback，这需要调用这个函数传入self
+        if ('$vmCallback' in self.$config && self.$config.$vmCallback) {
+          self.$config.$vmCallback(self);
+        }
+
         triggerLifecycle.call(self, LIFECYCLE_HOOKS[3]);
       }
     },

@@ -9,7 +9,7 @@ import {
   pascalCaseToKebabCase,
 } from '../../shared/util';
 import { getComponentConfig } from './util';
-import { mergeComputed, mergeData, mergeMethods, mergeProps } from '../merge';
+import { mergeComputed, mergeData, mergeMethods, mergeRouterHooks, mergeProps } from '../merge';
 import { resetComputed, triggerLifecycle, mixinConfig } from '../util';
 
 import { getGlobalConfig } from '../index';
@@ -191,6 +191,9 @@ class Component {
 
     // methods混入
     mergeMethods.call(this);
+
+    // 组件路由钩子混入
+    mergeRouterHooks.call(this);
 
     // 创建template的el对象
     this.templateEl = createElement(this.$config.template);

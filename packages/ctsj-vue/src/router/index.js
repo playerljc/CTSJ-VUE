@@ -10,9 +10,13 @@ import {
   isArray,
 } from '@ctsj/vue-util';
 
-import { PATH_SPLIT, MULIT_SPLIT_REGEX } from './constants';
+import { PATH_SPLIT } from './constants';
 
 import { parse, stringify } from './qs';
+
+import { guard, clear } from './routeHooks';
+
+import { wrapPathByBase, getCurRoutePath } from './util';
 
 /**
  * getConfig - 获取配置
@@ -204,52 +208,6 @@ function createPath(location) {
 }
 
 /**
- * getCurRoutePath - 获取route向上的完整路径
- * @param route - Object 当前的路由对象
- * @return string
- */
-function getCurRoutePath(route) {
-  const result = [];
-
-  let curRoute = route;
-
-  while (curRoute) {
-    result.push(curRoute.path);
-
-    // 不是以/结尾在添加/
-    if (curRoute.path.lastIndexOf(PATH_SPLIT) === -1) {
-      result.push(PATH_SPLIT);
-    }
-
-    curRoute = curRoute.parent;
-  }
-
-  if (result.length) {
-    // 不是以/开头
-    if (result[0].indexOf(PATH_SPLIT) === -1) {
-      result.unshift(PATH_SPLIT);
-    }
-
-    // 不是以/结尾
-    if (result[result.length - 1].indexOf(PATH_SPLIT) === -1) {
-      result.push(PATH_SPLIT);
-    }
-  }
-
-  return result.reverse().join('').replace(MULIT_SPLIT_REGEX, PATH_SPLIT);
-}
-
-/**
- * wrapPathByBase - 使用base包裹path
- * @param base - String 项目的base
- * @param path - String 路径
- * @return string wrapPath
- */
-function wrapPathByBase(base, path) {
-  return `${base}/${path}`.replace(MULIT_SPLIT_REGEX, PATH_SPLIT);
-}
-
-/**
  * findRouteByName - 通过route的name属性寻找route的配置
  * @param routerConfigv - Array 路由的配置
  * @param name - string 视图的名字
@@ -283,6 +241,93 @@ function findRouteByName(routerConfigv, name) {
 function onPopstate() {
   // 这里会执行强制刷新
   this.$root.$forceUpdate();
+}
+
+/**
+ * historyChange - 改变路由的地址
+ * @param location - [string | Object] 导航的信息
+ * @param onComplete - Function
+ * @param onAbort - Function
+ * @param historyChangeCallback - Function history改变的回调
+ * @return Promise
+ *
+ * // 字符串
+ router.push('home')
+
+ // 对象
+ router.push({ path: 'home' })
+
+ // 命名的路由
+ router.push({ name: 'user', params: { userId: '123' }})
+
+ // 带查询参数，变成 /register?plan=private
+ router.push({ path: 'register', query: { plan: 'private' }})
+
+
+ const userId = '123'
+ router.push({ name: 'user', params: { userId }}) // -> /user/123
+ router.push({ path: `/user/${userId}` }) // -> /user/123
+ // 这里的 params 不生效
+ router.push({ path: '/user', params: { userId }}) // -> /user
+
+
+ 在 2.2.0+，可选的在 router.push 或 router.replace 中提供 onComplete 和 onAbort 回调作为第二个和第三个参数。这些回调将会在导航成功完成 (在所有的异步钩子被解析之后) 或终止 (导航到相同的路由、或在当前导航完成之前导航到另一个不同的路由) 的时候进行相应的调用。在 3.1.0+，可以省略第二个和第三个参数，此时如果支持 Promise，router.push 或 router.replace 将返回一个 Promise。
+
+ 注意： 如果目的地和当前路由相同，只有参数发生了改变 (比如从一个用户资料到另一个 /users/1 -> /users/2)，你需要使用 beforeRouteUpdate 来响应这个变化 (比如抓取用户信息)
+ */
+function historyChange({ location, onComplete, onAbort, historyChangeCallback }) {
+  const self = this;
+
+  const { pathname } = window.location;
+
+  // 1.根据数据拼接路径(这个路径是要跳转到的路径)
+  const path = createPath.call(self, location);
+
+  // 设置router的currentRoute对象
+  self.currentRoute = {
+    from: pathname,
+    to: path,
+  };
+
+  return new Promise(function (resolve, reject) {
+    // 这里要要进行路由守卫的操作
+    // guard(path, self)
+    //   .then(() => {
+    // 到这里已经可以进行path的跳转了
+
+    // 2.使用history.pushState替换浏览器路径
+    historyChangeCallback(path);
+
+    // 清空匹配数据
+    clear();
+
+    // 3.执行重新渲染
+    if (self.$root.$forceUpdate()) {
+      if (onComplete) {
+        onComplete();
+      }
+
+      // 调用全局的 afterEach 钩子
+      if ('afterEach' in self && isFunction(self.afterEach)) {
+        self.afterEach(path, pathname);
+      }
+
+      resolve();
+    }
+    // 渲染失败
+    else {
+      if (onAbort) {
+        onAbort();
+      }
+
+      reject();
+    }
+  }).catch((result) => {
+    // 如果到了这里是不能进行路由跳转的
+    // 会对result进行处理
+    // 这里result会是对象，或字符串(重定向的字符串)或者是null
+  });
+  // });
 }
 
 /**
@@ -363,8 +408,11 @@ class VueRouter {
 
       const keys = [];
 
+      // 生成正则表达式的路径
+      const targetPath = wrapPathByBase(base, path);
+
       // 通过路由中定义的path生成正则表达式
-      const reg = pathToRegexp(wrapPathByBase(base, path), keys, {
+      const reg = pathToRegexp(targetPath, keys, {
         sensitive: false, // When true the route will be case sensitive. (default: false)
         strict: false, // When false the trailing slash is optional. (default: false)
         end: 'exact' in routes[i], // When false the path will match at the beginning. (default: true)
@@ -403,6 +451,7 @@ class VueRouter {
           name,
         });
 
+        // 返回值
         result = {
           // 命中的组件
           component: curComponent,
@@ -412,6 +461,10 @@ class VueRouter {
           route: routes[i],
           // 命中的组件props的信息
           props: createProps({ detail, props }),
+          // 当前路由配置路径
+          path: targetPath,
+          // 匹配的正则表达式
+          regexp: reg,
         };
 
         // 命中后就结束迭代
@@ -460,7 +513,9 @@ class VueRouter {
         curPath = `${parentFullPath}/${path}`;
       }
 
-      //
+      debugger;
+
+      // 生成正则表达式
       const reg = pathToRegexp(curPath, keys, {
         sensitive: false, // When true the route will be case sensitive. (default: false)
         strict: false, // When false the trailing slash is optional. (default: false)
@@ -490,6 +545,7 @@ class VueRouter {
           paramMap,
         });
 
+        // 返回值
         result = {
           // 命中的组件
           component: curComponent,
@@ -499,6 +555,10 @@ class VueRouter {
           route: children[i],
           // 命中组件的props信息
           props: createProps({ detail, props }),
+          // 当前路由配置路径
+          path: curPath,
+          // 匹配的正则表达式
+          regexp: reg,
         };
 
         // 命中后就结束迭代
@@ -570,36 +630,20 @@ class VueRouter {
      注意： 如果目的地和当前路由相同，只有参数发生了改变 (比如从一个用户资料到另一个 /users/1 -> /users/2)，你需要使用 beforeRouteUpdate 来响应这个变化 (比如抓取用户信息)
    */
   push(location, onComplete, onAbort) {
-    const self = this;
-
-    // 1.根据数据拼接路径
-    const path = createPath.call(self, location);
-
-    // 2.使用history.pushState替换浏览器路径
-    window.history.pushState(
-      {
-        location,
-        path,
+    return historyChange.call(this, {
+      location,
+      onComplete,
+      onAbort,
+      historyChangeCallback: (path) => {
+        window.history.pushState(
+          {
+            location,
+            path,
+          },
+          path,
+          path,
+        );
       },
-      path,
-      path,
-    );
-
-    // 3.触发Vue实例的render方法重新渲染
-    return new Promise(function (resolve, reject) {
-      if (self.$root.$forceUpdate()) {
-        if (onComplete) {
-          onComplete();
-        }
-
-        resolve();
-      } else {
-        if (onAbort) {
-          onAbort();
-        }
-
-        reject();
-      }
     });
   }
 
@@ -611,36 +655,20 @@ class VueRouter {
    * @return Promise
    */
   replace(location, onComplete, onAbort) {
-    const self = this;
-
-    // 1.根据数据拼接路径
-    const path = createPath.call(self, location);
-
-    // 2.使用history.pushState替换浏览器路径
-    window.history.replaceState(
-      {
-        location,
-        path,
+    return historyChange.call(this, {
+      location,
+      onComplete,
+      onAbort,
+      historyChangeCallback: (path) => {
+        window.history.replaceState(
+          {
+            location,
+            path,
+          },
+          path,
+          path,
+        );
       },
-      path,
-      path,
-    );
-
-    // 3.触发Vue实例的render方法重新渲染
-    return new Promise(function (resolve, reject) {
-      if (self.$root.$forceUpdate()) {
-        if (onComplete) {
-          onComplete();
-        }
-
-        resolve();
-      } else {
-        if (onAbort) {
-          onAbort();
-        }
-
-        reject();
-      }
     });
   }
 

@@ -1,4 +1,6 @@
 import { isEmpty, uuid } from '@ctsj/vue-util';
+import { push as matchRoutePush } from '@ctsj/vue-router/routeHooks';
+
 import { getAttrEntrys, getKey, getVAttrNames } from './directives/util';
 import { hasVFor, parseVFor } from './directives/for';
 import { hasVIf, parseVIf } from './directives/if';
@@ -201,6 +203,16 @@ export function renderComponentNode({ context, el, parentVNode, parentElement, r
       $route,
     });
 
+    // 当前匹配路由的设置
+    if (route && $route) {
+      matchRoutePush({
+        path: $route.path,
+        regexp: $route.regexp,
+        route,
+        component,
+      });
+    }
+
     // 处理ref
     if (refVal) {
       self.$refs[refVal] = component;
@@ -210,6 +222,16 @@ export function renderComponentNode({ context, el, parentVNode, parentElement, r
 
     // 调用组件的render方法返回VNode
     return component.$render();
+  }
+
+  // 当前匹配路由的设置
+  if (route && $route) {
+    matchRoutePush({
+      path: $route.path,
+      regexp: $route.regexp,
+      route,
+      component,
+    });
   }
 
   // 处理ref

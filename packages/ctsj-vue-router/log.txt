@@ -60,9 +60,10 @@ Vue实例
 
  /system/list    /car/list/add
 
- / -> App
- /system/:id/:name -> System
- /system/list SystemList
+ /system/123/456?id=1&name=2  ->  /system/567
+ / -> App -> /
+ /system System -> /system
+ /system/:id/:name -> SystemList -> /system/123/456
 
  核心算法
  .建立一个全局对象，用来存储在render中解析<router-view>标签路径和组件的对用关系
@@ -72,10 +73,11 @@ Vue实例
 
 
  导航被触发。
- 在失活的组件里调用 beforeRouteLeave 守卫。
+ 在(失活)的组件里调用 beforeRouteLeave 守卫。
  调用全局的 beforeEach 守卫。
- 在重用的组件里调用 beforeRouteUpdate 守卫 (2.2+)。
+ 在(重用)的组件里调用 beforeRouteUpdate 守卫 (2.2+)。
  在路由配置里调用 beforeEnter。
+
  解析异步路由组件。
  在被激活的组件里调用 beforeRouteEnter。
  调用全局的 beforeResolve 守卫 (2.5+)。

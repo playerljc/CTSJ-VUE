@@ -1,4 +1,5 @@
 import { isEmpty, isObject, uuid } from '@ctsj/vue-util';
+
 import { pascalCaseToKebabCase } from '../shared/util';
 import { getAttribute, getKey, getVAttrNames } from './directives/util';
 import { hasVFor, parseVFor } from './directives/for';
@@ -149,6 +150,10 @@ export function renderRouterViewNode({ context, el, parentVNode, parentElement }
     route,
     // 传递给组件的props值
     props,
+    // 匹配的路由配置项
+    path,
+    // 匹配的正则表达式
+    regexp,
   } = matchResult;
 
   // 初始化$route对象
@@ -191,6 +196,6 @@ export function renderRouterViewNode({ context, el, parentVNode, parentElement }
     parentVNode,
     parentElement,
     route,
-    $route: { ...detail },
+    $route: { ...detail, path, regexp },
   });
 }
