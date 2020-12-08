@@ -33,3 +33,28 @@ Vue实例
        </div>
     </div>
   `
+
+
+~~~~功能的列表
+
+.router-view标签解析 ok
+ .$router
+ .$route
+   .query
+   .params
+.嵌套路由解析 ok
+.router-view name(命名视图)解析 ok
+ .components
+.props ok
+.编程方式的api ok
+ .push
+ .replace
+ .go
+.<route-link>
+
+.重定向
+.路由的守卫
+ .全局
+ .路由配置
+ .组件
+.懒加载

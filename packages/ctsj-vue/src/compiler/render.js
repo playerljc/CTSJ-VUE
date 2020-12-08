@@ -81,19 +81,25 @@ export function render(el, isMount) {
      * 一个元素被直接或间接删除
      */
     destroy: (curVNode) => {
+      // vue实例销毁的时候需要调用router的销毁,执行router的销毁操作
+      self.$router.$destory();
+
       if (curVNode === vnode) {
         triggerLifecycle.call(self, LIFECYCLE_HOOKS[7]);
       }
     },
   });
 
+  // 挂载
   if (isMount) {
     // 需要赋值$preVNode
     // this.$preVNode = vnode;
     this.$preVNode = patch(el, vnode);
     // ------ mount
     triggerLifecycle.call(self, LIFECYCLE_HOOKS[3]);
-  } else {
+  }
+  // 更新
+  else {
     if (!this.$preVNode) {
       this.$preVNode = vnode;
     }

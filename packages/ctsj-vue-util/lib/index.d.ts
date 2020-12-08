@@ -23,6 +23,18 @@ export function isArray(obj: any): boolean;
  */
 export function isNumber(val: any): boolean;
 /**
+ * isBoolean - 判断是否是boolean
+ * @param val
+ * @return {boolean}
+ */
+export function isBoolean(val: any): boolean;
+/**
+ * isString - 判断是否是string
+ * @param val
+ * @return {boolean}
+ */
+export function isString(val: any): boolean;
+/**
  * isFunction - 判断函数
  * @param obj
  * @return {boolean}

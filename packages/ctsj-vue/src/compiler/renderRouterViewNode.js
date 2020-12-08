@@ -1,5 +1,6 @@
-import { isEmpty, uuid } from '@ctsj/vue-util';
-import { getKey, getVAttrNames } from './directives/util';
+import { isEmpty, isObject, uuid } from '@ctsj/vue-util';
+import { pascalCaseToKebabCase } from '../shared/util';
+import { getAttribute, getKey, getVAttrNames } from './directives/util';
 import { hasVFor, parseVFor } from './directives/for';
 import { hasVIf, parseVIf } from './directives/if';
 import { hasVElse, parseVElse } from './directives/else';
@@ -11,6 +12,12 @@ import { renderComponentNode } from './renderComponentNode';
 
 /**
  * renderRouterViewNode - 渲染router-view元素
+ *
+ * 其实<router-view>会被转换成一个组件节点，这个方法的核心目的是
+ * 通过路由的配置和window.location.pathname进行匹配选择出一个匹配的路由项
+ * 匹配的路由项中会有component信息，params，query，name，fullpath等一系列信息
+ * 细节会分为this是Vue实例和this是组件实例2种情况下
+ *
  * @param context - Object 上下文对象
  * @param el - HtmlElement 元素
  * @param parentVNode VNode
@@ -18,7 +25,6 @@ import { renderComponentNode } from './renderComponentNode';
  * @return VNode
  */
 export function renderRouterViewNode({ context, el, parentVNode, parentElement }) {
-  debugger;
   const vAttrNames = getVAttrNames(el);
 
   let key;
@@ -104,6 +110,9 @@ export function renderRouterViewNode({ context, el, parentVNode, parentElement }
   // 这个key属性可能是v-bind:key=，也可能是key=
   key = getKey.call(this, { context, el });
 
+  // 获取<router-view>的name属性值，缺省是default，为了处理命名视图
+  const name = getAttribute({ context, attrName: 'name', el }) || 'default';
+
   // 根据路由配置获取component的组件，然后根据component反查tagName
   // 创建tagName的元素
 
@@ -111,14 +120,14 @@ export function renderRouterViewNode({ context, el, parentVNode, parentElement }
 
   // 如果是vue实例
   if (isVueInstance(this)) {
-    //  得到routes的配置数据
-    matchResult = this.$router.$getComponentIsVueIns();
+    // 在ins是vue实例的情况下获取路由的匹配信息
+    matchResult = this.$router.$getComponentIsVueIns(name);
   }
   // 如果是组件
   else if (isComponentInstance(this)) {
-    //  得到浏览器的pathname
+    //  在ins是组件实例的情况下获取路由的匹配信息
     //  组件的实例中需要有路由的配置项信息(重点)
-    matchResult = this.$router.$getComponentIsComIns(this.$matchRoute);
+    matchResult = this.$router.$getComponentIsComIns(this.$matchRoute, name);
   }
 
   // 如果没有匹配的路由说明连*都没写
@@ -131,10 +140,19 @@ export function renderRouterViewNode({ context, el, parentVNode, parentElement }
   }
 
   // 结构matchResult
-  const { component, detail, route } = matchResult;
+  const {
+    // 匹配的组件配置
+    component,
+    // 匹配的详细信息
+    detail,
+    // 匹配的路由项
+    route,
+    // 传递给组件的props值
+    props,
+  } = matchResult;
 
   // 初始化$route对象
-  this.$route = { ...detail };
+  // this.$route = { ...detail };
 
   // 根据component去全局注册中寻找组件的名字
   const comName = getNameByComponentInGlobal(component);
@@ -142,7 +160,29 @@ export function renderRouterViewNode({ context, el, parentVNode, parentElement }
   // 根据注册的名字创建一个el元素并赋值key属性
   const comEl = document.createElement(comName);
 
-  comEl.setAttribute('key', key);
+  let entry = this.componentsMap.get(key);
+
+  if (!entry) {
+    entry = { component, key: uuid() };
+    this.componentsMap.set(key, entry);
+  }
+
+  // 如果2次组件是不一致的会重新生成key
+  if (component !== entry.component) {
+    entry.component = component;
+    entry.key = uuid();
+  }
+
+  // 给组件元素设置key属性
+  comEl.setAttribute('key', entry.key);
+
+  // 给comEl元素设置props的值
+  if (props && isObject(props)) {
+    Array.from(Object.keys(props)).forEach(function (property) {
+      // props的属性是驼峰的需要转换成kebabCase形式
+      comEl.setAttribute(pascalCaseToKebabCase(property), props[property]);
+    });
+  }
 
   // 调用renderComponentNode方法
   return renderComponentNode.call(this, {
@@ -151,5 +191,6 @@ export function renderRouterViewNode({ context, el, parentVNode, parentElement }
     parentVNode,
     parentElement,
     route,
+    $route: { ...detail },
   });
 }

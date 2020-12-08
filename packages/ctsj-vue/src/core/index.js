@@ -1,5 +1,10 @@
 import { createElement, isFunction, cloneDeep, isObject } from '@ctsj/vue-util';
-import { isKebabCase, isPascalCase, pascalCaseToKebabCase } from './component/util';
+import {
+  isKebabCase,
+  isPascalCase,
+  pascalCaseToKebabCase,
+  createExecutionContext,
+} from '../shared/util';
 import { patch } from './vdom';
 import { register } from './component/register';
 import { render } from '../compiler/render';
@@ -7,7 +12,6 @@ import { LIFECYCLE_HOOKS } from '../shared/constants';
 import { mergeData, mergeComputed, mergeMethods } from './merge';
 import { triggerLifecycle, getEl, mixinConfig } from './util';
 import { createVueProxy } from './proxy';
-import { createExecutionContext } from '../shared/util';
 
 /**
  * findVNodeParentByKey - 查询key的Parent
@@ -151,6 +155,10 @@ class Vue {
 
     // 路由对象的引用
     this.$router = this.$config.router;
+    // 给router(路由的对象)设置vue实例对象
+    if (this.$router && isFunction(this.$router.$setVueIns)) {
+      this.$router.$setVueIns(this);
+    }
 
     // 纯净的data数据，没有进行代理的，在watch中使用
     this.$noProxySrcData = cloneDeep(isFunction(this.$config.data) ? this.$config.data() : {});
@@ -201,14 +209,26 @@ class Vue {
   $refresh(VNode) {
     // this.$preVNode
     const cloneNode = cloneDeep(this.$preVNode);
+
     const parent = findVNodeParentByKey.call(this, cloneNode, VNode.key);
+
     if (parent) {
       const index = parent.children.findIndex((node) => node.key === VNode.key);
+
       if (index !== -1) {
         parent.children[index] = VNode;
         this.$preVNode = patch(this.$preVNode, cloneNode);
       }
     }
+  }
+
+  /**
+   * $forceUpdate - Vue实例重新渲染
+   * @return boolean
+   */
+  $forceUpdate() {
+    // 渲染
+    return render.call(this, this.$config.el, false);
   }
 }
 

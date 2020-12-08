@@ -18,6 +18,34 @@ export function toCamelCase(str, toUpperCase = false) {
 }
 
 /**
+ * isKebabCase - 是否是烤肉串形式的名字
+ * @param name - string 名称
+ * @return boolean
+ */
+export function isKebabCase(name) {
+  return /^([a-z][a-z0-9]*)(-[a-z0-9]+)*$/.test(name);
+}
+
+/**
+ * isPascalCase - 是否是驼峰形式的名字
+ * @param name - string 名称
+ * @return boolean
+ */
+export function isPascalCase(name) {
+  return /^[A-Z][a-z]+(?:[A-Z][a-z]+)*$/.test(name);
+}
+
+/**
+ * pascalCaseToKebabCase 驼峰转xxx-xxx-xxx
+ * @param name - string pascalCase的字符串
+ * @return {string}
+ */
+export function pascalCaseToKebabCase(name) {
+  const result = name.replace(/([a-z0-9]|(?=[A-Z]))([A-Z])/g, '$1-$2');
+  return (result.startsWith('-') ? result.substring(1) : result).toLowerCase();
+}
+
+/**
  * execExpression - 执行表达式
  * @param context - {Object} 执行的上下文
  * @param expressionStr - {String} 表达式

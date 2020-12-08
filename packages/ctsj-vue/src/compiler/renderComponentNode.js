@@ -18,9 +18,10 @@ import { isVueInstance } from '../core/util';
  * @param parentVNode - VNode 父元素VNode
  * @param parentElement - HtmlElement 父元素
  * @param route - Object 如果是路由匹配，则是匹配路由的配置项
+ * @param $route - Object 当前的路由信息
  * @return VNode | Array<VNode>
  */
-export function renderComponentNode({ context, el, parentVNode, parentElement, route }) {
+export function renderComponentNode({ context, el, parentVNode, parentElement, route, $route }) {
   // 合并多个文本节点为一个文本节点
   el.normalize();
 
@@ -197,6 +198,7 @@ export function renderComponentNode({ context, el, parentVNode, parentElement, r
       el,
       key,
       route,
+      $route,
     });
 
     // 处理ref
@@ -220,6 +222,9 @@ export function renderComponentNode({ context, el, parentVNode, parentElement, r
 
   // 重新赋值一下$matchRoute
   component.$matchRoute = route;
+
+  // 当前路由信息
+  component.$route = $route;
 
   console.log('componentUpdate', 'update');
 

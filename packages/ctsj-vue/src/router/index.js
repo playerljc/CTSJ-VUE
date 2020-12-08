@@ -1,8 +1,10 @@
 import pathToRegexp from 'path-to-regexp';
 
-import { cloneDeep } from '@ctsj/vue-util';
+import { cloneDeep, isBoolean, isObject, isFunction, isString, isEmpty } from '@ctsj/vue-util';
 
-import { parse } from './qs';
+import { PATH_SPLIT, MULIT_SPLIT_REGEX } from './constants';
+
+import { parse, stringify } from './qs';
 
 /**
  * getConfig - 获取配置
@@ -50,9 +52,10 @@ function linkRouteLoop(route) {
  * createRoute - 创建route
  * @param route - Object 命中的route配置
  * @param paramMap - :foo/:bar 等的匹配对象
+ * @param name - string 命名的路由名称
  * @return Object
  */
-function createRoute({ route, paramMap }) {
+function createRoute({ route, paramMap, name }) {
   return {
     // 字符串，对应当前路由的路径，总是解析为绝对路径，如 "/foo/bar"
     path: getCurRoutePath(route),
@@ -67,10 +70,129 @@ function createRoute({ route, paramMap }) {
     // 一个数组，包含当前路由的所有嵌套路径片段的路由记录 。路由记录就是 routes 配置数组中的对象副本 (还有在 children 数组)
     matched: cloneDeep(route),
     // 当前路由的名称，如果有的话。(查看命名路由)
-    name: '',
+    name,
     // 如果存在重定向，即为重定向来源的路由的名字。(参阅重定向和别名)
     redirectedFrom: '',
   };
+}
+
+/**
+ * createProps - 创建命中组件的props对象
+ * @param detail - 命中的路由详细信息
+ * @param props [boolean | Object | Function] 命中的路由配置中props属性的配置
+ * @return Object
+ */
+function createProps({ detail, props }) {
+  // props是boolean值
+  // .布尔模式
+  //  如果 props 被设置为 true，route.params 将会被设置为组件属性。
+  if (isBoolean(props) && props) {
+    return { ...detail.params };
+  }
+
+  // props是object
+  // .对象模式
+  //  如果 props 是一个对象，它会被按原样设置为组件属性。当 props 是静态的时候有用
+  if (isObject(props)) {
+    return { ...props };
+  }
+
+  // props是function
+  // .函数模式
+  //  你可以创建一个函数返回 props。这样你便可以将参数转换成另一种类型，将静态值与基于路由的值结合等等
+  if (isFunction(props)) {
+    return props({ ...detail });
+  }
+
+  return null;
+}
+
+/**
+ * createPath - 创建push | replace方法的path路径
+ * @param location - [string | Object] 导航的信息
+ * @return string path
+ *
+ *
+ * // 字符串
+ router.push('home')
+
+ // 对象
+ router.push({ path: 'home' })
+
+ // 命名的路由
+ router.push({ name: 'user', params: { userId: '123' }})
+
+ // 带查询参数，变成 /register?plan=private
+ router.push({ path: 'register', query: { plan: 'private' }})
+
+
+ const userId = '123'
+ router.push({ name: 'user', params: { userId }}) // -> /user/123
+ router.push({ path: `/user/${userId}` }) // -> /user/123
+ // 这里的 params 不生效
+ router.push({ path: '/user', params: { userId }}) // -> /user
+ */
+function createPath(location) {
+  if (isEmpty(location)) return '';
+
+  // location是string 那就是path的值
+  if (isString(location)) {
+    return location;
+  }
+
+  // location是Object
+  if (isObject(location)) {
+    // 替换params和query参数到path上
+    const { name, params = {}, query = {} } = location;
+
+    // 路由的配置项
+    const {
+      $config: { routes = [] },
+    } = this;
+
+    // 如果含有name属性(命名视图)
+    if ('name' in location && !isEmpty(name)) {
+      const route = findRouteByName(routes || [], name);
+
+      if (route) {
+        // 获取当前route的全路径
+        let path = getCurRoutePath(route);
+
+        // 替换params和query参数
+
+        // 替换params
+        // params对象是 {
+        //   userId: '123',
+        //   teacherId: '456',
+        // }
+        // 假如路径是 /system/:userId/:teacherId/abc/def
+        const toPath = pathToRegexp.compile(path, { encode: encodeURIComponent });
+        path = toPath(params || {});
+
+        // 替换query参数
+        // query对象是 {
+        //   id: '1',
+        //   name: 'lzq',
+        // }
+        // 假如路径是 /system/abc/def/
+        path = `${path}${stringify(query || {})}`;
+
+        return path;
+      }
+    }
+
+    // 如果含有path属性
+    if ('path' in location && !isEmpty(location.path)) {
+      // 替换query参数到path上
+      let { path } = location;
+
+      path = `${path}${stringify(query || {})}`;
+
+      return path;
+    }
+  }
+
+  return '';
 }
 
 /**
@@ -87,8 +209,8 @@ function getCurRoutePath(route) {
     result.push(curRoute.path);
 
     // 不是以/结尾在添加/
-    if (curRoute.path.lastIndexOf('/') === -1) {
-      result.push('/');
+    if (curRoute.path.lastIndexOf(PATH_SPLIT) === -1) {
+      result.push(PATH_SPLIT);
     }
 
     curRoute = curRoute.parent;
@@ -96,17 +218,17 @@ function getCurRoutePath(route) {
 
   if (result.length) {
     // 不是以/开头
-    if (result[0].indexOf('/') === -1) {
-      result.unshift('/');
+    if (result[0].indexOf(PATH_SPLIT) === -1) {
+      result.unshift(PATH_SPLIT);
     }
 
     // 不是以/结尾
-    if (result[result.length - 1].indexOf('/') === -1) {
-      result.push('/');
+    if (result[result.length - 1].indexOf(PATH_SPLIT) === -1) {
+      result.push(PATH_SPLIT);
     }
   }
 
-  return result.reverse().join('');
+  return result.reverse().join('').replace(MULIT_SPLIT_REGEX, PATH_SPLIT);
 }
 
 /**
@@ -116,9 +238,43 @@ function getCurRoutePath(route) {
  * @return string wrapPath
  */
 function wrapPathByBase(base, path) {
-  if (path === '*') return path;
+  return `${base}/${path}`.replace(MULIT_SPLIT_REGEX, PATH_SPLIT);
+}
 
-  return `${base}/${path}`.replace(/\/{2,}/gim, '/');
+/**
+ * findRouteByName - 通过route的name属性寻找route的配置
+ * @param routerConfigv - Array 路由的配置
+ * @param name - string 视图的名字
+ * @return Route
+ */
+function findRouteByName(routerConfigv, name) {
+  let result;
+
+  for (let i = 0, len = (routerConfigv || []).length; i < len; i++) {
+    const route = routerConfigv[i];
+    if (route.name === 'name') {
+      result = route;
+      break;
+    } else {
+      result = findRouteByName(route.children || [], name);
+      if (result) break;
+    }
+  }
+
+  return result;
+}
+
+/**
+ * onPopstate - 并且仅当用户在同一文档的两个历史记录条目之间导航时才触发该事件
+ * @param e - HtmlEvent
+ *
+ * 注意：仅调用history.pushState()或history.replaceState()不会触发popstate事件。
+ *      该popstate事件仅做一个浏览器行动，诸如后退按钮的点击（或调用触发history.back()JavaScript中）。
+ *      并且仅当用户在同一文档的两个历史记录条目之间导航时才触发该事件
+ */
+function onPopstate() {
+  // 这里会执行强制刷新
+  this.$root.$forceUpdate();
 }
 
 /**
@@ -142,10 +298,15 @@ class VueRouter {
    * }
    */
   constructor(config) {
-    this.$config = getConfig({ base: '/', ...config });
+    this.$config = getConfig({ base: PATH_SPLIT, ...config });
 
     // 需要处理$config中routes这个属性，这个属性是一个树形结构，需要接入parent属性
     linkRoutes(this.$config.routes || []);
+
+    onPopstate = onPopstate.bind(this);
+
+    // 注册popstate的事件
+    window.addEventListener('popstate', onPopstate);
 
     // 属性
     // .app
@@ -158,10 +319,29 @@ class VueRouter {
   }
 
   /**
+   * $destory 执行销毁操作
+   */
+  $destory() {
+    window.removeEventListener('popstate', onPopstate);
+  }
+
+  /**
+   * $setVueIns - 设置Vue实例对象
+   * @param vueIns - Vue Vue实例的对象
+   */
+  $setVueIns(vueIns) {
+    this.$root = vueIns;
+  }
+
+  /**
    * $getComponentIsVueIns - 获取$config的routes第一级中路径匹配项的component属性值
+   *
+   * 如果是Vue实例template的<router-view>则只能在router的第一层中进行寻找
+   *
+   * @param viewName string - <router-view name=""> 中的name
    * @return Object
    */
-  $getComponentIsVueIns() {
+  $getComponentIsVueIns(viewName) {
     // 获取地址栏的pathname
     const { pathname } = window.location;
 
@@ -171,7 +351,7 @@ class VueRouter {
     let result;
 
     for (let i = 0, len = (routes || []).length; i < len; i++) {
-      const { path, component } = routes[i];
+      const { path, component, components, name = '', props } = routes[i];
 
       const keys = [];
 
@@ -201,19 +381,32 @@ class VueRouter {
         const matchValues = reg.exec(pathname);
 
         // 填充paramMap /:foo/:bar 组成的对象
-        keys.forEach(function ({ name }, index) {
-          paramMap[name] = matchValues[index];
+        keys.forEach(function ({ name: keyName }, index) {
+          paramMap[keyName] = matchValues[index + 1];
+        });
+
+        // 根据是否设置了viewName和components来返回实际的component(主要是处理命名视图)
+        const curComponent = viewName ? (components ? components[viewName] : component) : component;
+
+        // 当前命中的路由信息的包装
+        const detail = createRoute({
+          route: routes[i],
+          paramMap,
+          name,
         });
 
         result = {
-          component,
-          detail: createRoute({
-            route: routes[i],
-            paramMap,
-          }),
+          // 命中的组件
+          component: curComponent,
+          // 当前命中的路由信息的包装
+          detail,
+          // 当前命中的路由配置信息
           route: routes[i],
+          // 命中的组件props的信息
+          props: createProps({ detail, props }),
         };
 
+        // 命中后就结束迭代
         break;
       }
     }
@@ -223,10 +416,14 @@ class VueRouter {
 
   /**
    * $getComponentIsComIns - 获取组件所在的route中匹配的component属性值
+   *
+   * 若果是组件template中的<router-view>则只能在route的组下寻找
+   *
    * @param route Object - 组件所在的route
+   * @param viewName string - <router-view name=""> 中的name
    * @return Object
    */
-  $getComponentIsComIns(route) {
+  $getComponentIsComIns(route, viewName) {
     // 获取地址栏的pathname
     const { pathname } = window.location;
 
@@ -241,17 +438,17 @@ class VueRouter {
     const parentFullPath = wrapPathByBase(base, getCurRoutePath(route));
 
     for (let i = 0, len = (children || []).length; i < len; i++) {
-      const { path, component } = children[i];
+      const { path, component, components, props } = children[i];
 
       const keys = [];
 
       let curPath = `${parentFullPath}${path}`;
 
-      if (parentFullPath.endsWith('/')) {
-        if (path.startsWith('/')) {
+      if (parentFullPath.endsWith(PATH_SPLIT)) {
+        if (path.startsWith(PATH_SPLIT)) {
           curPath = `${parentFullPath}${path.substring(1)}`;
         }
-      } else if (!path.startsWith('/')) {
+      } else if (!path.startsWith(PATH_SPLIT)) {
         curPath = `${parentFullPath}/${path}`;
       }
 
@@ -260,9 +457,9 @@ class VueRouter {
         sensitive: false, // When true the route will be case sensitive. (default: false)
         strict: false, // When false the trailing slash is optional. (default: false)
         end: 'exact' in children[i], // When false the path will match at the beginning. (default: true)
-        delimiter: '/', // Set the default delimiter for repeat parameters. (default: '/')
+        delimiter: PATH_SPLIT, // Set the default delimiter for repeat parameters. (default: PATH_SPLIT)
       });
-      // keys = [{ name: 'foo', prefix: '/', ... }, { name: 'bar', prefix: '/', ... }]
+      // keys = [{ name: 'foo', prefix: PATH_SPLIT, ... }, { name: 'bar', prefix: PATH_SPLIT, ... }]
 
       // 如果patchname匹配的path
       if (reg.test(pathname)) {
@@ -273,23 +470,178 @@ class VueRouter {
 
         // 填充paramMap /:foo/:bar 组成的对象
         keys.forEach(function ({ name }, index) {
-          paramMap[name] = matchValues[index];
+          paramMap[name] = matchValues[index + 1];
+        });
+
+        // 根据是否设置了viewName和components来返回实际的component(主要是处理命名视图)
+        const curComponent = viewName ? (components ? components[viewName] : component) : component;
+
+        // 当前命中的路由信息的包装
+        const detail = createRoute({
+          route: children[i],
+          paramMap,
         });
 
         result = {
-          component,
-          detail: createRoute({
-            route: children[i],
-            paramMap,
-          }),
+          // 命中的组件
+          component: curComponent,
+          // 当前命中的路由信息的包装
+          detail,
+          // 当前命中的路由配置信息
           route: children[i],
+          // 命中组件的props信息
+          props: createProps({ detail, props }),
         };
 
+        // 命中后就结束迭代
         break;
       }
     }
 
     return result;
+  }
+
+  /**
+   * createPath - 创建push | replace方法的path路径
+   * @param location - [string | Object] 导航的信息
+   * @return string path
+   *
+   *
+   * // 字符串
+   router.push('home')
+
+   // 对象
+   router.push({ path: 'home' })
+
+   // 命名的路由
+   router.push({ name: 'user', params: { userId: '123' }})
+
+   // 带查询参数，变成 /register?plan=private
+   router.push({ path: 'register', query: { plan: 'private' }})
+
+
+   const userId = '123'
+   router.push({ name: 'user', params: { userId }}) // -> /user/123
+   router.push({ path: `/user/${userId}` }) // -> /user/123
+   // 这里的 params 不生效
+   router.push({ path: '/user', params: { userId }}) // -> /user
+   */
+  createPath(location) {
+    return createPath.call(this, location);
+  }
+
+  /**
+   * push - 改变路由的地址
+   * @param location - [string | Object] 导航的信息
+   * @param onComplete - Function
+   * @param onAbort - Function
+   * @return Promise
+   *
+   * // 字符串
+     router.push('home')
+
+     // 对象
+     router.push({ path: 'home' })
+
+     // 命名的路由
+     router.push({ name: 'user', params: { userId: '123' }})
+
+     // 带查询参数，变成 /register?plan=private
+     router.push({ path: 'register', query: { plan: 'private' }})
+
+
+     const userId = '123'
+     router.push({ name: 'user', params: { userId }}) // -> /user/123
+     router.push({ path: `/user/${userId}` }) // -> /user/123
+     // 这里的 params 不生效
+     router.push({ path: '/user', params: { userId }}) // -> /user
+
+
+     在 2.2.0+，可选的在 router.push 或 router.replace 中提供 onComplete 和 onAbort 回调作为第二个和第三个参数。这些回调将会在导航成功完成 (在所有的异步钩子被解析之后) 或终止 (导航到相同的路由、或在当前导航完成之前导航到另一个不同的路由) 的时候进行相应的调用。在 3.1.0+，可以省略第二个和第三个参数，此时如果支持 Promise，router.push 或 router.replace 将返回一个 Promise。
+
+     注意： 如果目的地和当前路由相同，只有参数发生了改变 (比如从一个用户资料到另一个 /users/1 -> /users/2)，你需要使用 beforeRouteUpdate 来响应这个变化 (比如抓取用户信息)
+   */
+  push(location, onComplete, onAbort) {
+    const self = this;
+
+    // 1.根据数据拼接路径
+    const path = createPath.call(self, location);
+
+    // 2.使用history.pushState替换浏览器路径
+    window.history.pushState(
+      {
+        location,
+        path,
+      },
+      path,
+      path,
+    );
+
+    // 3.触发Vue实例的render方法重新渲染
+    return new Promise(function (resolve, reject) {
+      if (self.$root.$forceUpdate()) {
+        if (onComplete) {
+          onComplete();
+        }
+
+        resolve();
+      } else {
+        if (onAbort) {
+          onAbort();
+        }
+
+        reject();
+      }
+    });
+  }
+
+  /**
+   * replace - 替换路由的地址
+   * @param location - [string | Object] 导航的信息
+   * @param onComplete - Function
+   * @param onAbort - Function
+   * @return Promise
+   */
+  replace(location, onComplete, onAbort) {
+    const self = this;
+
+    // 1.根据数据拼接路径
+    const path = createPath.call(self, location);
+
+    // 2.使用history.pushState替换浏览器路径
+    window.history.replaceState(
+      {
+        location,
+        path,
+      },
+      path,
+      path,
+    );
+
+    // 3.触发Vue实例的render方法重新渲染
+    return new Promise(function (resolve, reject) {
+      if (self.$root.$forceUpdate()) {
+        if (onComplete) {
+          onComplete();
+        }
+
+        resolve();
+      } else {
+        if (onAbort) {
+          onAbort();
+        }
+
+        reject();
+      }
+    });
+  }
+
+  /**
+   * go - 和history一致
+   * @param number
+   */
+  go(number) {
+    window.history.go(number);
   }
 }
 

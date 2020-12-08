@@ -1,11 +1,17 @@
-import { createElement, isArray, isFunction, isObject, cloneDeep } from '@ctsj/vue-util';
+import { createElement, isArray, isFunction, isObject, cloneDeep, isString } from '@ctsj/vue-util';
 import { executeExecutionContextVOn } from '../../compiler/directives/on';
 import { renderComponent } from '../../compiler/renderComponent';
 import { createComponentProxy, createPropsProxy } from '../proxy';
-import { createExecutionContext } from '../../shared/util';
-import { getComponentConfig, isKebabCase, isPascalCase, pascalCaseToKebabCase } from './util';
+import {
+  createExecutionContext,
+  isKebabCase,
+  isPascalCase,
+  pascalCaseToKebabCase,
+} from '../../shared/util';
+import { getComponentConfig } from './util';
 import { mergeComputed, mergeData, mergeMethods, mergeProps } from '../merge';
 import { resetComputed, triggerLifecycle, mixinConfig } from '../util';
+
 import { getGlobalConfig } from '../index';
 
 import { LIFECYCLE_HOOKS } from '../../shared/constants';
@@ -117,8 +123,9 @@ class Component {
    * @param root - vue实例
    * @param parent - 父对象(可能是Vue实例，也肯能是Component实例)
    * @param route - 匹配的路由配置
+   * @param $route - 当前路由信息
    */
-  constructor(config, { key, el, root, parent, route }) {
+  constructor(config, { key, el, root, parent, route, $route }) {
     this.$el = el;
 
     // Vue实例对象
@@ -135,6 +142,9 @@ class Component {
 
     // 匹配的路由的信息
     this.$matchRoute = route;
+
+    // 当前路由信息
+    this.$route = $route;
 
     // 组件的配置对象
     this.$config = this.$getConfig();
@@ -198,7 +208,7 @@ class Component {
     if (attrs.class) {
       if (isObject(attrs.class)) {
         Object.assign(VNode.data.class, attrs.class);
-      } else if (typeof attrs.class === 'string') {
+      } else if (isString(attrs.class)) {
         attrs.class.split(' ').forEach((className) => {
           VNode.data.class[className] = true;
         });
@@ -208,7 +218,7 @@ class Component {
     if (attrs.style) {
       if (isObject(attrs.style)) {
         Object.assign(VNode.data.style, attrs.style);
-      } else if (typeof attrs.style === 'string') {
+      } else if (isString(attrs.style)) {
         attrs.style.split(';').forEach((style) => {
           const entry = style.split(':');
           VNode.data.style[entry[0]] = entry[1];

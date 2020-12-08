@@ -1,63 +1,174 @@
 import VueRouter from '@ctsj/vue-router';
+
 import Vue from './core';
 
-const MyComponent = {
-  data: () => ({}),
+const Header = {
   template: `
-    <div>
-      <p>我是一个路由组件</p>
-      <router-view></router-view>   
+    <ul class="header">
+      <!--<li><a v-on:click="$router.push('/user')">用户管理</a></li>
+      <li><a v-on:click="$router.push('/car')">车辆管理</a></li>
+      <li><a v-on:click="$router.push('/article')">物品管理</a></li>-->
+
+      <li><router-link to="/user">用户管理</router-link></li>
+      <li><router-link to="/car">车辆管理</router-link></li>
+      <li><router-link to="/article">物品管理</router-link></li>
+    </ul>
+  `,
+};
+
+const UserManager = {
+  template: `
+    <div class="user-manager">
+      <div class="user-manager-nav">
+        <ul class="user-manager-ul">
+          <!--<li><a v-on:click="$router.push('/user/base')">基本信息管理</a></li>
+          <li><a v-on:click="$router.push('/user/attendance')">考勤管理</a></li>
+          <li><a v-on:click="$router.push('/user/career')">职业生涯管理</a></li>
+          <li><a v-on:click="$router.push('/user/flow')">流程审批管理</a></li>-->
+          
+          <li><router-link to="/user/base">基本信息管理</router-link></li>
+          <li><router-link to="/user/attendance">考勤管理</router-link></li>
+          <li><router-link to="/user/career">职业生涯管理</router-link></li>
+          <li><router-link to="/user/flow">流程审批管理</router-link></li>
+        </ul>
+      </div>
+      <div class="user-manager-body">
+        <router-view></router-view>
+      </div>
     </div>
   `,
 };
 
-const MyComponentChildren = {
-  data: () => ({}),
+const UserManagerBase = {
   template: `
-    <div>我是路由组件的子组件</div>
+    <div>基本信息管理</div>
   `,
 };
 
-const LogonComponent = {
-  data: () => ({}),
+const UserManagerAttendance = {
   template: `
-    <div>我是一个登陆组件</div>
+    <div>考勤管理</div>
   `,
 };
 
-const CommonComponent = {
-  template: `<div>我是Common组件</div>`,
+const UserManagerCareer = {
+  template: `
+    <div>职业生涯管理</div>
+  `,
 };
 
-Vue.component('common-component', CommonComponent);
-Vue.component('my-component', MyComponent);
-Vue.component('my-children-component', MyComponentChildren);
-Vue.component('login-component', LogonComponent);
+const UserManagerFlow = {
+  template: `
+    <div>流程审批管理</div>
+  `,
+};
+
+const CarManager = {
+  template: `
+    <div class="car-manager">CarManager</div>
+  `,
+};
+
+const ArticleManager = {
+  template: `
+    <div class="article-manager">ArticleManager</div>
+  `,
+};
+
+const App = {
+  template: `
+    <div class="wrap">
+      <div class="header-wrap">
+        <header-component></header-component>
+      </div>
+      
+      <div class="body-wrap">
+        <router-view></router-view>
+      </div>
+      
+    </div>
+  `,
+};
+
+// app-component
+Vue.component('app', App);
+
+// header-component
+Vue.component('header-component', Header);
+
+// user-manager
+Vue.component('user-manager', UserManager);
+
+// user-manager-base
+Vue.component('user-manager-base', UserManagerBase);
+
+// user-manager-attendance
+Vue.component('user-manager-attendance', UserManagerAttendance);
+
+// user-manager-career
+Vue.component('user-manager-career', UserManagerCareer);
+
+// user-manager-flow
+Vue.component('user-manager-flow', UserManagerFlow);
+
+// car-manager
+Vue.component('car-manager', CarManager);
+
+// article-manager
+Vue.component('article-manager', ArticleManager);
 
 const router = new VueRouter({
   routes: [
     {
-      path: '/log',
-      exact: 'exact',
-      component: LogonComponent,
-    },
-    {
       path: '/',
-      component: MyComponent,
+      component: App,
       children: [
         {
-          path: '',
-          component: MyComponentChildren,
+          path: 'user',
+          component: UserManager,
+          children: [
+            {
+              path: 'base',
+              component: UserManagerBase,
+              exact: 'exact',
+            },
+            {
+              path: 'attendance',
+              component: UserManagerAttendance,
+              exact: 'exact',
+            },
+            {
+              path: 'career',
+              component: UserManagerCareer,
+              exact: 'exact',
+            },
+            {
+              path: 'flow',
+              component: UserManagerFlow,
+              exact: 'exact',
+            },
+            {
+              path: '',
+              component: UserManagerBase,
+            },
+          ],
         },
         {
-          path: 'children',
-          component: MyComponentChildren,
+          path: 'car',
+          exact: 'exact',
+          component: CarManager,
+        },
+        {
+          path: 'article',
+          exact: 'exact',
+          component: ArticleManager,
+        },
+        // 缺省的匹配
+        {
+          path: '',
+          component: UserManager,
         },
       ],
-    },
-    {
-      path: '*',
-      component: CommonComponent,
     },
   ],
 });
@@ -66,86 +177,11 @@ const ins = new Vue({
   el: document.getElementById('app'),
   router,
   template: `
-        <div>
-          <!--<dl>
-            <dt><h3>列表嵌套</h3></dt>
-            <dd>
-              <ul>
-                <li v-for="(item , index) in list3">
-                  <div>
-                    <span>{{index + 1}}.</span>
-                    <span>{{item.title}}</span>
-                  </div>
-                  <ul>
-                    <li v-for="(item1, index1) in item.list">
-                      <span>{{index + 1}}-{{index1 + 1}}.</span>
-                      <span>{{item1.title}}</span>
-                    </li>
-                  </ul>
-                </li>
-              </ul>
-            </dd>
-          </dl>-->
-          
-          <div>vue实例template的div</div>
-          <router-view></router-view>
-        </div>
-      `,
-  data: () => ({
-    list3: [
-      {
-        title: 'xxx',
-        list: [
-          {
-            title: 'xxx',
-          },
-          {
-            title: 'xxx',
-          },
-          {
-            title: 'xxx',
-          },
-          {
-            title: 'xxx',
-          },
-        ],
-      },
-      {
-        title: 'xxx',
-        list: [
-          {
-            title: 'xxx',
-          },
-          {
-            title: 'xxx',
-          },
-          {
-            title: 'xxx',
-          },
-          {
-            title: 'xxx',
-          },
-        ],
-      },
-      {
-        title: 'xxx',
-        list: [
-          {
-            title: 'xxx',
-          },
-          {
-            title: 'xxx',
-          },
-          {
-            title: 'xxx',
-          },
-          {
-            title: 'xxx',
-          },
-        ],
-      },
-    ],
-  }),
+    <div>
+      <router-view></router-view>
+    </div>
+  `,
+  data: () => ({}),
   methods: {},
   computed: {},
   watch: {},

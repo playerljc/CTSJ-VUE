@@ -40,6 +40,24 @@ export function isNumber(val) {
 }
 
 /**
+ * isBoolean - 判断是否是boolean
+ * @param val
+ * @return {boolean}
+ */
+export function isBoolean(val) {
+  return (typeof val).toLowerCase() === 'boolean';
+}
+
+/**
+ * isString - 判断是否是string
+ * @param val
+ * @return {boolean}
+ */
+export function isString(val) {
+  return (typeof val).toLowerCase() === 'string';
+}
+
+/**
  * isFunction - 判断函数
  * @param obj
  * @return {boolean}
