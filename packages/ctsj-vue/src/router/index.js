@@ -276,6 +276,7 @@ function onPopstate() {
  注意： 如果目的地和当前路由相同，只有参数发生了改变 (比如从一个用户资料到另一个 /users/1 -> /users/2)，你需要使用 beforeRouteUpdate 来响应这个变化 (比如抓取用户信息)
  */
 function historyChange({ location, onComplete, onAbort, historyChangeCallback }) {
+  debugger;
   const self = this;
 
   const { pathname } = window.location;
@@ -512,8 +513,6 @@ class VueRouter {
       } else if (!path.startsWith(PATH_SPLIT)) {
         curPath = `${parentFullPath}/${path}`;
       }
-
-      debugger;
 
       // 生成正则表达式
       const reg = pathToRegexp(curPath, keys, {

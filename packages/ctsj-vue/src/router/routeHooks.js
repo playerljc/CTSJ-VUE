@@ -142,7 +142,7 @@ const guard_steps = [
           }
         });
       } else {
-        reject();
+        resolve();
       }
     });
   },
@@ -254,7 +254,7 @@ const guard_steps = [
           reject();
         }
       } else {
-        reject();
+        resolve();
       }
     });
   },

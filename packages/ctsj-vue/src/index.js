@@ -126,6 +126,7 @@ const router = new VueRouter({
         {
           path: 'user',
           component: UserManager,
+          exact: 'exact',
           children: [
             {
               path: 'base',
@@ -167,6 +168,12 @@ const router = new VueRouter({
         {
           path: '',
           component: UserManager,
+          children: [
+            {
+              path: '',
+              component: UserManagerBase,
+            },
+          ],
         },
       ],
     },
