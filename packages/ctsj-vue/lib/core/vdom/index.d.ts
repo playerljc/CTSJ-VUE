@@ -13,5 +13,5 @@ export function createTextVNode(value: any): {
     text: any;
 };
 export { toVNode };
-export const patch: (oldVnode: Element | import("snabbdom/build/package/vnode").VNode, vnode: import("snabbdom/build/package/vnode").VNode) => import("snabbdom/build/package/vnode").VNode;
+export const patch: (oldVnode: import("snabbdom/build/package/vnode").VNode | Element, vnode: import("snabbdom/build/package/vnode").VNode) => import("snabbdom/build/package/vnode").VNode;
 import { toVNode } from "snabbdom/build/package/tovnode";

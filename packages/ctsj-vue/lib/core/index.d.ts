@@ -61,4 +61,9 @@ declare class Vue {
      */
     $refresh(VNode: any): void;
     $preVNode: any;
+    /**
+     * $forceUpdate - Vue实例重新渲染
+     * @return boolean
+     */
+    $forceUpdate(): boolean;
 }

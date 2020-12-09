@@ -12,24 +12,6 @@ export function isComponentNodeByVue(el: any): boolean;
  */
 export function isComponentNodeByComponent(el: any, components: any): boolean;
 /**
- * isKebabCase - 是否是烤肉串形式的名字
- * @param name - string 名称
- * @return boolean
- */
-export function isKebabCase(name: any): boolean;
-/**
- * isPascalCase - 是否是驼峰形式的名字
- * @param name - string 名称
- * @return boolean
- */
-export function isPascalCase(name: any): boolean;
-/**
- * pascalCaseToKebabCase 驼峰转xxx-xxx-xxx
- * @param name - string pascalCase的字符串
- * @return {string}
- */
-export function pascalCaseToKebabCase(name: any): string;
-/**
  * createComponent - 创建一个组件(Component)
  * @param attrs - Object props和attrs的所有k/v数据
  * @param events - Object 所有events的k/v数据
@@ -39,9 +21,10 @@ export function pascalCaseToKebabCase(name: any): string;
  * @param el - HtmlElement 元素
  * @param key - string 组件的key
  * @param route - Object 匹配的路由配置
+ * @param $route - Object 当前理由信息
  * @return Component
  */
-export function createComponent({ attrs, events, parentContext, parent, root, el, key, route }: {
+export function createComponent({ attrs, events, parentContext, parent, root, el, key, route, $route, }: {
     attrs: any;
     events: any;
     parentContext: any;
@@ -50,6 +33,7 @@ export function createComponent({ attrs, events, parentContext, parent, root, el
     el: any;
     key: any;
     route: any;
+    $route: any;
 }): Component;
 /**
  * getComponentConfig - 获取组件的配置对象
