@@ -1,6 +1,6 @@
 import { createElement, isFunction, cloneDeep, isObject } from '@ctsj/vue-util';
 
-import { guard } from '@ctsj/vue-router/routeHooks';
+import { guard, clear } from '@ctsj/vue-router/routeHooks';
 
 import {
   isKebabCase,
@@ -189,8 +189,16 @@ class Vue {
     // 存放组件实例的Map
     this.componentsMap = new Map();
 
-    // 渲染
-    render.call(this, this.$config.el, true);
+    const to = `${window.location.pathname}${window.location.search}`;
+
+    // 需要进行路由守卫的操作
+    guard(to, this.$router).then(() => {
+      // 清空匹配数据
+      clear();
+
+      // 渲染
+      render.call(this, this.$config.el, true);
+    });
   }
 
   /**

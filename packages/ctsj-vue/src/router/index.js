@@ -251,8 +251,15 @@ function findRouteByName(routerConfigv, name) {
  *      并且仅当用户在同一文档的两个历史记录条目之间导航时才触发该事件
  */
 function onPopstate() {
-  // 这里会执行强制刷新
-  this.$root.$forceUpdate();
+  const to = `${window.location.pathname}${window.location.search}`;
+
+  // 加入路由守卫功能
+  guard(to, this).then(() => {
+    clear();
+
+    // 这里会执行强制刷新
+    this.$root.$forceUpdate();
+  });
 }
 
 /**
