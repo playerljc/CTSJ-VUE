@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>ctsj-vue-example</title>
+    <style>
+      html,body {
+        padding: 0;
+        margin: 0;
+        width: 100%;
+        height: 100%;
+      }
+
+      a {
+        cursor: pointer;
+      }
+
+      .wrap {
+        display: flex;
+        flex-direction: column;
+        padding: 0;
+        margin: 0;
+        width: 100%;
+        height: 100%;
+      }
+
+      .header-wrap {
+        flex-shrink: 0;
+      }
+
+      .body-wrap {
+        flex-grow: 1;
+        min-height: 0;
+      }
+
+      .header {
+        display: flex;
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        height: 50px;
+        border-bottom: 1px solid rgba(0,0,0,.1);
+      }
+
+      .header > li {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-grow: 1;
+        min-width: 0;
+      }
+
+      .user-manager {
+        display: flex;
+      }
+
+      .user-manager-nav {
+        flex-shrink: 0;
+        width: 100px;
+      }
+
+      .user-manager-ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+      }
+
+      .user-manager-ul > li {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 30px;
+      }
+
+      .user-manager-body {
+        flex-grow: 1;
+        min-width: 0;
+      }
+
+    </style>
+  </head>
+  <body>
+    <div id="app"></div>
+  </body>
+</html>

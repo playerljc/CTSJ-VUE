@@ -1,0 +1,13 @@
+{
+  "packages": [
+    "packages/**"
+  ],
+  "npmClient": "cnpm",
+  "command": {
+    "bootstrap": {
+      "ignore": "templates/**",
+      "npmClientArgs": ["--no-package-lock"]
+    }
+  },
+  "version": "1.0.0"
+}

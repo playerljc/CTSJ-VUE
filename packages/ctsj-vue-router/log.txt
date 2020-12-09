@@ -1,0 +1,89 @@
+路由的配置
+ const routes = [
+   { path: '/', component: App },
+   { path: '/foo', component: Foo, children:[
+        {
+          path:'abc',component: User, children:[
+            {
+              path:'def': component: User1
+            }
+          ]
+
+        }
+    ]
+   },
+   { path: '/bar', component: Bar }
+ ]
+
+Vue实例寻找 path = '/'的节点
+
+路径
+ http://localhost:8000/
+ http://localhost:8000/foo
+ http://localhost:8000/bar
+
+Vue实例
+  template:`
+    <div>
+       <div>111</div>
+       <p>222</p>
+       <router-view></router-view> -> Foo
+       <div>
+         <router-view></router-view> -> Bar
+       </div>
+    </div>
+  `
+
+
+~~~~功能的列表
+
+.router-view标签解析 ok
+ .$router
+ .$route
+   .query
+   .params
+.嵌套路由解析 ok
+.router-view name(命名视图)解析 ok
+ .components
+.props ok
+.编程方式的api ok
+ .push
+ .replace
+ .go
+.<route-link> ok
+.路由的守卫
+ 刚上来就要执行路由守卫 ok
+ 在onPopstate中也要执行路由守卫 ok
+ 在catch中处理error | '/other'这种重定向 和 location对象进行重定向 ok
+
+ /system/list?id=1&name=2 -> /system/add list失活
+ /system/list?id=1&name=2 -> /car/list system|list失活
+
+ /system/list    /car/list/add
+
+ /system/123/456?id=1&name=2  ->  /system/567
+ / -> App -> /
+ /system System -> /system
+ /system/:id/:name -> SystemList -> /system/123/456
+
+ 核心算法
+ .建立一个全局对象，用来存储在render中解析<router-view>标签路径和组件的对用关系
+ .在$getComponentIsVueIns和$getComponentIsComIns中进行处理
+ .得到了这个关系，目标地址例如：/car/list 再去进行一次和router配置匹配的查找过程
+ .就可以得出导航需要出发钩子的对象引用
+
+ 导航被触发。
+ step1:在(失活)的组件里调用 beforeRouteLeave 守卫。 ok
+ step2:调用全局的 beforeEach 守卫。ok
+ step3:在(重用)的组件里调用 beforeRouteUpdate 守卫 (2.2+)。ok
+ step4:在路由配置里调用 beforeEnter。ok
+ 解析异步路由组件。
+ step5:在被激活的组件里调用 beforeRouteEnter。ok
+ 调用全局的 beforeResolve 守卫 (2.5+)。
+ 导航被确认。
+ step6:调用全局的 afterEach 钩子。ok
+ 触发 DOM 更新。
+ step7:调用 beforeRouteEnter 守卫中传给 next 的回调函数，创建好的组件实例会作为回调函数的参数传入。ok
+
+.重定向
+.懒加载
