@@ -1,6 +1,6 @@
 import { createElement, isFunction, cloneDeep, isObject } from '@ctsj/vue-util';
 
-import { guard, clear } from '@ctsj/vue-router/routeHooks';
+import { guard, clear } from '@ctsj/vue-router/lib/routeHooks';
 
 import {
   isKebabCase,
@@ -192,7 +192,12 @@ class Vue {
     const to = `${window.location.pathname}${window.location.search}`;
 
     // 需要进行路由守卫的操作
-    guard(to, this.$router).then(() => {
+    guard(
+      {
+        fullPath: to,
+      },
+      this.$router,
+    ).then(() => {
       // 清空匹配数据
       clear();
 

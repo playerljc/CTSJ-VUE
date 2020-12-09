@@ -1,5 +1,5 @@
 import { isEmpty, uuid } from '@ctsj/vue-util';
-import { push as matchRoutePush } from '@ctsj/vue-router/routeHooks';
+import { push as matchRoutePush } from '@ctsj/vue-router/lib/routeHooks';
 
 import { getAttrEntrys, getKey, getVAttrNames } from './directives/util';
 import { hasVFor, parseVFor } from './directives/for';
@@ -206,8 +206,9 @@ export function renderComponentNode({ context, el, parentVNode, parentElement, r
     // 当前匹配路由的设置
     if (route && $route) {
       matchRoutePush({
-        path: $route.path,
-        regexp: $route.regexp,
+        // path: $route.path,
+        // regexp: $route.regexp,
+        ...$route,
         route,
         component,
       });
@@ -227,8 +228,9 @@ export function renderComponentNode({ context, el, parentVNode, parentElement, r
   // 当前匹配路由的设置
   if (route && $route) {
     matchRoutePush({
-      path: $route.path,
-      regexp: $route.regexp,
+      // path: $route.path,
+      // regexp: $route.regexp,
+      ...$route,
       route,
       component,
     });
