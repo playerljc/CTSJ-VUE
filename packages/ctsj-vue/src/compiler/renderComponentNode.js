@@ -206,8 +206,9 @@ export function renderComponentNode({ context, el, parentVNode, parentElement, r
     // 当前匹配路由的设置
     if (route && $route) {
       matchRoutePush({
-        path: $route.path,
-        regexp: $route.regexp,
+        // path: $route.path,
+        // regexp: $route.regexp,
+        ...$route,
         route,
         component,
       });
@@ -227,8 +228,9 @@ export function renderComponentNode({ context, el, parentVNode, parentElement, r
   // 当前匹配路由的设置
   if (route && $route) {
     matchRoutePush({
-      path: $route.path,
-      regexp: $route.regexp,
+      // path: $route.path,
+      // regexp: $route.regexp,
+      ...$route,
       route,
       component,
     });

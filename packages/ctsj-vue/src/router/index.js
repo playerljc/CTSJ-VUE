@@ -14,7 +14,7 @@ import { PATH_SPLIT } from './constants';
 
 import { parse, stringify } from './qs';
 
-import { guard, clear } from './routeHooks';
+import { guard, clear, getTop, getMatchData } from './routeHooks';
 
 import { wrapPathByBase, getCurRoutePath } from './util';
 
@@ -253,8 +253,28 @@ function findRouteByName(routerConfigv, name) {
 function onPopstate() {
   const to = `${window.location.pathname}${window.location.search}`;
 
+  const matchData = getMatchData();
+
+  let toRoute;
+
+  const route = matchData.find((data) => data.path === to);
+  if (route) {
+    toRoute = {
+      path: route.path,
+      fullPath: to,
+      name: route.name,
+      params: route.params,
+      query: route.query,
+      hash: route.hash,
+    };
+  } else {
+    toRoute = {
+      fullPath: to,
+    };
+  }
+
   // 加入路由守卫功能
-  guard(to, this).then(() => {
+  guard(toRoute, this).then(() => {
     clear();
 
     // 这里会执行强制刷新
@@ -297,24 +317,41 @@ function onPopstate() {
 function historyChange({ location, onComplete, onAbort, historyChangeCallback }) {
   const self = this;
 
-  const { pathname } = window.location;
+  const { pathname, search } = window.location;
 
   // 1.根据数据拼接路径(这个路径是要跳转到的路径)
   const path = createPath.call(self, location);
 
+  const topMatchData = getTop();
+
+  const toRoute = {
+    ...location,
+    fullPath: path,
+  };
+
+  const fromRoute = {
+    path: topMatchData.path,
+    fullPath: `${pathname}${search}`,
+    name: topMatchData.name,
+    params: topMatchData.params,
+    query: topMatchData.query,
+    hash: topMatchData.hash,
+  };
+
   // 设置router的currentRoute对象
   self.currentRoute = {
-    from: pathname,
-    to: path,
+    from: fromRoute,
+    to: toRoute,
   };
 
   return new Promise(function (resolve, reject) {
     // 这里要要进行路由守卫的操作
-    guard(path, self).then(() => {
+    guard(toRoute, self).then(() => {
       // 到这里已经可以进行path的跳转了
 
+      debugger;
       // 2.使用history.pushState替换浏览器路径
-      historyChangeCallback(path);
+      historyChangeCallback(toRoute);
 
       // 清空匹配数据
       clear();
@@ -647,14 +684,14 @@ class VueRouter {
       location,
       onComplete,
       onAbort,
-      historyChangeCallback: (path) => {
+      historyChangeCallback: (toRoute) => {
         window.history.pushState(
           {
             location,
-            path,
+            toRoute,
           },
-          path,
-          path,
+          toRoute.fullPath,
+          toRoute.fullPath,
         );
       },
     });
@@ -672,14 +709,14 @@ class VueRouter {
       location,
       onComplete,
       onAbort,
-      historyChangeCallback: (path) => {
+      historyChangeCallback: (toRoute) => {
         window.history.replaceState(
           {
             location,
-            path,
+            toRoute,
           },
-          path,
-          path,
+          toRoute.fullPath,
+          toRoute.fullPath,
         );
       },
     });

@@ -192,7 +192,12 @@ class Vue {
     const to = `${window.location.pathname}${window.location.search}`;
 
     // 需要进行路由守卫的操作
-    guard(to, this.$router).then(() => {
+    guard(
+      {
+        fullPath: to,
+      },
+      this.$router,
+    ).then(() => {
       // 清空匹配数据
       clear();
 

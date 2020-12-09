@@ -29,7 +29,7 @@
 
 import pathToRegexp from 'path-to-regexp';
 
-import { isFunction, isBoolean, isObject, isString, isEmpty } from '@ctsj/vue-util';
+import { isFunction, isBoolean, isObject, isString, isEmpty, cloneDeep } from '@ctsj/vue-util';
 
 import { PATH_SPLIT } from './constants';
 import { wrapPathByBase, getCurRoutePath } from './util';
@@ -383,7 +383,7 @@ function findLoopComponent({ componentsConfig, to, routes, base }) {
 
 /**
  * guard - 路由守卫
- * @param path string - 要跳转的路径(也就是to)
+ * @param toRoute Object - 要跳转的路径(也就是to)
  * @param $router vue-router VueRouter路由的实例对象
  * @return Promise
  *
@@ -393,11 +393,27 @@ function findLoopComponent({ componentsConfig, to, routes, base }) {
    /system System -> /system
    /system/:id/:name -> SystemList -> /system/123/456
  */
-export function guard(path, $router) {
+export function guard(toRoute, $router) {
+  const { pathname, search } = window.location;
+
+  const topMatchData = getTop();
+
+  const fromRoute = !isEmpty(topMatchData)
+    ? {
+        path: topMatchData.path,
+        fullPath: `${pathname}${search}`,
+        name: topMatchData.name,
+        params: topMatchData.params,
+        query: topMatchData.query,
+        hash: topMatchData.hash,
+      }
+    : {
+        fullPath: `${pathname}${search}`,
+      };
+
   // promise对象初始化
   const promise = new Promise((resolve, reject) => {
     // 当前浏览器路径的pathname(form)
-    const { pathname } = window.location;
 
     // 一.需要进行一个操作计算出(失活)和(重用)的组件
     // 直接修改matchData数据加入状态属性
@@ -406,7 +422,7 @@ export function guard(path, $router) {
       const { regexp } = matchData[i];
 
       // 如果to匹配了regexp
-      if (regexp.test(path)) {
+      if (regexp.test(toRoute.fullPath)) {
         // 那就是重用
         matchData[i].status = 'update';
       } else {
@@ -430,7 +446,7 @@ export function guard(path, $router) {
           const task = guard_steps[index++];
 
           if (task) {
-            task({ to: path, from: pathname, $router })
+            task({ to: toRoute, from: fromRoute, $router })
               .then(() => {
                 loopTask().then(() => {
                   s();
@@ -513,6 +529,26 @@ export function guard(path, $router) {
  */
 export function push(matchEntry) {
   matchData.push(matchEntry);
+}
+
+/**
+ * getTop - 获取matchData的最后一个元素
+ * @return Object
+ */
+export function getTop() {
+  if (matchData.length) {
+    return matchData[matchData.length - 1];
+  }
+
+  return null;
+}
+
+/**
+ * getMatchData - 获取MatchData的副本
+ * @return {Array}
+ */
+export function getMatchData() {
+  return cloneDeep(matchData);
 }
 
 /**
