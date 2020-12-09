@@ -1,5 +1,5 @@
 import { isEmpty, uuid } from '@ctsj/vue-util';
-import { push as matchRoutePush } from '@ctsj/vue-router/routeHooks';
+import { push as matchRoutePush } from '@ctsj/vue-router/lib/routeHooks';
 
 import { getAttrEntrys, getKey, getVAttrNames } from './directives/util';
 import { hasVFor, parseVFor } from './directives/for';

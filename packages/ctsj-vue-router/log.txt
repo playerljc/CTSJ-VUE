@@ -56,8 +56,8 @@ Vue实例
  在onPopstate中也要执行路由守卫 ok
  在catch中处理error | '/other'这种重定向 和 location对象进行重定向 ok
 
- to和form是Route对象，现在是string
- 各个守卫函数的this是否正确
+ to和form是Route对象，现在是string ok
+ 各个守卫函数的this是否正确 ok
 
  /system/list?id=1&name=2 -> /system/add list失活
  /system/list?id=1&name=2 -> /car/list system|list失活

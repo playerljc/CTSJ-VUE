@@ -1,6 +1,6 @@
 import { createElement, isFunction, cloneDeep, isObject } from '@ctsj/vue-util';
 
-import { guard, clear } from '@ctsj/vue-router/routeHooks';
+import { guard, clear } from '@ctsj/vue-router/lib/routeHooks';
 
 import {
   isKebabCase,

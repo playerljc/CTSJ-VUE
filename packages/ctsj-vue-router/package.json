@@ -2,7 +2,7 @@
   "name": "@ctsj/vue-router",
   "version": "1.0.0",
   "description": "一个对vue-router进行的模拟",
-  "main": "lib/core/index.js",
+  "main": "lib/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "startapp": "ctbuild startapp --define alias=@,cssModules=true",
