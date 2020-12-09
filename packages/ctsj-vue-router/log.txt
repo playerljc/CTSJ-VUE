@@ -52,8 +52,8 @@ Vue实例
  .go
 .<route-link> ok
 .路由的守卫
- 刚上来就要执行路由守卫
- 在onPopstate中也要执行路由守卫
+ 刚上来就要执行路由守卫 ok
+ 在onPopstate中也要执行路由守卫 ok
  在catch中处理error | '/other'这种重定向 和 location对象进行重定向 ok
 
  /system/list?id=1&name=2 -> /system/add list失活
