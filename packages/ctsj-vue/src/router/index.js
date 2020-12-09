@@ -18,6 +18,9 @@ import { guard, clear } from './routeHooks';
 
 import { wrapPathByBase, getCurRoutePath } from './util';
 
+let _beforeEachHandler;
+let _afterEachHandler;
+
 /**
  * getConfig - 获取配置
  * @param config - Object
@@ -218,11 +221,14 @@ function findRouteByName(routerConfigv, name) {
 
   for (let i = 0, len = (routerConfigv || []).length; i < len; i++) {
     const route = routerConfigv[i];
+
     if (route.name === 'name') {
       result = route;
+
       break;
     } else {
       result = findRouteByName(route.children || [], name);
+
       if (result) break;
     }
   }
@@ -292,43 +298,45 @@ function historyChange({ location, onComplete, onAbort, historyChangeCallback })
 
   return new Promise(function (resolve, reject) {
     // 这里要要进行路由守卫的操作
-    // guard(path, self)
-    //   .then(() => {
-    // 到这里已经可以进行path的跳转了
+    guard(path, self)
+      .then(() => {
+        // 到这里已经可以进行path的跳转了
 
-    // 2.使用history.pushState替换浏览器路径
-    historyChangeCallback(path);
+        // 2.使用history.pushState替换浏览器路径
+        historyChangeCallback(path);
 
-    // 清空匹配数据
-    clear();
+        // 清空匹配数据
+        clear();
 
-    // 3.执行重新渲染
-    if (self.$root.$forceUpdate()) {
-      if (onComplete) {
-        onComplete();
-      }
+        // 3.执行重新渲染
+        if (self.$root.$forceUpdate()) {
+          if (onComplete) {
+            onComplete();
+          }
 
-      // 调用全局的 afterEach 钩子
-      if ('afterEach' in self && isFunction(self.afterEach)) {
-        self.afterEach(path, pathname);
-      }
+          // 调用全局的 afterEach 钩子
+          const afterEach = self.getAfterEachHandler();
+          if (afterEach) {
+            afterEach(path, pathname);
+          }
 
-      resolve();
-    }
-    // 渲染失败
-    else {
-      if (onAbort) {
-        onAbort();
-      }
+          resolve();
+        }
+        // 渲染失败
+        else {
+          if (onAbort) {
+            onAbort();
+          }
 
-      reject();
-    }
-  }).catch((result) => {
-    // 如果到了这里是不能进行路由跳转的
-    // 会对result进行处理
-    // 这里result会是对象，或字符串(重定向的字符串)或者是null
+          reject();
+        }
+      })
+      .catch((result) => {
+        // 如果到了这里是不能进行路由跳转的
+        // 会对result进行处理
+        // 这里result会是对象，或字符串(重定向的字符串)或者是null
+      });
   });
-  // });
 }
 
 /**
@@ -669,6 +677,38 @@ class VueRouter {
         );
       },
     });
+  }
+
+  /**
+   * beforeEach - 全局beforeEach守卫
+   * @param handler - Function
+   */
+  beforeEach(handler) {
+    _beforeEachHandler = handler;
+  }
+
+  /**
+   * afterEach - 全局afterEach守卫
+   * @param handler - Function
+   */
+  afterEach(handler) {
+    _afterEachHandler = handler;
+  }
+
+  /**
+   * getBeforeEachHandler
+   * @return {Function}
+   */
+  getBeforeEachHandler() {
+    return _beforeEachHandler;
+  }
+
+  /**
+   * getAfterEachHandler
+   * @return {Function}
+   */
+  getAfterEachHandler() {
+    return _afterEachHandler;
   }
 
   /**

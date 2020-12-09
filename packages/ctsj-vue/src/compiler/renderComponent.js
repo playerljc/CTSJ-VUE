@@ -49,8 +49,10 @@ export function renderComponent() {
       if (curVNode === vnode) {
         // ------ mount
 
+        debugger;
         // 如果组件的配置中含有$vmCallback，这需要调用这个函数传入self
         if ('$vmCallback' in self.$config && self.$config.$vmCallback) {
+          debugger;
           self.$config.$vmCallback(self);
         }
 

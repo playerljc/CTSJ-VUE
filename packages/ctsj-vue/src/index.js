@@ -37,12 +37,24 @@ const UserManager = {
       </div>
     </div>
   `,
+  beforeRouteEnter(to, from, next) {
+    debugger;
+    next((vm) => {
+      debugger;
+    });
+  },
 };
 
 const UserManagerBase = {
   template: `
     <div>基本信息管理</div>
   `,
+  beforeRouteEnter(to, from, next) {
+    debugger;
+    next((vm) => {
+      debugger;
+    });
+  },
 };
 
 const UserManagerAttendance = {
@@ -67,6 +79,16 @@ const CarManager = {
   template: `
     <div class="car-manager">CarManager</div>
   `,
+  beforeRouteLeave(to, from, next) {
+    debugger;
+    next();
+  },
+  beforeRouteEnter(to, from, next) {
+    debugger;
+    next((vm) => {
+      debugger;
+    });
+  },
 };
 
 const ArticleManager = {
@@ -88,6 +110,16 @@ const App = {
       
     </div>
   `,
+  beforeRouteUpdate(to, from, next) {
+    debugger;
+    next();
+  },
+  beforeRouteEnter(to, from, next) {
+    debugger;
+    next((vm) => {
+      debugger;
+    });
+  },
 };
 
 // app-component
@@ -126,7 +158,6 @@ const router = new VueRouter({
         {
           path: 'user',
           component: UserManager,
-          exact: 'exact',
           children: [
             {
               path: 'base',
@@ -158,6 +189,10 @@ const router = new VueRouter({
           path: 'car',
           exact: 'exact',
           component: CarManager,
+          beforeEnter(to, from, next) {
+            debugger;
+            next();
+          },
         },
         {
           path: 'article',
@@ -178,6 +213,12 @@ const router = new VueRouter({
       ],
     },
   ],
+});
+
+// 全局的 beforeEach 守卫
+router.beforeEach((to, from, next) => {
+  debugger;
+  next(true);
 });
 
 const ins = new Vue({
