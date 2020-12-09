@@ -18,8 +18,14 @@ import { guard, clear } from './routeHooks';
 
 import { wrapPathByBase, getCurRoutePath } from './util';
 
+// 用来存放beforeEach回调函数的句柄
 let _beforeEachHandler;
+
+// 用来存放afterEach回调函数的句柄
 let _afterEachHandler;
+
+// 用来存放onError回调函数的句柄
+let _errorHandler;
 
 /**
  * getConfig - 获取配置
@@ -282,7 +288,6 @@ function onPopstate() {
  注意： 如果目的地和当前路由相同，只有参数发生了改变 (比如从一个用户资料到另一个 /users/1 -> /users/2)，你需要使用 beforeRouteUpdate 来响应这个变化 (比如抓取用户信息)
  */
 function historyChange({ location, onComplete, onAbort, historyChangeCallback }) {
-  debugger;
   const self = this;
 
   const { pathname } = window.location;
@@ -298,44 +303,38 @@ function historyChange({ location, onComplete, onAbort, historyChangeCallback })
 
   return new Promise(function (resolve, reject) {
     // 这里要要进行路由守卫的操作
-    guard(path, self)
-      .then(() => {
-        // 到这里已经可以进行path的跳转了
+    guard(path, self).then(() => {
+      // 到这里已经可以进行path的跳转了
 
-        // 2.使用history.pushState替换浏览器路径
-        historyChangeCallback(path);
+      // 2.使用history.pushState替换浏览器路径
+      historyChangeCallback(path);
 
-        // 清空匹配数据
-        clear();
+      // 清空匹配数据
+      clear();
 
-        // 3.执行重新渲染
-        if (self.$root.$forceUpdate()) {
-          if (onComplete) {
-            onComplete();
-          }
-
-          // 调用全局的 afterEach 钩子
-          const afterEach = self.getAfterEachHandler();
-          if (afterEach) {
-            afterEach(path, pathname);
-          }
-
-          resolve();
+      // 3.执行重新渲染
+      if (self.$root.$forceUpdate()) {
+        if (onComplete) {
+          onComplete();
         }
-        // 渲染失败
-        else {
-          if (onAbort) {
-            onAbort();
-          }
 
-          reject();
+        // 调用全局的 afterEach 钩子
+        const afterEach = self.getAfterEachHandler();
+        if (afterEach) {
+          afterEach(path, pathname);
         }
-      })
-      .catch((result) => {
-        // 如果到了这里是不能进行路由跳转的
-        // 会对result进行处理
-        // 这里result会是对象，或字符串(重定向的字符串)或者是null
-      });
+
+        resolve();
+      }
+      // 渲染失败
+      else {
+        if (onAbort) {
+          onAbort();
+        }
+
+        reject();
+      }
+    });
   });
 }
 
@@ -696,6 +695,19 @@ class VueRouter {
   }
 
   /**
+   * onError - 注册一个回调，该回调会在路由导航过程中出错时被调用。注意被调用的错误必须是下列情形中的一种
+   错误在一个路由守卫函数中被同步抛出；
+
+   错误在一个路由守卫函数中通过调用 next(err) 的方式异步捕获并处理；
+
+   渲染一个路由的过程中，需要尝试解析一个异步组件时发生错误
+   * @param handler
+   */
+  onError(handler) {
+    _errorHandler = handler;
+  }
+
+  /**
    * getBeforeEachHandler
    * @return {Function}
    */
@@ -709,6 +721,14 @@ class VueRouter {
    */
   getAfterEachHandler() {
     return _afterEachHandler;
+  }
+
+  /**
+   * getErrorHandler - 获取errorHandler
+   * @return {Function}
+   */
+  getErrorHandler() {
+    return _errorHandler;
   }
 
   /**

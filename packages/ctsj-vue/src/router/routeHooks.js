@@ -29,7 +29,7 @@
 
 import pathToRegexp from 'path-to-regexp';
 
-import { isFunction, isBoolean, isObject, isString } from '@ctsj/vue-util';
+import { isFunction, isBoolean, isObject, isString, isEmpty } from '@ctsj/vue-util';
 
 import { PATH_SPLIT } from './constants';
 import { wrapPathByBase, getCurRoutePath } from './util';
@@ -303,10 +303,10 @@ function guardStep5({ to, from, $router }) {
                   resolve: s,
                   reject: f,
                   afterHandler: ({ result }) => {
-                    debugger;
                     if (isFunction(result)) {
                       // 向配置中赋值$vmCallback属性
                       config.$vmCallback = result;
+
                       s();
                     }
                   },
@@ -394,7 +394,8 @@ function findLoopComponent({ componentsConfig, to, routes, base }) {
    /system/:id/:name -> SystemList -> /system/123/456
  */
 export function guard(path, $router) {
-  return new Promise((resolve, reject) => {
+  // promise对象初始化
+  const promise = new Promise((resolve, reject) => {
     // 当前浏览器路径的pathname(form)
     const { pathname } = window.location;
 
@@ -456,6 +457,49 @@ export function guard(path, $router) {
         reject(error);
       });
   });
+
+  // 错误的处理
+  promise.catch((result) => {
+    // 如果到了这里是不能进行路由跳转的
+    // 会对result进行处理
+    // 这里result会是对象，或字符串(重定向的字符串)或者是null
+
+    // 错误句柄函数
+    const errorHandler = $router.getErrorHandler();
+
+    // result不为null
+    if (!isEmpty(result)) {
+      if (isObject(result)) {
+        // Error的处理
+        if (result instanceof Error) {
+          if (errorHandler) {
+            errorHandler(result);
+          }
+        }
+
+        // 进行重定向
+        if ('replace' in result && result.replace) {
+          $router.replace(result);
+        } else {
+          $router.push(result);
+        }
+      }
+
+      if (isString(result)) {
+        // 进行重定向
+        $router.push(result);
+      }
+    }
+    // result为null
+    else if (errorHandler) {
+      errorHandler();
+    }
+
+    // 继续下沉错误到下面的catch
+    throw new Error(result);
+  });
+
+  return promise;
 }
 
 /**

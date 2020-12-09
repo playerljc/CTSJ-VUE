@@ -50,13 +50,11 @@ Vue实例
  .push
  .replace
  .go
-.<route-link>
-
-.重定向
-
+.<route-link> ok
 .路由的守卫
  刚上来就要执行路由守卫
  在onPopstate中也要执行路由守卫
+ 在catch中处理error | '/other'这种重定向 和 location对象进行重定向 ok
 
  /system/list?id=1&name=2 -> /system/add list失活
  /system/list?id=1&name=2 -> /car/list system|list失活
@@ -74,17 +72,18 @@ Vue实例
  .得到了这个关系，目标地址例如：/car/list 再去进行一次和router配置匹配的查找过程
  .就可以得出导航需要出发钩子的对象引用
 
-
  导航被触发。
- step1:在(失活)的组件里调用 beforeRouteLeave 守卫。
- step2:调用全局的 beforeEach 守卫。
- step3:在(重用)的组件里调用 beforeRouteUpdate 守卫 (2.2+)。
- step4:在路由配置里调用 beforeEnter。
+ step1:在(失活)的组件里调用 beforeRouteLeave 守卫。 ok
+ step2:调用全局的 beforeEach 守卫。ok
+ step3:在(重用)的组件里调用 beforeRouteUpdate 守卫 (2.2+)。ok
+ step4:在路由配置里调用 beforeEnter。ok
  解析异步路由组件。
- step5:在被激活的组件里调用 beforeRouteEnter。
+ step5:在被激活的组件里调用 beforeRouteEnter。ok
  调用全局的 beforeResolve 守卫 (2.5+)。
  导航被确认。
- step6:调用全局的 afterEach 钩子。
+ step6:调用全局的 afterEach 钩子。ok
  触发 DOM 更新。
- step7:调用 beforeRouteEnter 守卫中传给 next 的回调函数，创建好的组件实例会作为回调函数的参数传入。
+ step7:调用 beforeRouteEnter 守卫中传给 next 的回调函数，创建好的组件实例会作为回调函数的参数传入。ok
+
+.重定向
 .懒加载
