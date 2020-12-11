@@ -1,6 +1,7 @@
 {
   "name": "@ctsj/vue-example",
   "version": "1.0.0",
+  "private": true,
   "description": "ctsj-vue的例子",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",

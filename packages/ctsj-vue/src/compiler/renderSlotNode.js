@@ -3,6 +3,7 @@ import { getAttribute, getVAttrNames, hasAttr } from './directives/util';
 import { getVBindEntrys, hasVBind } from './directives/bind';
 import { DIRECT_PREFIX } from '../shared/constants';
 import { createContext } from '../core/proxy';
+import { renderTemplateNode } from './renderTemplateNode';
 
 /**
  * renderSlotNode - 渲染slot元素
@@ -67,6 +68,9 @@ export function renderSlotNode({ context, el, parentVNode, parentElement }) {
   // this.$parent是Vue实例或者是Component实例，应该用this.getParentContext()获取父亲的上下文对象作为调用renderTemplateNode的上下文参数
   // el<slot></slot>的el this.$el是$parent的template中<my-component></my-component>这个el
 
+  // this.$el这个变量需要克隆，因为下面会对这个变量进行操作，这个变量不能改变
+  const $elClone = this.$el.cloneNode(true);
+
   let name = 'default';
 
   let contextType = 'parent';
@@ -85,7 +89,7 @@ export function renderSlotNode({ context, el, parentVNode, parentElement }) {
   }
 
   // 在父亲中寻找指定的<template v-slot:name></template>元素
-  const templateEls = Array.from(this.$el.getElementsByTagName('template'));
+  const templateEls = Array.from($elClone.getElementsByTagName('template'));
   const slotTemplateElIndex = templateEls.findIndex((templateEl) =>
     templateEl
       .getAttributeNames()
@@ -104,8 +108,8 @@ export function renderSlotNode({ context, el, parentVNode, parentElement }) {
 
     // 如果是default
     if (name === 'default') {
-      // 需要在this.$el的childrenNodes排除<template v-slot开头的元素放入自定义template元素中
-      Array.from(this.$el.childNodes)
+      // 需要在$elClone的childrenNodes排除<template v-slot开头的元素放入自定义template元素中
+      Array.from($elClone.childNodes)
         .filter((node) => {
           if (isElementNode(node) && node.tagName.toLowerCase() === 'template') {
             return !node
@@ -153,6 +157,6 @@ export function renderSlotNode({ context, el, parentVNode, parentElement }) {
     context: curContext,
     el: slotTemplateEl,
     parentVNode,
-    parentElement: this.$el,
+    parentElement: $elClone,
   });
 }

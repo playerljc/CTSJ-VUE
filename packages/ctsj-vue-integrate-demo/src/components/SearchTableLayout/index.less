@@ -1,0 +1,18 @@
+.Wrap {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  padding: 20px;
+  background-color: rgba(0, 0, 0, 0.1);
+
+  > .Fixed {
+    flex-shrink: 0;
+    margin-bottom: 5px;
+  }
+
+  > .Auto {
+    display: flex;
+    flex-grow: 1;
+    min-height: 0;
+  }
+}

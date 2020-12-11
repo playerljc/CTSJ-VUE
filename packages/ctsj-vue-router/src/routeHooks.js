@@ -396,8 +396,10 @@ function findLoopComponent({ componentsConfig, to, routes, base }) {
 export function guard(toRoute, $router) {
   const { pathname, search } = window.location;
 
+  // matchData的栈顶元素
   const topMatchData = getTop();
 
+  // 当前浏览器路径的pathname(form)
   const fromRoute = !isEmpty(topMatchData)
     ? {
         path: topMatchData.path,
@@ -412,8 +414,12 @@ export function guard(toRoute, $router) {
       };
 
   // promise对象初始化
-  const promise = new Promise((resolve, reject) => {
-    // 当前浏览器路径的pathname(form)
+  const promise = new Promise(function (resolve, reject) {
+    // 如果没有设置router对象
+    if (isEmpty($router)) {
+      resolve();
+      return false;
+    }
 
     // 一.需要进行一个操作计算出(失活)和(重用)的组件
     // 直接修改matchData数据加入状态属性

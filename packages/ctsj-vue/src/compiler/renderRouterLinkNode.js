@@ -1,11 +1,13 @@
-import { isEmpty, isString, isObject } from '@ctsj/vue-util/src';
+import { isEmpty, isString, isObject, isTextNode } from '@ctsj/vue-util';
+import { CLASSNAME_SPLIT, STYLE_RULE_ENTRY_SPLIT, STYLE_RULE_SPLIT } from '../shared/regexp';
 import { getVBindEntrys, hasVBind } from './directives/bind';
 import { getAttrEntrys, getVAttrNames } from './directives/util';
 import { hasVFor, parseVFor } from './directives/for';
 import { hasVIf, parseVIf } from './directives/if';
 import { hasVElse, parseVElse } from './directives/else';
 import { hasVElseIf, parseVElseIf } from './directives/else-if';
-import { createTextVNode, createVNode } from '../core/vdom';
+import { createVNode } from '../core/vdom';
+import { renderTextNode } from './renderTextNode';
 
 /**
  * renderRouterLinkNode - 渲染router-link元素
@@ -62,6 +64,11 @@ import { createTextVNode, createVNode } from '../core/vdom';
     配置当链接被精确匹配的时候应该激活的 class。注意默认值也是可以通过路由构造函数选项 linkExactActiveClass 进行全局配置的
  */
 export function renderRouterLinkNode({ context, el, parentVNode, parentElement }) {
+  // 如果没有router对象则返回null节点
+  if (isEmpty(this.$router)) {
+    return null;
+  }
+
   const vAttrNames = getVAttrNames(el);
 
   if (vAttrNames.length) {
@@ -143,7 +150,13 @@ export function renderRouterLinkNode({ context, el, parentVNode, parentElement }
   const VNode = createVNode(tagName);
 
   // 创建VNode的Text
-  VNode.children.push(createTextVNode(el.innerText));
+  el.normalize();
+  for (let i = 0, len = el.childNodes.length; i < len; i++) {
+    const childEl = el.childNodes[i];
+    if (isTextNode(childEl)) {
+      VNode.children.push(renderTextNode.call(this, { context, el: childEl }));
+    }
+  }
 
   // class的处理
   // class -> value
@@ -151,7 +164,9 @@ export function renderRouterLinkNode({ context, el, parentVNode, parentElement }
     if (isObject(attrs.class)) {
       Object.assign(VNode.data.class, attrs.class);
     } else if (isString(attrs.class)) {
-      attrs.class.split(' ').forEach((className) => {
+      const classNames = attrs.class.trim().split(CLASSNAME_SPLIT);
+
+      classNames.forEach((className) => {
         VNode.data.class[className] = true;
       });
     }
@@ -162,10 +177,13 @@ export function renderRouterLinkNode({ context, el, parentVNode, parentElement }
     if (isObject(attrs.style)) {
       Object.assign(VNode.data.style, attrs.style);
     } else if (isString(attrs.style)) {
-      attrs.style.split(';').forEach((style) => {
-        const entry = style.split(':');
-        VNode.data.style[entry[0]] = entry[1];
-      });
+      attrs.style
+        .split(STYLE_RULE_SPLIT)
+        .filter((t) => t)
+        .forEach((style) => {
+          const entry = style.split(STYLE_RULE_ENTRY_SPLIT).filter((t) => t);
+          VNode.data.style[entry[0]] = entry[1];
+        });
     }
   }
 
@@ -186,6 +204,8 @@ export function renderRouterLinkNode({ context, el, parentVNode, parentElement }
   }
 
   // 说明当前浏览器路径和当前<router-link to>相等需要加入active-class默认值是router-link-active
+  // path包含pathname
+  // if (path.startsWith(pathname)) {
   if (path === pathname) {
     const { $config } = this.$router;
 

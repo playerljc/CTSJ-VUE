@@ -36,6 +36,7 @@ import { FORM_CONTROL_BINDING_TAG_NAMES } from '../shared/constants';
 import { hasVModel, isFormTag, parseVModel } from './directives/model';
 import { hasVOn, parseVOn } from './directives/on';
 import { hasVHtml, parseVHtml } from './directives/html';
+import { CLASSNAME_SPLIT, STYLE_RULE_ENTRY_SPLIT, STYLE_RULE_SPLIT } from '../shared/regexp';
 
 /**
  * renderVAttr - 解析指令属性
@@ -229,11 +230,22 @@ export function renderAttr({ el, VNode }) {
       }
       // style属性
       else if (attrName === 'style') {
-        VNode.data.style[attrName] = val;
+        // VNode.data.style[attrName] = val;
+        val.style
+          .split(STYLE_RULE_SPLIT)
+          .filter((t) => t)
+          .forEach((style) => {
+            const entry = style.split(STYLE_RULE_ENTRY_SPLIT).filter((t) => t);
+            VNode.data.style[entry[0]] = entry[1];
+          });
       }
       // class属性
       else if (attrName === 'class') {
-        VNode.data.class[val] = true;
+        const classNames = val.trim().split(CLASSNAME_SPLIT);
+
+        classNames.forEach((className) => {
+          VNode.data.class[className] = true;
+        });
       }
       // data-*属性
       else if (attrName.startsWith('data-')) {

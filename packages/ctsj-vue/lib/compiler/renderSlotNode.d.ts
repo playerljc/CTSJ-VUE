@@ -61,4 +61,4 @@ export function renderSlotNode({ context, el, parentVNode, parentElement }: {
     el: any;
     parentVNode: any;
     parentElement: any;
-}): any;
+}): any[] | null;

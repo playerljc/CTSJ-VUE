@@ -1,0 +1,86 @@
+.Wrap {
+  position: relative;
+  width: 100%;
+  height: 100%;
+
+  > .Mask {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: #fff;
+    opacity: 0.6;
+
+    > .IconWrap {
+      position: relative;
+      display: inline-block;
+      width: 1em;
+      height: 1em;
+      margin-bottom: 20px;
+      font-size: 32px;
+      transform: rotate(45deg);
+      animation: antRotate 1.2s linear infinite;
+      > .Dot {
+        position: absolute;
+        display: block;
+        width: 14px;
+        height: 14px;
+        background-color: #1890ff;
+        border-radius: 100%;
+        -webkit-transform: scale(0.75);
+        transform: scale(0.75);
+        -webkit-transform-origin: 50% 50%;
+        transform-origin: 50% 50%;
+        opacity: 0.3;
+        -webkit-animation: antspinmove 1s linear infinite alternate;
+        animation: antSpinMove 1s linear infinite alternate;
+
+        &:first-child {
+          top: 0;
+          left: 0;
+        }
+
+        &:nth-child(2) {
+          top: 0;
+          right: 0;
+          animation-delay: 0.4s;
+        }
+
+        &:nth-child(3) {
+          right: 0;
+          bottom: 0;
+          animation-delay: 0.8s;
+        }
+
+        &:nth-child(4) {
+          bottom: 0;
+          left: 0;
+          animation-delay: 1.2s;
+        }
+      }
+    }
+
+    > .Title {
+      margin-bottom: 5px;
+      color: @primary-color;
+    }
+  }
+}
+
+@keyframes antSpinMove {
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes antRotate {
+  to {
+    transform: rotate(405deg);
+  }
+}

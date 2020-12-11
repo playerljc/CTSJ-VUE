@@ -1,0 +1,67 @@
+.Wrap {
+  display: flex;
+  height: 80px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+
+  > .Auto {
+    display: flex;
+    flex-grow: 1;
+    min-width: 0;
+    margin: 0 15px;
+
+    > .MenuWrap {
+      display: flex;
+      margin: 0;
+      padding: 20px;
+      list-style: none;
+
+      > .MenuItem {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 20px;
+
+        &:not(:last-child) {
+          margin-right: 25px;
+        }
+
+        &:hover {
+          cursor: pointer;
+        }
+
+        > .MenuItemInner {
+          padding: 10px 30px;
+          font-size: 18px;
+          border: 1px solid rgba(0, 0, 0, 0.1);
+          border-radius: 20px;
+          &:hover {
+            background-color: rgba(0, 0, 0, 0.1);
+          }
+        }
+
+        :global {
+          .router-link-exact-active {
+            color: #fff;
+            background-color: @primary-color;
+            &:hover {
+              background-color: @primary-color;
+              opacity: 0.6;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  > .Fixed {
+    flex-shrink: 0;
+  }
+
+  > .LogoWrap {
+    width: 15%;
+  }
+
+  > .InfoWrap {
+    width: 20%;
+  }
+}

@@ -10,6 +10,7 @@ export function renderComponent() {
   // 组件的实例对象
   const self = this;
 
+  debugger;
   // 组件实例代表的vnode
   const vnode = renderLoop.call(this, {
     context: {},

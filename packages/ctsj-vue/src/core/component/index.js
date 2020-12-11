@@ -1,4 +1,5 @@
 import { createElement, isArray, isFunction, isObject, cloneDeep, isString } from '@ctsj/vue-util';
+import { CLASSNAME_SPLIT, STYLE_RULE_ENTRY_SPLIT, STYLE_RULE_SPLIT } from '../../shared/regexp';
 import { executeExecutionContextVOn } from '../../compiler/directives/on';
 import { renderComponent } from '../../compiler/renderComponent';
 import { createComponentProxy, createPropsProxy } from '../proxy';
@@ -26,7 +27,9 @@ function getPropsAndAttrs() {
 
   // 配置定义的
   let props = cloneDeep(this.$config.props) || [];
+
   const prop = {};
+
   const attr = {};
 
   // props必须是object或者array
@@ -41,7 +44,9 @@ function getPropsAndAttrs() {
     if (model && 'value' in attrs) {
       if (!props.includes(model.prop)) {
         props.push(model.prop);
+
         attrs[model.prop] = attrs.value;
+
         delete attrs.value;
       }
     } else if ('value' in attrs && !props.includes('value')) {
@@ -88,6 +93,7 @@ function createEmit() {
     for (let i = 0; i < arguments.length; i++) {
       // arguments.length
       if (i === 0 && eventName) continue;
+
       argv.push(arguments[i]);
     }
 
@@ -195,6 +201,7 @@ class Component {
     // 组件路由钩子混入
     mergeRouterHooks.call(this);
 
+    debugger;
     // 创建template的el对象
     this.templateEl = createElement(this.$config.template);
 
@@ -208,11 +215,14 @@ class Component {
    */
   $assignClassAndStyle(VNode) {
     const { attrs } = this.$argConfig;
+
     if (attrs.class) {
       if (isObject(attrs.class)) {
         Object.assign(VNode.data.class, attrs.class);
       } else if (isString(attrs.class)) {
-        attrs.class.split(' ').forEach((className) => {
+        const classNames = attrs.class.trim().split(CLASSNAME_SPLIT);
+
+        classNames.forEach((className) => {
           VNode.data.class[className] = true;
         });
       }
@@ -222,10 +232,13 @@ class Component {
       if (isObject(attrs.style)) {
         Object.assign(VNode.data.style, attrs.style);
       } else if (isString(attrs.style)) {
-        attrs.style.split(';').forEach((style) => {
-          const entry = style.split(':');
-          VNode.data.style[entry[0]] = entry[1];
-        });
+        attrs.style
+          .split(STYLE_RULE_SPLIT)
+          .filter((t) => t)
+          .forEach((style) => {
+            const entry = style.split(STYLE_RULE_ENTRY_SPLIT).filter((t) => t);
+            VNode.data.style[entry[0]] = entry[1];
+          });
       }
     }
   }

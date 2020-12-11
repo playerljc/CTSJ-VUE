@@ -1,2 +1,2 @@
-"use strict";Object.defineProperty(exports,"__esModule",{value:!0}),exports.COMMA_SPLIT=exports.EMPTY_SPLIT=void 0,exports.EMPTY_SPLIT=/\sin\s|\sof\s/,exports.COMMA_SPLIT=/\s*,\s*/;
+"use strict";Object.defineProperty(exports,"__esModule",{value:!0}),exports.STYLE_RULE_ENTRY_SPLIT=exports.STYLE_RULE_SPLIT=exports.CLASSNAME_SPLIT=exports.COMMA_SPLIT=exports.EMPTY_SPLIT=void 0,exports.EMPTY_SPLIT=/\sin\s|\sof\s/,exports.COMMA_SPLIT=/\s*,\s*/,exports.CLASSNAME_SPLIT=/\s{1,}/,exports.STYLE_RULE_SPLIT=/\s*;\s*/,exports.STYLE_RULE_ENTRY_SPLIT=/\s*:\s*/;
 //# sourceMappingURL=regexp.js.map

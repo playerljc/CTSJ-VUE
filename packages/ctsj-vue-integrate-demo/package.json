@@ -1,6 +1,7 @@
 {
   "name": "@ctsj/vue-integrate-demo",
   "version": "1.0.0",
+  "private": true,
   "description": "ctsj-vue的综合demo整合了ctsj-vue和ctsj-vue-router",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -41,6 +42,9 @@
   "dependencies": {
     "@ctsj/vue": "^1.0.0",
     "@ctsj/vue-router": "^1.0.0",
-    "@ctsj/vue-util": "^1.0.0"
+    "@ctsj/vue-util": "^1.0.0",
+    "classnames": "^2.2.6",
+    "snabbdom": "^2.1.0",
+    "uuid": "^8.3.2"
   }
 }

@@ -26,6 +26,11 @@ import { renderComponentNode } from './renderComponentNode';
  * @return VNode
  */
 export function renderRouterViewNode({ context, el, parentVNode, parentElement }) {
+  // 如果没有router对象则返回null节点
+  if (isEmpty(this.$router)) {
+    return null;
+  }
+
   const vAttrNames = getVAttrNames(el);
 
   let key;
