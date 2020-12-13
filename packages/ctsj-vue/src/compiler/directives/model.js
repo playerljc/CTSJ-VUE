@@ -1,6 +1,7 @@
 import { isArray, chainCallAssignment, getObjectByChainStr } from '@ctsj/vue-util';
 import { execExpression, createExecutionContext } from '../../shared/util';
 import { getDirectiveEntry, hasVAttr } from './util';
+import { createTextVNode } from '../../core/vdom';
 import {
   FORM_CONTROL_BINDING_TAG_NAMES,
   FORM_CONTROL_CHECKED_TAG_NAMES,
@@ -124,7 +125,6 @@ export function parseVModel({ context, el, vAttrNames, tagName, VNode }) {
 
   // 1.赋值
   if (tagName === 'input') {
-    debugger;
     // radio | checkbox
     if (FORM_CONTROL_CHECKED_TAG_NAMES.includes(inputType)) {
       // value属性
@@ -133,6 +133,7 @@ export function parseVModel({ context, el, vAttrNames, tagName, VNode }) {
         //  <input type="radio" value="2" v-model="sex" />女
         if (inputType === 'radio') {
           VNode.data.props.checked = value == inputValue;
+          VNode.data.attrs.checked = value == inputValue;
         }
         // checkbox
         //  <input type="checkbox" value="1" v-model="data" />java
@@ -141,24 +142,29 @@ export function parseVModel({ context, el, vAttrNames, tagName, VNode }) {
         else if (inputType === 'checkbox') {
           if (isArray(value)) {
             VNode.data.props.checked = value.includes(inputValue);
+            VNode.data.attrs.checked = value.includes(inputValue);
           } else {
             VNode.data.props.checked = value == inputValue;
+            VNode.data.attrs.checked = value == inputValue;
           }
         }
       }
       // 没有value属性
       else {
         VNode.data.props.checked = value;
+        VNode.data.attrs.checked = value;
       }
     }
     // text | number | ...
     else {
       VNode.data.props.value = value;
+      VNode.data.attrs.value = value;
     }
   }
   // textarea
   else if (tagName === 'textarea') {
-    VNode.data.props.value = value;
+    VNode.children.push(createTextVNode(value));
+    // VNode.data.attrs.value = value;
   }
   // select
   // else if (tagName === 'select') {
@@ -388,17 +394,19 @@ export function parseOption({ context, VNode, parentElement }) {
   );
 
   // 获取option的value value表示的是text或value
-  const val = VNode.data.props.value;
+  const val = VNode.data.attrs.value || VNode.data.props.value;
 
   // model的值是数组
   if (isArray(value)) {
     if (value.includes(val)) {
       VNode.data.props.selected = 'selected';
+      VNode.data.attrs.selected = 'selected';
     }
   }
   // model的值不是数组
   else if (val == value) {
     VNode.data.props.selected = 'selected';
+    VNode.data.attrs.selected = 'selected';
   }
 }
 

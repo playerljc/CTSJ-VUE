@@ -135,7 +135,7 @@ function createProxy(srcObj, depth, renderHandler) {
           // 如果可以则会给value继续创建代理
           if ((isObject(value) || isArray(value)) && !(PATH_SYMBOLS[0] in value)) {
             value = createProxy.call(self, value, depth, renderHandler);
-            value[PATH_SYMBOLS[0]] = key;
+            value[PATH_SYMBOLS[0]] = `[${key}]`;
             value[PATH_SYMBOLS[1]] = target;
             result = Reflect.set(target, key, value, receiver);
           }
@@ -147,7 +147,7 @@ function createProxy(srcObj, depth, renderHandler) {
           // 如果可以则会给value继续创建代理
           if ((isObject(value) || isArray(value)) && !(PATH_SYMBOLS[0] in value)) {
             value = createProxy.call(self, value, depth, renderHandler);
-            value[PATH_SYMBOLS[0]] = key;
+            value[PATH_SYMBOLS[0]] = `[${key}]`;
             value[PATH_SYMBOLS[1]] = target;
             result = Reflect.set(target, key, value, receiver);
           }

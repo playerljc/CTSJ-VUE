@@ -167,7 +167,7 @@ export function renderVAttr({ el, parentVNode, parentElement, context, renderFun
     parseVModel.call(self, {
       context,
       tagName,
-      vProps: VNode.data.props,
+      vProps: VNode.data.attrs,
       el,
       vAttrNames,
       VNode,
