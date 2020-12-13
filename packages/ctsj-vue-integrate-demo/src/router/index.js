@@ -11,11 +11,14 @@ import Spin from '@/components/Spin';
 import Button from '@/components/Button';
 import Modal from '@/components/Modal';
 import DeleteConfirm from '@/components/DeleteConfirm';
+import Layout from '@/components/Layout';
+import Nav from '@/components/Nav';
 
 import App from '@/pages/App';
 import UserManager from '@/pages/UserManager';
 import Analysis from '@/pages/UserManager/Analysis';
 import UserList from '@/pages/UserManager/Manager';
+import SaveOrUpdate from '@/pages/UserManager/SaveOrUpdate';
 import TaskManager from '@/pages/TaskManager';
 
 Vue.component('app', App);
@@ -29,6 +32,8 @@ Vue.component('v-spin', Spin);
 Vue.component('v-button', Button);
 Vue.component('v-modal', Modal);
 Vue.component('v-delete-confirm', DeleteConfirm);
+Vue.component('v-layout', Layout);
+Vue.component('v-nav', Nav);
 
 Vue.component('user-manager', UserManager);
 Vue.component('user-analysis', Analysis);
@@ -53,6 +58,16 @@ export default new VueRouter({
             {
               path: 'list',
               component: UserList,
+              exact: 'exact',
+            },
+            {
+              path: 'save',
+              component: SaveOrUpdate,
+              exact: 'exact',
+            },
+            {
+              path: 'edit/:id',
+              component: SaveOrUpdate,
               exact: 'exact',
             },
             {

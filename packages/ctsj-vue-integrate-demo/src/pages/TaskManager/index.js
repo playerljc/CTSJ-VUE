@@ -71,8 +71,8 @@ export default {
       searchRecord: {
         name: '',
         describe: '',
-        createUser: -1,
-        status: -1,
+        createUser: '-1',
+        status: '-1',
         createTime: '',
       },
     };
@@ -319,27 +319,27 @@ export default {
       return this.dataSource
         .filter((record) => {
           if (name) {
-            return record.name.indexOf(name) !== -1;
+            return record.name.indexOf(name) !== '-1';
           }
 
           return true;
         })
         .filter((record) => {
           if (describe) {
-            return record.describe.indexOf(describe) !== -1;
+            return record.describe.indexOf(describe) !== '-1';
           }
 
           return true;
         })
         .filter((record) => {
-          if (createUser !== -1) {
+          if (createUser !== '-1') {
             return record.createUser === createUser;
           }
 
           return true;
         })
         .filter((record) => {
-          if (status !== -1) {
+          if (status !== '-1') {
             return record.status === status;
           }
 
@@ -347,7 +347,7 @@ export default {
         })
         .filter((record) => {
           if (createTime) {
-            return record.createTime.indexOf(createTime) !== -1;
+            return record.createTime.indexOf(createTime) !== '-1';
           }
 
           return true;
@@ -357,7 +357,7 @@ export default {
       return [
         {
           label: '全部',
-          value: -1,
+          value: '-1',
         },
         {
           label: '未接收',
@@ -381,7 +381,7 @@ export default {
       return [
         {
           label: '全部',
-          value: -1,
+          value: '-1',
         },
         {
           label: '张三',
@@ -435,8 +435,8 @@ export default {
           this.searchRecord = {
             name: '',
             describe: '',
-            createUser: -1,
-            status: -1,
+            createUser: '-1',
+            status: '-1',
             createTime: '',
           };
 

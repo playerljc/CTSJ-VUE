@@ -8,7 +8,7 @@ export default {
       <div class="${styles.Auto}">
         <ul class="${styles.MenuWrap}">
           <li class="${styles.MenuItem}">
-            <router-link class="${styles.MenuItemInner}" to="/user">用户管理</router-link>
+            <router-link class="${styles.MenuItemInner}" to="/user">人员管理</router-link>
           </li>
           <li class="${styles.MenuItem}">
             <router-link class="${styles.MenuItemInner}" to="/task">任务管理</router-link>

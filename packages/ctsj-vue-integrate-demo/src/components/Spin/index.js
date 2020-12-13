@@ -18,7 +18,7 @@ export default {
   `,
   computed: {
     loadingTip() {
-      return this.tip ? this.tip : 'Loading...';
+      return this.tip ? this.tip : '加载中...';
     },
   },
 };

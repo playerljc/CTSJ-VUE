@@ -1,4 +1,5 @@
-import { isEmpty, isString, isObject, isTextNode } from '@ctsj/vue-util';
+import { isEmpty, isString, isObject, isArray } from '@ctsj/vue-util';
+import { renderLoop } from '@/vue/compiler/renderUtil';
 import { CLASSNAME_SPLIT, STYLE_RULE_ENTRY_SPLIT, STYLE_RULE_SPLIT } from '../shared/regexp';
 import { getVBindEntrys, hasVBind } from './directives/bind';
 import { getAttrEntrys, getVAttrNames } from './directives/util';
@@ -7,7 +8,6 @@ import { hasVIf, parseVIf } from './directives/if';
 import { hasVElse, parseVElse } from './directives/else';
 import { hasVElseIf, parseVElseIf } from './directives/else-if';
 import { createVNode } from '../core/vdom';
-import { renderTextNode } from './renderTextNode';
 
 /**
  * renderRouterLinkNode - 渲染router-link元素
@@ -150,13 +150,13 @@ export function renderRouterLinkNode({ context, el, parentVNode, parentElement }
   const VNode = createVNode(tagName);
 
   // 创建VNode的Text
-  el.normalize();
-  for (let i = 0, len = el.childNodes.length; i < len; i++) {
-    const childEl = el.childNodes[i];
-    if (isTextNode(childEl)) {
-      VNode.children.push(renderTextNode.call(this, { context, el: childEl }));
-    }
-  }
+  // el.normalize();
+  // for (let i = 0, len = el.childNodes.length; i < len; i++) {
+  //   const childEl = el.childNodes[i];
+  //   if (isTextNode(childEl)) {
+  //     VNode.children.push(renderTextNode.call(this, { context, el: childEl }));
+  //   }
+  // }
 
   // class的处理
   // class -> value
@@ -239,6 +239,26 @@ export function renderRouterLinkNode({ context, el, parentVNode, parentElement }
       this.$router.push(attrs.to);
     }
   };
+
+  // loop children
+  for (let i = 0, len = el.childNodes.length; i < len; i++) {
+    const VNodes = renderLoop.call(this, {
+      context,
+      el: el.childNodes[i],
+      parentVNode: VNode,
+      parentElement: el,
+    });
+    if (!VNodes) continue;
+
+    // v-for返回的
+    if (isArray(VNodes)) {
+      VNodes.filter((n) => n).forEach((n) => {
+        VNode.children.push(n);
+      });
+    } else if (isObject(VNodes)) {
+      VNode.children.push(VNodes);
+    }
+  }
 
   return VNode;
 }

@@ -1,0 +1,21 @@
+.Wrap {
+  display: flex;
+  height: 100%;
+
+  > .Fixed {
+    flex-shrink: 0;
+  }
+
+  > .Auto {
+    flex-grow: 1;
+    min-width: 0;
+  }
+}
+
+.Vertical {
+  flex-direction: column;
+
+  > .Auto {
+    min-height: 0;
+  }
+}

@@ -1,0 +1,53 @@
+.Wrap {
+  width: 200px;
+  height: 100%;
+  color: hsla(0, 0%, 100%, .65);
+  background: #001529;
+
+  > .Inner {
+    list-style: none;
+    padding: 10px 20px 10px 0;
+    margin: 0;
+
+    > .Item {
+      > .ItemInner {
+        display: flex;
+        align-items: center;
+        padding: 10px 0;
+
+        &:hover {
+          cursor: pointer;
+
+          > .Title {
+            color: #fff;
+          }
+        }
+
+        > .Icon {
+          flex-shrink: 0;
+          margin: 0 10px;
+
+          > img {
+            width: 20px;
+            height: 20px;
+            vertical-align: middle;
+          }
+
+        }
+
+        > .Title {
+          flex-grow: 1;
+          min-width: 0;
+          word-break: break-all;
+        }
+
+      }
+
+      &.Active {
+        > .ItemInner {
+          background-color: @primary-color;
+        }
+      }
+    }
+  }
+}

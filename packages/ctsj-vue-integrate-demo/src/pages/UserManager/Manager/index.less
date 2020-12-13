@@ -1,2 +1,21 @@
+@import '~@/form.less';
+@import '~@/inputForm.less';
+
 .Wrap {
+  display: flex;
+  width: 100%;
+
+  .OptionWrap {
+    a {
+      color: @primary-color;
+      &:hover {
+        cursor: pointer;
+      }
+    }
+
+    span {
+      margin: 0 5px;
+      color: #999;
+    }
+  }
 }
