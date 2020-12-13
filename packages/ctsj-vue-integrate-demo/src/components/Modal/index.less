@@ -1,0 +1,72 @@
+.Wrap {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.45);
+
+  > .Inner {
+    position: relative;
+    background-color: #fff;
+    background-clip: padding-box;
+    border: 0;
+    border-radius: 4px;
+    box-shadow: 0 4px 12px rgba(0,0,0,.15);
+    pointer-events: auto;
+
+
+    > .Header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 24px;
+      color: rgba(0,0,0,.65);
+      background: #fff;
+      border-bottom: 1px solid #e8e8e8;
+      border-radius: 4px 4px 0 0;
+
+      > .Title {
+        margin: 0;
+        color: rgba(0,0,0,.85);
+        font-weight: 500;
+        font-size: 16px;
+        line-height: 22px;
+        word-wrap: break-word;
+      }
+
+      > .Close {
+        &:hover {
+          cursor: pointer;
+        }
+      }
+    }
+
+    > .Body {
+      padding: 24px;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    > .Footer {
+      display: flex;
+      justify-content: flex-end;
+      padding: 10px 16px;
+      text-align: right;
+      background: transparent;
+      border-top: 1px solid #e8e8e8;
+      border-radius: 0 0 4px 4px;
+
+      > .FooterItem {
+        &:not(:last-of-type) {
+          margin-right: 15px;
+        }
+      }
+    }
+  }
+}

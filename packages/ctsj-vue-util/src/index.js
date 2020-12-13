@@ -85,6 +85,15 @@ export function isTextNode(el) {
 }
 
 /**
+ * isCommentNode - 是否是注释节点
+ * @param el
+ * @return {boolean}
+ */
+export function isCommentNode(el) {
+  return el.nodeType === Node.COMMENT_NODE;
+}
+
+/**
  * isElementNode - 是否是元素节点
  * @param el - Element
  * @return {boolean}
@@ -232,6 +241,58 @@ export function cloneDeep(value, map = new Map()) {
   // }
   //
   // return value;
+}
+
+/**
+ * chainCallAssignment - 对象的链式赋值
+ * obj.a.b.c.d.x.x.x = value
+ * @param obj Object - 赋值的对象
+ * @param chainStr string - 属性链式表达式 a.b.c
+ * @param value any - 要复值的值
+ */
+export function chainCallAssignment({ obj, chainStr, value }) {
+  if (!isObject(obj) || !isString(chainStr) || isEmpty(chainStr) || isEmpty(obj)) return false;
+
+  const chain = chainStr.split('.');
+
+  // const obj = {};
+  // a.b.c
+  // const item = obj['a']
+  let target = obj;
+
+  for (let i = 0; i < chain.length; i++) {
+    const property = chain[i];
+
+    if (i < chain.length - 1) {
+      target = target[property];
+    } else {
+      target[property] = value;
+    }
+  }
+}
+
+/**
+ * getObjectByChainStr - 通过chainStr获取对象
+ * obj.a.b.c.d.x.x.x = value
+ * @param obj Object - 赋值的对象
+ * @param chainStr string - 属性链式表达式 a.b.c
+ * @return Object
+ */
+export function getObjectByChainStr({ obj, chainStr }) {
+  if (!isObject(obj) || !isString(chainStr) || isEmpty(chainStr) || isEmpty(obj)) return obj;
+
+  const chain = chainStr.split('.');
+
+  // const obj = {};
+  // a.b.c
+  // const item = obj['a']
+  let target = obj;
+
+  for (let i = 0; i < chain.length; i++) {
+    target = target[chain[i]];
+  }
+
+  return target;
 }
 
 /**

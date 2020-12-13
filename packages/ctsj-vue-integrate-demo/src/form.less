@@ -10,7 +10,7 @@
       > tr {
         > td {
           &:nth-child(2n - 1) {
-            max-width: 30px;
+            max-width: 50px;
             text-align: right;
           }
         }
@@ -46,5 +46,9 @@
     border: 1px solid #d9d9d9;
     border-radius: 2px;
     transition: all 0.3s;
+
+    &:focus {
+      outline: 2px solid @primary-color;
+    }
   }
 }

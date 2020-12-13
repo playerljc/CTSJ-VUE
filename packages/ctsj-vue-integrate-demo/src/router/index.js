@@ -9,6 +9,8 @@ import SearchTableLayout from '@/components/SearchTableLayout';
 import Table from '@/components/Table';
 import Spin from '@/components/Spin';
 import Button from '@/components/Button';
+import Modal from '@/components/Modal';
+import DeleteConfirm from '@/components/DeleteConfirm';
 
 import App from '@/pages/App';
 import UserManager from '@/pages/UserManager';
@@ -25,6 +27,8 @@ Vue.component('search-table-layout', SearchTableLayout);
 Vue.component('v-table', Table);
 Vue.component('v-spin', Spin);
 Vue.component('v-button', Button);
+Vue.component('v-modal', Modal);
+Vue.component('v-delete-confirm', DeleteConfirm);
 
 Vue.component('user-manager', UserManager);
 Vue.component('user-analysis', Analysis);

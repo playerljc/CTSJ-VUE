@@ -1,4 +1,4 @@
-import { isArray } from '@ctsj/vue-util';
+import { isArray, chainCallAssignment, getObjectByChainStr } from '@ctsj/vue-util';
 import { execExpression, createExecutionContext } from '../../shared/util';
 import { getDirectiveEntry, hasVAttr } from './util';
 import {
@@ -124,6 +124,7 @@ export function parseVModel({ context, el, vAttrNames, tagName, VNode }) {
 
   // 1.赋值
   if (tagName === 'input') {
+    debugger;
     // radio | checkbox
     if (FORM_CONTROL_CHECKED_TAG_NAMES.includes(inputType)) {
       // value属性
@@ -195,13 +196,22 @@ export function parseVModel({ context, el, vAttrNames, tagName, VNode }) {
       createExecutionContext.call(self, self, function () {
         const { selectedOptions } = e.target;
 
+        // entry.expression 现在是xx.xx.xxx模式，需要处理一下
+
         // 多选的模式
         if (hasProp({ el, prop: 'multiple' })) {
           // model的值是数组
           if (isArray(value)) {
-            self.$dataProxy[entry.expression] = Array.from(selectedOptions).map((selectedOption) =>
-              filterChain(selectedOption.value, entry),
-            );
+            chainCallAssignment({
+              obj: self.$dataProxy,
+              chainStr: entry.expression,
+              value: Array.from(selectedOptions).map((selectedOption) =>
+                filterChain(selectedOption.value, entry),
+              ),
+            });
+            // self.$dataProxy[entry.expression] = Array.from(selectedOptions).map((selectedOption) =>
+            //   filterChain(selectedOption.value, entry),
+            // );
           }
           // 不是数组不处理
         }
@@ -209,7 +219,13 @@ export function parseVModel({ context, el, vAttrNames, tagName, VNode }) {
         else {
           // 不是数组才处理
           if (!isArray(value)) {
-            self.$dataProxy[entry.expression] = filterChain(selectedOptions[0].value, entry);
+            chainCallAssignment({
+              obj: self.$dataProxy,
+              chainStr: entry.expression,
+              value: filterChain(selectedOptions[0].value, entry),
+            });
+
+            // self.$dataProxy[entry.expression] = filterChain(selectedOptions[0].value, entry);
           }
         }
       });
@@ -226,7 +242,13 @@ export function parseVModel({ context, el, vAttrNames, tagName, VNode }) {
         if (inputType === 'radio') {
           VNode.data.on.change = (e) => {
             createExecutionContext.call(self, self, function () {
-              self.$dataProxy[entry.expression] = e.target.checked ? inputValue : '';
+              chainCallAssignment({
+                obj: self.$dataProxy,
+                chainStr: entry.expression,
+                value: e.target.checked ? inputValue : '',
+              });
+
+              // self.$dataProxy[entry.expression] = e.target.checked ? inputValue : '';
             });
           };
         }
@@ -237,13 +259,25 @@ export function parseVModel({ context, el, vAttrNames, tagName, VNode }) {
           if (isArray(value)) {
             VNode.data.on.change = (e) => {
               createExecutionContext.call(self, self, function () {
+                const target = getObjectByChainStr({
+                  obj: self.$dataProxy,
+                  chainStr: entry.expression,
+                });
+
                 if (e.target.checked) {
-                  self.$dataProxy[entry.expression].push(inputValue);
+                  target.push(inputValue);
+
+                  // self.$dataProxy[entry.expression].push(inputValue);
                 } else {
-                  const deleteIndex = self.$dataProxy[entry.expression].indexOf(inputValue);
+                  const deleteIndex = target.indexOf(inputValue);
                   if (deleteIndex !== -1) {
-                    self.$dataProxy[entry.expression].splice(deleteIndex, 1);
+                    target.splice(deleteIndex, 1);
                   }
+
+                  // const deleteIndex = self.$dataProxy[entry.expression].indexOf(inputValue);
+                  // if (deleteIndex !== -1) {
+                  //   self.$dataProxy[entry.expression].splice(deleteIndex, 1);
+                  // }
                 }
               });
             };
@@ -252,7 +286,13 @@ export function parseVModel({ context, el, vAttrNames, tagName, VNode }) {
           else {
             VNode.data.on.change = (e) => {
               createExecutionContext.call(self, self, function () {
-                self.$dataProxy[entry.expression] = e.target.checked ? inputValue : '';
+                chainCallAssignment({
+                  obj: self.$dataProxy,
+                  chainStr: entry.expression,
+                  value: e.target.checked ? inputValue : '',
+                });
+
+                // self.$dataProxy[entry.expression] = e.target.checked ? inputValue : '';
               });
             };
           }
@@ -262,7 +302,13 @@ export function parseVModel({ context, el, vAttrNames, tagName, VNode }) {
       else {
         VNode.data.on.change = (e) => {
           createExecutionContext.call(self, self, function () {
-            self.$dataProxy[entry.expression] = e.target.checked;
+            chainCallAssignment({
+              obj: self.$dataProxy,
+              chainStr: entry.expression,
+              value: e.target.checked,
+            });
+
+            // self.$dataProxy[entry.expression] = e.target.checked;
           });
         };
       }
@@ -271,7 +317,13 @@ export function parseVModel({ context, el, vAttrNames, tagName, VNode }) {
     else if (lazy) {
       VNode.data.on.change = (e) => {
         createExecutionContext.call(self, self, function () {
-          self.$dataProxy[entry.expression] = filterChain(e.target.value, entry);
+          chainCallAssignment({
+            obj: self.$dataProxy,
+            chainStr: entry.expression,
+            value: filterChain(e.target.value, entry),
+          });
+
+          // self.$dataProxy[entry.expression] = filterChain(e.target.value, entry);
         });
       };
     }
@@ -279,7 +331,12 @@ export function parseVModel({ context, el, vAttrNames, tagName, VNode }) {
     else {
       VNode.data.on.input = (e) => {
         createExecutionContext.call(self, self, function () {
-          self.$dataProxy[entry.expression] = filterChain(e.target.value, entry);
+          chainCallAssignment({
+            obj: self.$dataProxy,
+            chainStr: entry.expression,
+            value: filterChain(e.target.value, entry),
+          });
+          // self.$dataProxy[entry.expression] = filterChain(e.target.value, entry);
         });
       };
     }
@@ -288,7 +345,13 @@ export function parseVModel({ context, el, vAttrNames, tagName, VNode }) {
   else if (lazy) {
     VNode.data.on.change = (e) => {
       createExecutionContext.call(self, self, function () {
-        self.$dataProxy[entry.expression] = filterChain(e.target.value, entry);
+        chainCallAssignment({
+          obj: self.$dataProxy,
+          chainStr: entry.expression,
+          value: filterChain(e.target.value, entry),
+        });
+
+        // self.$dataProxy[entry.expression] = filterChain(e.target.value, entry);
       });
     };
   }
@@ -296,7 +359,13 @@ export function parseVModel({ context, el, vAttrNames, tagName, VNode }) {
   else {
     VNode.data.on.input = (e) => {
       createExecutionContext.call(self, self, function () {
-        self.$dataProxy[entry.expression] = filterChain(e.target.value, entry);
+        chainCallAssignment({
+          obj: self.$dataProxy,
+          chainStr: entry.expression,
+          value: filterChain(e.target.value, entry),
+        });
+
+        // self.$dataProxy[entry.expression] = filterChain(e.target.value, entry);
       });
     };
   }

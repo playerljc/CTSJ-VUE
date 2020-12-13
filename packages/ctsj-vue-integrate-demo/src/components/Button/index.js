@@ -6,7 +6,7 @@ import styles from './index.less';
 export default {
   props: ['primary'],
   template: `
-    <div v-bind:class="classObj">
+    <div v-bind:class="classObj" v-on:click="$emit('click',$event)">
       <slot></slot>
     </div>
   `,
