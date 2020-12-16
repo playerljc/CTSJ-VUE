@@ -22,9 +22,9 @@ export const patch = init([
 ]);
 
 /**
- * createVNode
- * @param tagName
- * @return {*}
+ * createVNode - 使用snabbdom创建一个虚拟DOM的元素节点
+ * @param tagName - String 元素名称
+ * @return {VNode}
  */
 export function createVNode(tagName) {
   return h(
@@ -62,9 +62,9 @@ export function createVNode(tagName) {
 }
 
 /**
- * createTextVNode
- * @param value
- * @return Object
+ * createTextVNode - 使用snabbdom创建一个虚拟DOM的文本节点
+ * @param value - String 文本的值
+ * @return {VTextNode}
  */
 export function createTextVNode(value) {
   return {

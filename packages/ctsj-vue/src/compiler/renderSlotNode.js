@@ -1,5 +1,9 @@
 import { isElementNode, isEmpty, uuid } from '@ctsj/vue-util';
 import { isTextNode, isCommentNode } from '@ctsj/vue-util/src';
+import { hasVFor, parseVFor } from './directives/for';
+import { hasVIf, parseVIf } from './directives/if';
+import { hasVElse, parseVElse } from './directives/else';
+import { hasVElseIf, parseVElseIf } from './directives/else-if';
 import { getAttribute, getKey, getVAttrNames, hasAttr } from './directives/util';
 import { getVBindEntrys, hasVBind } from './directives/bind';
 import { DIRECT_PREFIX } from '../shared/constants';
@@ -72,6 +76,55 @@ export function renderSlotNode({ context, el, parentVNode, parentElement }) {
   // this.$el这个变量需要克隆，因为下面会对这个变量进行操作，这个变量不能改变
   // const $elClone = this.$el.cloneNode(true);
 
+  const vAttrNames = getVAttrNames(el);
+
+  if (vAttrNames.length) {
+    // 解析el的v-for标签
+    if (hasVFor(vAttrNames)) {
+      // parse v-for
+      return parseVFor.call(
+        this,
+        // 如果context是this.$dataProxy则需要重新创建新的context(上下文)，因为一个v-for就是一个新的上下文环境，因为v-for会有新的变量放入到this中
+        {
+          context,
+          // context === this.$dataProxy ? createContext.call(this, this.$dataProxy) : context,
+          el,
+          parentVNode,
+          vAttrNames,
+          renderFun: renderSlotNode,
+        },
+      );
+    }
+
+    // 解析v-if
+    if (hasVIf(vAttrNames)) {
+      // parse v-if
+      const display = parseVIf.call(this, { context, el, vAttrNames });
+      // 如果不显示则返回null
+      if (!display) {
+        return null;
+      }
+    }
+
+    // 解析v-else
+    if (hasVElse(vAttrNames)) {
+      // 合理性判断
+      // 如果合理则进行计算
+      const entry = parseVElse.call(this, { context, el, parentElement });
+      if (!entry.valid) return null;
+      if (!entry.result) return null;
+    }
+
+    // 解析v-else-if
+    if (hasVElseIf(vAttrNames)) {
+      // 合理性判断
+      // 如果合理则进行计算
+      const entry = parseVElseIf.call(this, { context, el, parentElement });
+      if (!entry.valid) return null;
+      if (!entry.result) return null;
+    }
+  }
+
   let name = 'default';
 
   let contextType = 'parent';
@@ -83,9 +136,6 @@ export function renderSlotNode({ context, el, parentVNode, parentElement }) {
   }
 
   let bindEntrys;
-
-  // el可能会有多个v-bind,如果有则是作用域插槽
-  const vAttrNames = getVAttrNames(el);
 
   if (hasVBind(vAttrNames)) {
     bindEntrys = getVBindEntrys.call(this, { context, el, vAttrNames });

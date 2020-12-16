@@ -1,0 +1,38 @@
+.Wrap {
+  display: flex;
+  flex-direction: column;
+
+  > .Indicator {
+    flex-shrink: 0;
+    height: 50px;
+    overflow-x: auto;
+
+    > .IndicatorItem {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 5px 15px;
+
+      &:hover {
+        cursor: pointer;
+      }
+
+      &.Active {
+        color: @primary-color;
+        font-weight: 600;
+        border-bottom: 2px solid @primary-color;
+      }
+    }
+  }
+
+  > .Tabs {
+    flex-grow: 1;
+    min-height: 0;
+
+    > .Empty {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+  }
+}

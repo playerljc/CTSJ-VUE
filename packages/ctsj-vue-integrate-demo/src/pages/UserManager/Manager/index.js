@@ -1,8 +1,4 @@
-import { v1 } from 'uuid';
-
 import styles from './index.less';
-
-let delId;
 
 /**
  * TaskManager
@@ -69,26 +65,18 @@ export default {
       dataSource: [],
       rowKey: 'id',
       loading: true,
-      visibleNewModal: false,
-      visibleEditModal: false,
-      visibleViewModal: false,
       visibleDeleteConfirm: false,
 
-      editRecord: null,
-      viewRecord: null,
-      newRecord: {
-        name: '',
-        createUser: '',
-        status: '',
-        describe: '',
-        createTime: '',
-      },
       searchRecord: {
+        idCard: '',
         name: '',
-        describe: '',
-        createUser: '-1',
-        status: '-1',
-        createTime: '',
+        sex: '-1',
+        birthday: '',
+        hometown: '',
+        city: '',
+        education: '-1',
+        years: '',
+        marriage: '-1',
       },
     };
   },
@@ -101,39 +89,57 @@ export default {
             <table>
               <tbody>
                 <tr>
-                  <td>任务名称：</td>
+                  <td>身份证：</td>
+                  <td><input type="text" v-model="searchRecord.idCard"/></td>
+                  
+                  <td>姓名：</td>
                   <td><input type="text" v-model="searchRecord.name"/></td>
                   
-                  <td>任务状态：</td>
+                  <td>性别：</td>
                   <td>
-                    <select v-model="searchRecord.status">
+                    <select v-model="searchRecord.sex">
                       <option 
-                        v-for="item in statusSelectList" 
+                        v-for="item in sexSelectList" 
                         v-bind:key="item.value"
                         v-bind:value="item.value">{{item.label}}</option>
                     </select>
                   </td>
-                  
-                  <td>创建时间：</td>
-                  <td><input type="datetime" v-model="searchRecord.createTime"/></td>
                 </tr>
                 
                 <tr>
-                  <td>创建人：</td>
+                  <td>出生年月：</td>
+                  <td><input type="text" v-model="searchRecord.birthday"/></td>
+                  
+                  <td>籍贯：</td>
+                  <td><input type="text" v-model="searchRecord.hometown"/></td>
+                  
+                  <td>所在城市：</td>
+                  <td><input type="text" v-model="searchRecord.city"/></td>
+                </tr>
+                
+                <tr>
+                  <td>学历：</td>
                   <td>
-                    <select v-model="searchRecord.createUser">
+                    <select v-model="searchRecord.education">
                       <option 
-                        v-for="item in userSelectList" 
+                        v-for="item in educationSelectList" 
                         v-bind:key="item.value"
                         v-bind:value="item.value">{{item.label}}</option>
                     </select>
                   </td>
                   
-                  <td>任务描述：</td>
-                  <td><input type="text" v-model="searchRecord.describe"/></td>
+                  <td>工作年限：</td>
+                  <td><input type="text" v-model="searchRecord.years"/></td>
                   
-                  <td></td>
-                  <td></td>
+                  <td>婚否：</td>
+                  <td>
+                    <select v-model="searchRecord.marriage">
+                      <option 
+                        v-for="item in marriageSelectList" 
+                        v-bind:key="item.value"
+                        v-bind:value="item.value">{{item.label}}</option>
+                    </select>
+                  </td>
                 </tr>
               </tbody>
             </table>
@@ -146,13 +152,13 @@ export default {
         
         <!--   表格的标题   -->
         <template v-slot:title>
-          <div>任务表格</div>
+          <div>人员表格</div>
         </template>
         
         <!--   表格右侧面板   -->
         <template v-slot:extra>
           <div>
-            <v-button primary v-on:click="onNew">新建</v-button>
+            <v-button primary v-on:click="$router.push('/user/save')">新建</v-button>
           </div>
         </template>
         
@@ -169,155 +175,9 @@ export default {
                 <a v-on:click="onDelete(slotProps.record.id,$event)">删除</a>
               </div>
             </template>
-            <template v-slot:number="slotProps">
-              <span>{{slotProps.rowindex + 1}}</span>
-            </template>
-            <template v-slot:user-select="slotProps">
-              <span>{{getUserLabel(slotProps.record.createUser)}}</span>
-            </template>
-            <template v-slot:status-select="slotProps">
-              <span>{{getStateLabel(slotProps.record.status)}}</span>
-            </template>
           </v-table>
         </template>
       </search-table-layout>
-      
-      <!--  新建任务   -->
-      <v-modal 
-        title="新建" 
-        v-bind:visible="visibleNewModal" 
-        v-on:onCancel="visibleNewModal = false"
-        v-on:onOk="onNewOk" 
-        >
-        <div class="${styles.InputForm}">
-          <table>
-            <tbody>
-              <tr>
-                <td>任务名称：</td>
-                <td><input type="text" v-model="newRecord.name"/></td>
-              </tr>
-              <tr>
-                <td>创建人：</td>
-                <td>
-                  <select v-model="newRecord.createUser">
-                    <option 
-                      v-for="item in userSelectList" 
-                      v-bind:key="item.value"
-                      v-bind:value="item.value">{{item.label}}</option>
-                  </select>
-                </td>
-              </tr>
-              <tr>
-                <td>任务状态：</td>
-                <td>
-                  <select v-model="newRecord.status">
-                    <option 
-                      v-for="item in statusSelectList" 
-                      v-bind:key="item.value"
-                      v-bind:value="item.value">{{item.label}}</option>
-                  </select>
-                </td>
-              </tr>
-              <tr>
-                <td>任务描述：</td>
-                <td><textarea v-model="newRecord.describe"></textarea></td>
-              </tr>
-              <tr>
-                <td>创建时间：</td>
-                <td><input type="datetime" v-model="newRecord.createTime" /></td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </v-modal>
-      
-      <!--  编辑任务   -->
-      <v-modal 
-        title="编辑" 
-        v-bind:visible="visibleEditModal" 
-        v-on:onCancel="visibleEditModal = false"
-        v-on:onOk="onEditOk" 
-        >
-        <div class="${styles.InputForm}">
-          <table>
-            <tbody>
-              <tr>
-                <td>任务名称：</td>
-                <td><input type="text" v-model="editRecord.name"/></td>
-              </tr>
-              <tr>
-                <td>创建人：</td>
-                <td>
-                  <select v-model="editRecord.createUser">
-                    <option 
-                      v-for="item in userSelectList" 
-                      v-bind:key="item.value"
-                      v-bind:value="item.value">{{item.label}}</option>
-                  </select>
-                </td>
-              </tr>
-              <tr>
-                <td>任务状态：</td>
-                <td>
-                  <select v-model="editRecord.status">
-                    <option 
-                      v-for="item in statusSelectList" 
-                      v-bind:key="item.value"
-                      v-bind:value="item.value">{{item.label}}</option>
-                  </select>
-                </td>
-              </tr>
-              <tr>
-                <td>任务描述：</td>
-                <td><textarea v-model="editRecord.describe"></textarea></td>
-              </tr>
-              <tr>
-                <td>任务描述：</td>
-                <td><input type="datetime" v-model="editRecord.createTime" /></td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </v-modal>
-      
-      <!--  查看任务   -->
-      <v-modal 
-        title="查看" 
-        v-bind:visible="visibleViewModal" 
-        v-on:onCancel="visibleViewModal = false"
-        v-on:onOk="onViewOk" 
-        >
-        <div class="${styles.InputForm}">
-          <table>
-            <tbody>
-              <tr>
-                <td>任务名称：</td>
-                <td>{{viewRecord.name}}</td>
-              </tr>
-              <tr>
-                <td>创建人：</td>
-                <td>
-                  {{statusLabel}}
-                </td>
-              </tr>
-              <tr>
-                <td>任务状态：</td>
-                <td>
-                  {{createUserLabel}}
-                </td>
-              </tr>
-              <tr>
-                <td>任务描述：</td>
-                <td>{{viewRecord.describe}}</td>
-              </tr>
-              <tr>
-                <td>任务描述：</td>
-                <td>{{viewRecord.createTime}}</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </v-modal>
       
       <!--  删除确认   -->
       <v-delete-confirm
@@ -330,8 +190,26 @@ export default {
   `,
   computed: {
     tableData() {
-      const { name, describe, createUser, status, createTime } = this.searchRecord;
+      const {
+        idCard,
+        name,
+        sex,
+        birthday,
+        hometown,
+        city,
+        education,
+        years,
+        marriage,
+      } = this.searchRecord;
+
       return this.dataSource
+        .filter((record) => {
+          if (idCard) {
+            return record.idCard.indexOf(idCard) !== '-1';
+          }
+
+          return true;
+        })
         .filter((record) => {
           if (name) {
             return record.name.indexOf(name) !== '-1';
@@ -340,244 +218,135 @@ export default {
           return true;
         })
         .filter((record) => {
-          if (describe) {
-            return record.describe.indexOf(describe) !== '-1';
+          if (birthday) {
+            return record.birthday.indexOf(birthday) !== '-1';
           }
 
           return true;
         })
         .filter((record) => {
-          if (createUser !== '-1') {
-            return record.createUser === createUser;
+          if (sex !== '-1') {
+            return record.sex === sex;
           }
 
           return true;
         })
         .filter((record) => {
-          if (status !== '-1') {
-            return record.status === status;
+          if (education !== '-1') {
+            return record.education === education;
           }
 
           return true;
         })
         .filter((record) => {
-          if (createTime) {
-            return record.createTime.indexOf(createTime) !== '-1';
+          if (marriage !== '-1') {
+            return record.marriage === marriage;
+          }
+
+          return true;
+        })
+        .filter((record) => {
+          if (hometown) {
+            return record.hometown.indexOf(hometown) !== '-1';
+          }
+
+          return true;
+        })
+        .filter((record) => {
+          if (city) {
+            return record.city.indexOf(city) !== '-1';
+          }
+
+          return true;
+        })
+        .filter((record) => {
+          if (years) {
+            return record.years.indexOf(years) !== '-1';
           }
 
           return true;
         });
     },
-    statusSelectList() {
+    sexSelectList() {
       return [
         {
           label: '全部',
           value: '-1',
         },
         {
-          label: '未接收',
+          label: '男',
           value: '1',
         },
         {
-          label: '已接收',
+          label: '女',
           value: '2',
-        },
-        {
-          label: '进行中',
-          value: '3',
-        },
-        {
-          label: '已完成',
-          value: '4',
         },
       ];
     },
-    userSelectList() {
+    educationSelectList() {
       return [
         {
           label: '全部',
           value: '-1',
         },
         {
-          label: '张三',
+          label: '小学',
           value: '1',
         },
         {
-          label: '李四',
+          label: '中学',
           value: '2',
         },
         {
-          label: '王五',
+          label: '高中',
           value: '3',
         },
         {
-          label: '赵刘',
+          label: '大专',
           value: '4',
+        },
+        {
+          label: '学士',
+          value: '5',
+        },
+        {
+          label: '硕士',
+          value: '6',
+        },
+        {
+          label: '博士',
+          value: '7',
         },
       ];
     },
-    statusLabel() {
-      if (this.viewRecord) {
-        return this.statusSelectList.find((t) => t.value === this.viewRecord.status).label;
-      }
-
-      return '';
-    },
-    createUserLabel() {
-      if (this.viewRecord) {
-        return this.userSelectList.find((t) => t.value === this.viewRecord.createUser).label;
-      }
-
-      return '';
+    marriageSelectList() {
+      return [
+        {
+          label: '全部',
+          value: '-1',
+        },
+        {
+          label: '是',
+          value: '1',
+        },
+        {
+          label: '否',
+          value: '2',
+        },
+      ];
     },
   },
   methods: {
-    onSearch() {
-      this.loading = true;
-
-      setTimeout(
-        this.$createAsyncExecContext(() => {
-          this.loading = false;
-        }),
-        4000,
-      );
-    },
-    onReset() {
-      this.loading = true;
-
-      setTimeout(
-        this.$createAsyncExecContext(() => {
-          this.searchRecord = {
-            name: '',
-            describe: '',
-            createUser: '-1',
-            status: '-1',
-            createTime: '',
-          };
-
-          this.loading = false;
-        }),
-        500,
-      );
-    },
-    onNew() {
-      this.newRecord = {
-        name: '',
-        createUser: '',
-        status: '',
-        describe: '',
-        createTime: '',
-      };
-      this.visibleNewModal = true;
-    },
-    onNewOk() {
-      this.loading = true;
-
-      this.visibleNewModal = false;
-
-      setTimeout(
-        this.$createAsyncExecContext(function () {
-          this.dataSource.push({
-            id: v1(),
-            name: this.newRecord.name,
-            createUser: this.newRecord.createUser,
-            status: this.newRecord.status,
-            describe: this.newRecord.describe,
-            createTime: this.newRecord.createTime,
-          });
-
-          this.loading = false;
-        }),
-        500,
-      );
-    },
-    onEdit(record) {
-      this.editRecord = record;
-      this.visibleEditModal = true;
-    },
-    onEditOk() {
-      debugger;
-      this.loading = true;
-
-      const index = this.dataSource.findIndex((t) => t.id === this.editRecord.id);
-
-      const record = this.dataSource[index];
-
-      this.visibleEditModal = false;
-
-      setTimeout(
-        this.$createAsyncExecContext(function () {
-          record.name = this.editRecord.name;
-          record.createUser = this.editRecord.createUser;
-          record.status = this.editRecord.status;
-          record.describe = this.editRecord.describe;
-          record.createTime = this.editRecord.createTime;
-
-          this.loading = false;
-        }),
-        500,
-      );
-    },
-    onView(record) {
-      this.viewRecord = record;
-      this.visibleViewModal = true;
-    },
-    onViewOk() {
-      this.visibleViewModal = false;
-    },
-    onDelete(id) {
-      delId = id;
-      this.visibleDeleteConfirm = true;
-    },
-    onDeleteConfirmOk() {
-      this.loading = true;
-      this.visibleDeleteConfirm = false;
-
-      setTimeout(
-        this.$createAsyncExecContext(function () {
-          const index = this.dataSource.findIndex((t) => t.id === delId);
-          this.dataSource.splice(index, 1);
-          this.loading = false;
-        }),
-        500,
-      );
-    },
-    getUserLabel(value) {
-      return this.userSelectList.find((t) => t.value === value).label;
-    },
-    getStateLabel(value) {
-      return this.statusSelectList.find((t) => t.value === value).label;
-    },
+    onReset() {},
+    onSearch() {},
+    onEdit() {},
+    onView() {},
+    onDelete() {},
+    onDeleteConfirmOk() {},
   },
   mounted() {
     setTimeout(
       this.$createAsyncExecContext(() => {
-        this.dataSource = [
-          {
-            id: v1(),
-            name: '任务1',
-            createUser: '1',
-            status: '1',
-            describe: '任务1',
-            createTime: '2010-10-12',
-          },
-          {
-            id: v1(),
-            name: '任务2',
-            createUser: '2',
-            status: '2',
-            describe: '任务2',
-            createTime: '2010-10-15',
-          },
-          {
-            id: v1(),
-            name: '任务3',
-            createUser: '3',
-            status: '3',
-            describe: '任务3',
-            createTime: '2010-10-16',
-          },
-        ];
         this.loading = false;
       }),
       500,

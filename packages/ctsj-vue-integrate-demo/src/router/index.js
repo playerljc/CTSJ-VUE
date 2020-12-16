@@ -13,6 +13,8 @@ import Modal from '@/components/Modal';
 import DeleteConfirm from '@/components/DeleteConfirm';
 import Layout from '@/components/Layout';
 import Nav from '@/components/Nav';
+import Space from '@/components/Space';
+import Tabs from '@/components/Tabs';
 
 import App from '@/pages/App';
 import UserManager from '@/pages/UserManager';
@@ -34,10 +36,13 @@ Vue.component('v-modal', Modal);
 Vue.component('v-delete-confirm', DeleteConfirm);
 Vue.component('v-layout', Layout);
 Vue.component('v-nav', Nav);
+Vue.component('v-space', Space);
+Vue.component('v-tabs', Tabs);
 
 Vue.component('user-manager', UserManager);
 Vue.component('user-analysis', Analysis);
 Vue.component('user-list', UserList);
+Vue.component('user-save-or-update', SaveOrUpdate);
 Vue.component('task-manager', TaskManager);
 
 export default new VueRouter({

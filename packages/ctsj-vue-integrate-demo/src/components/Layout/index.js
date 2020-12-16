@@ -21,7 +21,7 @@ export default {
     rootClassObj() {
       return {
         [styles.Wrap]: true,
-        [styles.Vertical]: this.direction === 'Vertical',
+        [styles.Vertical]: this.direction === 'vertical',
       };
     },
   },

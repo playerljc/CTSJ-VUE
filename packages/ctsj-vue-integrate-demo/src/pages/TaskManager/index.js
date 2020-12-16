@@ -481,7 +481,6 @@ export default {
       this.visibleEditModal = true;
     },
     onEditOk() {
-      debugger;
       this.loading = true;
 
       const index = this.dataSource.findIndex((t) => t.id === this.editRecord.id);
