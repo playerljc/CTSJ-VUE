@@ -80,17 +80,17 @@
 ## 整体流程和思路
 &ensp;&ensp;首先是模拟的内容，按照从大到小分首先应该是Vue相关的模拟，其次是Vue-Router模拟，Vue相关的模拟中最为重点的应该是**Vue实例创建**、**模板的解析** 、**数据的观测**这几部分，模板的解析还可以分为**迭代**、**文本节点的表达式解析**、**指令的解析**、**组件节点的解析**、**Vue标签解析**，而数据响应式这块分为**Vue实例的数据响应式**，**组件的数据响应式**和**计算属性的处理**，整体流程可以用下图表示
 
-![](https://github.com/playerljc/CTMobile/raw/master/outimages/pagelife.png)
+![](https://github.com/playerljc/CTSJ-VUE/blob/integrate-demo/packages/ctsj-vue/docs/Vue模拟整体流程1.png)
 
 &ensp;&ensp;上面的图展示了从一个div元素 -> 实例化Vue实例 -> 配置的解析一个完整的流程，这里面需要对2处详细说明，这两处也是最核心的2个地方，一个是数据响应式的建立，意外一个就是模板的解析，可以说模拟的核心就是这2处，如果完美的解决了这两块技术点，那么可以说我们就完成了百分之80%功能了，下面分别给出创建数据响应式和模板解析的关键流程。
 
 下图是一个完成的模板解析流程：
-![](https://github.com/playerljc/CTMobile/raw/master/outimages/pagelife.png)
+![](https://github.com/playerljc/CTSJ-VUE/blob/integrate-demo/packages/ctsj-vue/docs/模板的解析.png)
 
 &ensp;&ensp;模板解析的核心就是对template的html模板字符串进行解析，解析的方法定义为render，解析分为挂载和更新，不管是挂载还是更新，解析的核心就是对template的html字符串生成的游离dom结构进行迭代，在迭代当中在针对不同的节点情况进行分开解析，想了解具体的解析过程，我会在另一篇文章中详细讲述。
 
 &ensp;&ensp;有了模板解析还不行，我们还要能够监听到数据的变化，下面就给出创建数据响应式的流程图。
-![](https://github.com/playerljc/CTMobile/raw/master/outimages/pagelife.png)
+![](https://github.com/playerljc/CTSJ-VUE/blob/integrate-demo/packages/ctsj-vue/docs/创建数据响应式.png)
 
 &ensp;&ensp;创建数据响应式分为2种情况，一种是创建Vue实例数据的响应式，另一种是创建组件数据的响应式，创建数据响应式使用的核心技术是Proxy这个对象，Vue2用的是Object.defineProperty，用这种技术对数组的数据变化是监听不到的，而使用Proxy这种技术则可以对Object和Array的数据变化都可以监控到，首先对get和set2个钩子函数进行监听，在get种主要处理的是计算属性相关的操作，而在set里面需要对数据进行判断，只有Object和Array的数据变化我们才关系，其他的忽略，这里对Object和Array两种情况进行了分别的处理，数组数据的变化需要判断出，添加、修改和删除这三个操作，首先要处理的就是wacth监听这块，然后需要对改变的数据进行判断，如果是Object和Array类型则需要再次创建数据响应式，最后在实例化完Proxy对象之后，还需要对obj对象的每一个属性都需要建立数据响应式，因为我们需要监控到任意一级的数据变化，而不是只是数据的第一级数据变化，如果想了解更多细节，请阅读我分享的另一篇对数据监控这块的文章。
 
