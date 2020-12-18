@@ -13,14 +13,15 @@
 &ensp;&ensp;如今，前端技术日新月异，发展速度之迅猛，各种各样的库层出不穷，起初从DoJo、jQuery、requirejs、jQueryUI、jQueryEasyUI、EXTJS等前端库风靡一时，在html，js和css技术的生态体系下，前端的开发模式从jsp、php和asp的服务器端渲染发展到了web2.0的ajax，前后端分离的开发模式也应运而生，从此前端和后端的职责越来越清晰，前端之前大部分都是操作DOM，jQuery库也成为了当时事实的标准库，围绕jQeury库的生态体系也是越来越强大，当时的js库大部分都是基于jQuery开发的，比较著名的jQueryUI、jQueryEasyUI和BootStrap也是开发项目的首选库，当时前端的构建也是基于一些exe工具，或者说有的工程都没有进行压缩合并的操作，随着nodejs技术的兴起，前端开发者也能去开发服务端，但是效果并不是很好，和javaweb比起来，nodejs还是没有找到自己的位置，各个方面都处于下风，可以说想撼动java的地位是不可能的，所以nodejs把重点放到了中间件和前端工程化上，当时比较成功的前端工程化库就是Grunt和gulp，也成为了当时前端工程化必不可少的2个选择，再谈一谈当时前端的模板技术，当时前端的模板技术都是单方向的模板技术都是基于指定表达式替换，如jsp的<%%>和freemark，struct1和struct2的标签库这个是web1.0中的模板库，web2.0总的模板库有jsrender，和underscores的template等，但是这些模板库都只是单方向的变量到字符串的形式，也就是我们常说的mv(模型到视图)，随着Backbone.js的出现mvvm的思想得以在浏览器端实现，但是Backbone.js没有大红大紫，原因是因为React的出现，React提出的概念就是mvvm和虚拟dom的概念，起初出现只有小部分公司在使用，之后大厂纷纷使用，同时React的生态环境也是越来越强大，Redux和React-Router，babel，在配合Webpack的全家桶的出现，使开发React更加便捷和可靠，这个以nodejs和es6作为工程化开发的模式孕育而生，可以说这种模式的出现，完全颠覆了前端的传统开发模式，很多前端都必须从原始的开发模式转到这种nodejs模式，在随着Vue的出现彻底把这种模式推向了一个至高点，也称成为了现在开发前端事实的标准模式，时代在改变，技术在发展，作为一个老的程序员来说，在接受新的事物的同时也要看清事物本质，只有看清本质才能利于不败之地，才能跟得上时代的发展，老话说的好，万变不离其宗，所以就有了想彻底弄清楚mvvm和虚拟dom本质的想法，所以想从react和vue这两个框架中选取一个进行模拟的编写来更加深入的d对mvvm进行了解，左思右想之后最终选择了Vue框架来进行模拟，原因是Vue的模板渲染更接近于Web的原始技术，数据的改变也更能让人理解，除了这点之外模拟编写这个库也能带来其他的收获，比如可以巩固和深入es和dom的相关知识，磨练自身的意志，最后这也是一个成需要的追求。
 
 ## 所用的知识点
- - ES6的Proxy
- - eval函数
- - with语句
- - Function构造函数
- - DOM相关操作
- - Object.definePropertys
- - es基础知识
- - Snabbdom(虚拟DOM)
+ - [ES6的Proxy](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Proxy)
+ - [eval函数](https://developer.mozilla.org/es/docs/Web/JavaScript/Referencia/Objetos_globales/eval)
+ - [with语句](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Statements/with)
+ - [Function构造函数](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Function)
+ - [DOM相关操作](https://developer.mozilla.org/zh-CN/docs/Web/API/Document_Object_Model)
+ - [Object.definePropertys](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Object/defineProperty)
+ - [es基础知识](https://github.com/lukehoban/es6features#readme)
+ - [Snabbdom(虚拟DOM)](https://github.com/snabbdom/snabbdom#readme)
+ - [Vue相关知识](https://cn.vuejs.org/)
 
 ## 模拟的内容
  - Vue实例
