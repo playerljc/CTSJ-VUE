@@ -75,7 +75,9 @@
 ![](https://github.com/playerljc/CTSJ-VUE/blob/integrate-demo/packages/ctsj-vue/docs/模板的解析.png)
 
 &ensp;&ensp;模板解析的核心就是对template的html模板字符串进行解析，解析的方法定义为render，解析分为挂载和更新，不管是挂载还是更新，解析的核心就是对template的html字符串生成的游离dom结构进行迭代，在迭代当中在针对不同的节点情况进行分开解析，下面给出部分模板解析的代码，想了解具体的解析过程，我会在另一篇文章中详细讲述。
+
 ####迭代
+
 首先需要做的是把模板字符串转换成一个可以迭代的数据结构。
 ```javascript
 /**
@@ -214,6 +216,7 @@ for (let i = 0, len = el.childNodes.length; i < len; i++) {
 &ensp;&ensp;最后这个renderLoop方法有context,parentVNode和parentElement这几个参数，在这里大家先不要关心，之后会讲到这几个参数的含义。
 
 ####虚拟DOM
+
 &ensp;&ensp;刚才说到了模板解析的结果应该是一个HTMLDOM,然后将这个HTMLDOM插入到Vue实例配置对象el所代表的元素中，应该是如下的一个操作
 ```javascript
 // 1.解析模板字符串->HTMLDOM
