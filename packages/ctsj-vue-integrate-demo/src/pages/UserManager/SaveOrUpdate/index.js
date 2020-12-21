@@ -5,7 +5,7 @@ import styles from './index.less';
 export default {
   data() {
     return {
-      // 基本的信息
+      // // 基本的信息
       idCard: '',
       name: '',
       sex: '-1',
@@ -76,7 +76,7 @@ export default {
 
       // 家庭成员
       family: [],
-      familyActiveKey: '',
+      familyactivekey: '',
     };
   },
   template: `
@@ -317,23 +317,23 @@ export default {
           <v-button primary v-on:click="onNewFamily">新建</v-button>
         </template>
         
-        <v-tabs v-bind:tabs="family" v-bind:active-key="familyActiveKey" v-on:change="onFamilyTabChange">
-          <template v-slot:[familyActiveKey]>
+        <v-tabs v-bind:tabs="family" v-bind:active-key="familyactivekey" v-on:change="onFamilyTabChange">
+          <template v-slot:[familyactivekey]>
             <div class="${styles.InputForm}">
             <table>
               <tbody>
                 <tr>
                   <td>身份证：</td>
                   <td>
-                    <input type="text" v-model="idCard"/>
+                    <input type="text" v-model="activeFamilyEntry.idCard"/>
                   </td>
                   <td>姓名：</td>
                   <td>
-                    <input type="text" v-model="name"/>
+                    <input type="text" v-model="activeFamilyEntry.name"/>
                   </td>
                   <td>性别：</td>
                   <td>
-                    <select v-model="sex">
+                    <select v-model="activeFamilyEntry.sex">
                       <option 
                         v-for="item in sexSelectList" 
                         v-bind:key="item.value"
@@ -345,22 +345,22 @@ export default {
                 <tr>
                   <td>出生年月：</td>
                   <td>
-                    <input type="text" v-model="birthday"/>
+                    <input type="text" v-model="activeFamilyEntry.birthday"/>
                   </td>
                   <td>籍贯：</td>
                   <td>
-                    <input type="text" v-model="hometown"/>
+                    <input type="text" v-model="activeFamilyEntry.hometown"/>
                   </td>
                   <td>所在城市：</td>
                   <td>
-                    <input type="text" v-model="city"/>
+                    <input type="text" v-model="activeFamilyEntry.city"/>
                   </td>
                 </tr>
                 
                 <tr>
                   <td>学历：</td>
                   <td>
-                    <select v-model="education">
+                    <select v-model="activeFamilyEntry.education">
                       <option 
                         v-for="item in educationSelectList" 
                         v-bind:key="item.value"
@@ -369,11 +369,11 @@ export default {
                   </td>
                   <td>工作年限：</td>
                   <td>
-                    <input type="text" v-model="years"/>
+                    <input type="text" v-model="activeFamilyEntry.years"/>
                   </td>
                   <td>婚否：</td>
                   <td>
-                    <select v-model="marriage">
+                    <select v-model="activeFamilyEntry.marriage">
                       <option 
                         v-for="item in marriageSelectList" 
                         v-bind:key="item.value"
@@ -485,6 +485,9 @@ export default {
         },
       ];
     },
+    activeFamilyEntry() {
+      return this.family.find((t) => t.key === this.familyactivekey);
+    },
   },
   methods: {
     getOptionLabel({ list, value, prop }) {
@@ -567,12 +570,24 @@ export default {
       this.family.push({
         key,
         title: '家人',
+
+        // 基本的信息
+        idCard: '',
+        name: '',
+        sex: '-1',
+        birthday: '',
+        hometown: '',
+        city: '',
+        education: '-1',
+        years: '',
+        marriage: '-1',
       });
 
-      this.familyActiveKey = v1();
+      this.familyactivekey = key;
     },
     onFamilyTabChange(activeKey) {
-      this.familyActiveKey = activeKey;
+      debugger;
+      this.familyactivekey = activeKey;
     },
   },
 };
