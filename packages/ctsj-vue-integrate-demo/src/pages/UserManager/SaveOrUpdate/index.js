@@ -5,7 +5,7 @@ import styles from './index.less';
 export default {
   data() {
     return {
-      // // 基本的信息
+      // 基本的信息
       idCard: '',
       name: '',
       sex: '-1',
@@ -77,6 +77,10 @@ export default {
       // 家庭成员
       family: [],
       familyactivekey: '',
+
+      // 证件信息
+      certificate: [],
+      certificateactivekey: '',
     };
   },
   template: `
@@ -388,7 +392,45 @@ export default {
         </v-tabs>
       </system-card>
       
+      <v-space></v-space>
+      
       <!-- 证件信息多个，选项卡 -->
+      <system-card>
+        <template v-slot:title>
+          <div>证件信息</div>
+        </template>
+        <template v-slot:extra>
+          <v-button primary v-on:click="onNewCertificate">新建</v-button>
+        </template>
+        
+        <v-tabs v-bind:tabs="certificate" v-bind:active-key="certificateactivekey" v-on:change="onCertificateTabChange">
+          <template v-slot:[certificateactivekey]>
+            <div class="${styles.InputForm}">
+            <table>
+              <tbody>
+                <tr>
+                  <td>证件号：</td>
+                  <td>
+                    <input type="text" v-model="activeCertificateEntry.number"/>
+                  </td>
+                  <td>证件类型：</td>
+                  <td>
+                    <select v-model="activeCertificateEntry.type">
+                      <option 
+                        v-for="item in certificateSelectList" 
+                        v-bind:key="item.value"
+                        v-bind:value="item.value">{{item.label}}</option>
+                    </select>
+                  </td>
+                  <td></td>
+                  <td></td>
+                </tr>
+              </tbody>
+          </table>
+          </div>
+          </template>
+        </v-tabs>
+      </system-card>
       
     </div>
   `,
@@ -461,6 +503,34 @@ export default {
         },
       ];
     },
+    certificateSelectList() {
+      return [
+        {
+          label: '全部',
+          value: '-1',
+        },
+        {
+          label: '身份证',
+          value: '1',
+        },
+        {
+          label: '驾驶证',
+          value: '2',
+        },
+        {
+          label: '护照',
+          value: '3',
+        },
+        {
+          label: '港澳台通行证',
+          value: '4',
+        },
+        {
+          label: '行驶证',
+          value: '5',
+        },
+      ];
+    },
     contactNumbersSelectList() {
       return [
         {
@@ -487,6 +557,9 @@ export default {
     },
     activeFamilyEntry() {
       return this.family.find((t) => t.key === this.familyactivekey);
+    },
+    activeCertificateEntry() {
+      return this.certificate.find((t) => t.key === this.certificateactivekey);
     },
   },
   methods: {
@@ -586,8 +659,25 @@ export default {
       this.familyactivekey = key;
     },
     onFamilyTabChange(activeKey) {
-      debugger;
       this.familyactivekey = activeKey;
+    },
+
+    onNewCertificate() {
+      const key = v1();
+
+      this.certificate.push({
+        key,
+        title: '证件',
+
+        // 基本的信息
+        number: '',
+        type: '-1',
+      });
+
+      this.certificateactivekey = key;
+    },
+    onCertificateTabChange(activeKey) {
+      this.certificateactivekey = activeKey;
     },
   },
 };
