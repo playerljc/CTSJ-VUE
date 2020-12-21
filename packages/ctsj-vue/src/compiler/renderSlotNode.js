@@ -1,5 +1,5 @@
-import { isElementNode, isEmpty, uuid } from '@ctsj/vue-util';
-import { isTextNode, isCommentNode } from '@ctsj/vue-util/src';
+import { isElementNode, isEmpty, uuid, isTextNode, isCommentNode } from '@ctsj/vue-util';
+
 import { hasVFor, parseVFor } from './directives/for';
 import { hasVIf, parseVIf } from './directives/if';
 import { hasVElse, parseVElse } from './directives/else';
@@ -7,6 +7,7 @@ import { hasVElseIf, parseVElseIf } from './directives/else-if';
 import { getAttribute, getKey, getVAttrNames, hasAttr } from './directives/util';
 import { getVBindEntrys, hasVBind } from './directives/bind';
 import { DIRECT_PREFIX } from '../shared/constants';
+import { execExpression } from '../shared/util';
 import { createContext } from '../core/proxy';
 import { renderTemplateNode } from './renderTemplateNode';
 
@@ -78,6 +79,7 @@ export function renderSlotNode({ context, el, parentVNode, parentElement }) {
 
   const vAttrNames = getVAttrNames(el);
 
+  // 循环和判断
   if (vAttrNames.length) {
     // 解析el的v-for标签
     if (hasVFor(vAttrNames)) {
@@ -142,13 +144,75 @@ export function renderSlotNode({ context, el, parentVNode, parentElement }) {
   }
 
   // 在父亲中寻找指定的<template v-slot:name></template>元素
+
+  // 获取$el(父亲)中的所有template节点
   const templateEls = Array.from(this.$el.getElementsByTagName('template'));
 
-  const slotTemplateElIndex = templateEls.findIndex((templateEl) =>
-    templateEl
-      .getAttributeNames()
-      .some((attrName) => attrName.startsWith(`${DIRECT_PREFIX}slot:${name}`)),
-  );
+  // 寻找含有v-slot:name的template节点
+  let slotTemplateElIndex = -1;
+
+  // 命中的attributeName
+  let hitAttributeName;
+
+  // 处理命中关系
+  for (let i = 0, len = templateEls.length; i < len; i++) {
+    const templateEl = templateEls[i];
+
+    const attributeNames = templateEl.getAttributeNames();
+
+    const result = attributeNames.some((attributeName) => {
+      // 符合前缀标准(v-slot:开头)
+      if (attributeName.startsWith(`${DIRECT_PREFIX}slot:`)) {
+        // 如果是动态slot(v-slot:[symbol])
+        if (/v-slot:\[\w{1,}\]/gim.test(attributeName)) {
+          const startIndex = attributeName.indexOf('[');
+
+          const endIndex = attributeName.indexOf(']', startIndex);
+
+          // 这是一个表达式需要进行计算的
+          const expressionName = attributeName.substring(startIndex + 1, endIndex);
+
+          // 父亲去解析
+          const expressionNameValue = execExpression.call(
+            this.$parent,
+            this.$getParentContext(),
+            expressionName,
+          );
+
+          if (expressionNameValue === name) {
+            hitAttributeName = attributeName;
+          }
+
+          return expressionNameValue === name;
+        }
+
+        // 不是动态slot
+        if (attributeName === `${DIRECT_PREFIX}slot:${name}`) {
+          hitAttributeName = attributeName;
+        }
+
+        return attributeName === `${DIRECT_PREFIX}slot:${name}`;
+      }
+
+      return false;
+    });
+
+    if (result) {
+      slotTemplateElIndex = i;
+      break;
+    }
+  }
+
+  // const slotTemplateElIndex = templateEls.findIndex((templateEl) =>
+  //   templateEl
+  //     .getAttributeNames()
+  //     // TODO:这块需要处理动态v-slot
+  //     // v-slot:[abc]
+  //     .some((attrName) => {
+  //       // 这里的attrName可能的情况v-slot:111也可能是动态的v-slot:[111]
+  //       return attrName.startsWith(`${DIRECT_PREFIX}slot:${name}`);
+  //     }),
+  // );
 
   let slotTemplateEl = null;
 
@@ -162,6 +226,8 @@ export function renderSlotNode({ context, el, parentVNode, parentElement }) {
     slotTemplateEl = document.createElement('template');
 
     slotTemplateEl.setAttribute(`${DIRECT_PREFIX}slot:${name}`, '');
+
+    hitAttributeName = `${DIRECT_PREFIX}slot:${name}`;
 
     // 如果是default
     if (name === 'default') {
@@ -201,6 +267,7 @@ export function renderSlotNode({ context, el, parentVNode, parentElement }) {
         // 这个地方
         const cloneNode = node.cloneNode(true);
 
+        // 不是文本节点和注释节点
         if (!isTextNode(cloneNode) && !isCommentNode(cloneNode)) {
           let key = getKey.call(this, { context, el: cloneNode });
 
@@ -227,7 +294,7 @@ export function renderSlotNode({ context, el, parentVNode, parentElement }) {
     curContext = createContext(this.$getParentContext());
 
     // 判断<template v-slot:名字=""></template>是否有v-slot:名字=""
-    const slotTemplateAttrValue = slotTemplateEl.getAttribute(`${DIRECT_PREFIX}slot:${name}`);
+    const slotTemplateAttrValue = slotTemplateEl.getAttribute(hitAttributeName);
 
     // 如果有v-slot:名字=""说明是作用域插槽
     if (bindEntrys && bindEntrys.length && slotTemplateAttrValue) {
