@@ -74,7 +74,209 @@
 下图是一个完整的模板解析流程：
 ![](https://github.com/playerljc/CTSJ-VUE/blob/integrate-demo/packages/ctsj-vue/docs/模板的解析.png)
 
-&ensp;&ensp;模板解析的核心就是对template的html模板字符串进行解析，解析的方法定义为render，解析分为挂载和更新，不管是挂载还是更新，解析的核心就是对template的html字符串生成的游离dom结构进行迭代，在迭代当中在针对不同的节点情况进行分开解析，想了解具体的解析过程，我会在另一篇文章中详细讲述。
+&ensp;&ensp;模板解析的核心就是对template的html模板字符串进行解析，解析的方法定义为render，解析分为挂载和更新，不管是挂载还是更新，解析的核心就是对template的html字符串生成的游离dom结构进行迭代，在迭代当中在针对不同的节点情况进行分开解析，下面给出部分模板解析的代码，想了解具体的解析过程，我会在另一篇文章中详细讲述。
+####迭代
+首先需要做的是把模板字符串转换成一个可以迭代的数据结构。
+```javascript
+/**
+ * createElement - 根据html字符串创建dom
+ * @param htmlStr - string
+ * @return {Element}
+ */
+function createElement(htmlStr) {
+	const el = document.createElement('div');
+	el.innerHTML = htmlStr;
+	return el.firstElementChild;
+}
+```
+&ensp;&ensp;接下来就是迭代这个数据结构分类型解析的过程，首先获取的数据结构是一个DOMTree，所以选择深度优先遍历这种方式可以对Tree进行遍历，js中还有TreeWalker可以对DOM节点进行遍历。这里我使用了自行实现的方式。
+```javascript
+/**
+ * renderLoop - 进行递归的渲染
+ * @param context - 上下文对象
+ * @param el - HtmlElement 当前节点的el
+ * @param parentVNode - VNode 父节点VNode
+ * @param parentElement - HtmlElement 父元素
+ * @return {VNode | Array<VNode>}
+ */
+function renderLoop({ context, el, parentVNode, parentElement }) {
+  // 文本节点
+  if (isTextNode(el)) {
+    // 文本节点的渲染
+    return renderTextNode.call(this, { context, el });
+  }
+
+  let isComponent = false;
+
+  const isVueIns = isVueInstance(this);
+
+  // this是否是vue实例
+  if (isVueIns) {
+    // 在vue实例下判断是否是组件节点
+    isComponent = isComponentNodeByVue(el);
+  }
+  // 其他的情况
+  else {
+    const isComponentIns = isComponentInstance(this);
+
+    // this是否是component实例
+    if (isComponentIns) {
+      // 在component实例下判断是否是组件节点
+      isComponent = isComponentNodeByComponent(el, this.$getComponentsConfig());
+    }
+    // this既不是vue实例也不是component实例
+    else {
+      return null;
+    }
+  }
+
+  if (!isComponent) {
+    // 如果是template元素
+    if (isTemplateNode(el)) {
+      return renderTemplateNode.call(this, { context, el, parentVNode, parentElement });
+    }
+
+    // 如果是slot元素 vue实例没有slot元素
+    if (!isVueIns && isSlotNode(el)) {
+      return renderSlotNode.call(this, { context, el, parentVNode, parentElement });
+    }
+
+    // 如果是component元素
+    if (isDynamicComponentNode(el)) {
+      return renderDynamicComponentNode.call(this, { context, el, parentVNode, parentElement });
+    }
+
+    // 如果是router-link元素
+    if (isRouterLinkNode(el)) {
+      return renderRouterLinkNode.call(this, { context, el, parentVNode, parentElement });
+    }
+
+    // 如果是router-view元素
+    if (isRouterViewNode(el)) {
+      return renderRouterViewNode.call(this, { context, el, parentVNode, parentElement });
+    }
+
+    // 如果是Html元素
+    if (isElementNode(el)) {
+      // 是元素不是组件节点
+      return renderElementNode.call(this, { context, el, parentVNode, parentElement });
+    }
+  } else {
+    return renderComponentNode.call(this, { context, el, parentVNode, parentElement });
+  }
+
+  return null;
+}
+```
+&ensp;&ensp;这段代码首先是判断节点的类型，分为文本节点和元素节点，而元素节点又分为HTML元素节点、组件节点和Vue提供的标签节点。首先判断文本节点使用了isTextNode方法来判断。
+```javascript
+/**
+ * isTextNode - 是否是文本节点
+ * @param el - Node
+ * @return {boolean}
+ */
+function isTextNode(el) {
+  return el.nodeType === Node.TEXT_NODE;
+}
+
+/**
+ * isElementNode - 是否是元素节点
+ * @param el - Element
+ * @return {boolean}
+ */
+function isElementNode(el) {
+  return el.nodeType === Node.ELEMENT_NODE;
+}
+```
+&ensp;&ensp;这个函数应该是解析模板的关键函数，根据判断不同节点类型从而进行不同节点的解析，我们还需要知道一点，就是什么时候进行递归操作，应该是元素类型是HTML元素的时候才进行深度优先遍历的递归操作，因为文本节点，组件节点和Vue提供的标签节点按理来说都应该是叶子节点
+```javascript
+// loop children
+for (let i = 0, len = el.childNodes.length; i < len; i++) {
+    // 继续调用renderLoop
+    const VNodes = renderLoop.call(this, {
+      context,
+      el: el.childNodes[i],
+      parentVNode: VNode,
+      parentElement: el,
+    });
+    if (!VNodes) continue;
+    
+    // v-for返回的
+    if (isArray(VNodes)) {
+      VNodes.filter((n) => n).forEach((n) => {
+        VNode.children.push(n);
+      });
+    } else if (isObject(VNodes)) {
+      VNode.children.push(VNodes);
+    }
+}
+```
+&ensp;&ensp;最后这个renderLoop方法有context,parentVNode和parentElement这几个参数，在这里大家先不要关心，之后会讲到这几个参数的含义。
+
+####虚拟DOM
+&ensp;&ensp;刚才说到了模板解析的结果应该是一个HTMLDOM,然后将这个HTMLDOM插入到Vue实例配置对象el所代表的元素中，应该是如下的一个操作
+```javascript
+// 1.解析模板字符串->HTMLDOM
+const templateEl = renderLoop(el);
+// 2.获取Vue实例config中el所代表的HTMLDOM元素，并将其插入到el中
+// 先清空el的内容
+el.innerHTML = '';
+// 在添加
+el.appendChild(templateEl);
+```
+&ensp;&ensp;上面的代码就是一个从模板解析到插入目标元素的过程，我们应该预想到一点，就是模板解析不是只解析一次，而是随着数据的变化多次调用模板解析方法，也就是上面的操作会随着数据的更改而执行很多次，如果每一次都是这样处理的话，效率上肯定非常低，因为先需要清空，在插入的操作，大家也知道操作DOM的开销是巨大的，而使用innerHTML的开销更大，所以就需要使用虚拟DOM技术来实现整个渲染过程。虚拟DOM这块我们有选择自己弄，原因是在网上找了一些虚拟DOM相关的文章，原理很简单，但实现起来很困难，其实原理很简单，就是对2个Tree的数据结构进行比较，比较出增量，那增量是什么呢，增量就是对Tree的增、删和改的操作，增量中可能包含所有的操作，这个比较的过程是很复杂的，React用的diff算法，Vue应该是自己实现的一套比较算法，经我查阅资料Vue是仿照snabbdom这个库实现的虚拟DOM，我模拟的时候也使用了这个库，那模板解析后的结果就不应该是一个HTMLDOM了，应该是一个虚拟DOM的节点，虚拟DOM节点的结构也非常简单。
+```javascript
+{
+    // 元素名称
+    sel: 'div',
+    data: {
+     // 样式表
+     class: {},
+     // HTML特性
+     props: {},
+     // 除了特性外的属性
+     attrs: {},
+     // data-set
+     dataset: {},
+     // 内联样式
+     style: {},
+     // 事件
+     on: {},
+     // 钩子
+     hook: {},
+    },
+    // 孩子节点
+    children: [],
+    // 文本节点内容
+    text: 'Hello, World',
+    // 对应的DOM元素
+    elm: Element,
+    key: undefined,
+}
+```
+&ensp;&ensp;我也大致了解了一下虚拟DOM比较的一些算法，因素非常多，核心的比较应该是逐层比较，每一个节点的比较，也很复杂，比如说属性的值改了没有，有没有新增或删除的属性，孩子是否有修改和增加删除等，比较的时候还和一个属性key有关系，如果大家想了解具体细节，可以参看[snabbdom](https://github.com/snabbdom/snabbdom "snabbdom")和[virtual-dom](https://github.com/Matt-Esch/virtual-dom "virtual-dom")的具体代码实现。
+
+接下来模板解析的代码应该就变成如下所示：
+```javascript
+// 1.解析模板字符串->VNode
+const vnode = renderLoop(el);
+
+// 挂载
+if (isMount) {
+    // 如果是挂载，则用vnode初始化el元素，返回值是一个与真是DOM对用的虚拟DOM节点
+    this.$preVNode = patch(el, vnode);
+}
+// 更新
+else {
+    if (!this.$preVNode) {
+      this.$preVNode = vnode;
+    }
+    
+    // 如果是更新，$preVNode是修改之前的虚拟DOM节点，vnode是新的虚拟DOM节点，对两个节点进行比较来找     // 出增量从而对el进行更新
+    this.$preVNode = patch(this.$preVNode, vnode);
+}
+```
+
 
 &ensp;&ensp;有了模板解析还不行，我们还要能够监听到数据的变化，下面就给出创建数据响应式的流程图。
 ![](https://github.com/playerljc/CTSJ-VUE/blob/integrate-demo/packages/ctsj-vue/docs/创建数据响应式.png)
@@ -83,7 +285,7 @@
 
 &ensp;&ensp;最后如果模板解析和数据监控都处理完了之后，我们的整体流程也就开发的差不多了，首先第一次的时候先调用一次render，然后在数据变化的时候(一般数据变化都会在生成命周期钩子或者函数中去改变)在此执行render。
 
-这篇文章只是简单的介绍一下整体的思路和流程，如果想详细的了解模拟的细节，请阅读后续文章，在后续文章中会详细的介绍每一个细节点，整体分为12篇文章。
+这篇文章只是简单的介绍一下整体的思路和流程，如果想详细的了解模拟的细节，请阅读后续文章，在后续文章中会详细的介绍每一个细节点[(系列文章)](#系列文章)
 
 ## 所用的知识点
  - [ES6的Proxy](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Proxy)
@@ -152,3 +354,8 @@
  - 父亲更新，和组件自身更新，怎么渲染
  
    父亲的更新对于子元素来说都是重新解析，而组件自身的更新只是子树中的一个局部节点进行更新，要想使只能进行path操作需要找到子树在整个树中的位置，然后替换掉。
+
+## 系列文章
+ - [模板解析](https://github.com/playerljc/CTSJ-VUE/blob/integrate-demo/packages/ctsj-vue/docs/README_STEP1.md)
+ - [数据观测](https://github.com/playerljc/CTSJ-VUE/blob/integrate-demo/packages/ctsj-vue/docs/README_STEP1.md)
+ - [组件的解析](https://github.com/playerljc/CTSJ-VUE/blob/integrate-demo/packages/ctsj-vue/docs/README_STEP1.md)
