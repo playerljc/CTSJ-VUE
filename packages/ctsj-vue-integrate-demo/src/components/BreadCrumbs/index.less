@@ -1,0 +1,28 @@
+.Wrap {
+  display: flex;
+  align-items: center;
+  height: 40px;
+  margin: 0;
+  padding-left: 20px;
+  list-style: none;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+
+  > .Item {
+    > .Label {
+      font-size: 14px;
+    }
+
+    > .Link {
+      color: #999;
+      &:hover {
+        color: @primary-color;
+        cursor: pointer;
+        opacity: 0.6;
+      }
+    }
+
+    > .Symbol {
+      margin: 0 10px;
+    }
+  }
+}

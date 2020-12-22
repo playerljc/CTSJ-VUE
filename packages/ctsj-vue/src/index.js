@@ -3,15 +3,20 @@ import VueRouter from '@ctsj/vue-router';
 import Vue from './core';
 
 const Header = {
+  data: () => ({
+    text1: '用户管理',
+    text2: '车辆管理',
+    text3: '物品管理',
+  }),
   template: `
     <ul class="header">
       <!--<li><a v-on:click="$router.push('/user')">用户管理</a></li>
       <li><a v-on:click="$router.push('/car')">车辆管理</a></li>
       <li><a v-on:click="$router.push('/article')">物品管理</a></li>-->
 
-      <li><router-link to="/user">用户管理</router-link></li>
-      <li><router-link to="/car">车辆管理</router-link></li>
-      <li><router-link to="/article">物品管理</router-link></li>
+      <li><router-link class="item item1" to="/user">{{text1}}</router-link></li>
+      <li><router-link class="item" to="/car">{{text2}}</router-link></li>
+      <li><router-link class="item" to="/article">{{text3}}</router-link></li>
     </ul>
   `,
 };

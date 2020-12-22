@@ -53,6 +53,12 @@ export function isObject(obj: any): boolean;
  */
 export function isTextNode(el: any): boolean;
 /**
+ * isCommentNode - 是否是注释节点
+ * @param el
+ * @return {boolean}
+ */
+export function isCommentNode(el: any): boolean;
+/**
  * isElementNode - 是否是元素节点
  * @param el - Element
  * @return {boolean}
@@ -106,6 +112,29 @@ export function clone(value: any): {} | null;
  * @return Object | Array
  */
 export function cloneDeep(value: any, map?: Map<any, any>): any;
+/**
+ * chainCallAssignment - 对象的链式赋值
+ * obj.a.b.c.d.x.x.x = value
+ * @param obj Object - 赋值的对象
+ * @param chainStr string - 属性链式表达式 a.b.c
+ * @param value any - 要复值的值
+ */
+export function chainCallAssignment({ obj, chainStr, value }: {
+    obj: any;
+    chainStr: any;
+    value: any;
+}): false | undefined;
+/**
+ * getObjectByChainStr - 通过chainStr获取对象
+ * obj.a.b.c.d.x.x.x = value
+ * @param obj Object - 赋值的对象
+ * @param chainStr string - 属性链式表达式 a.b.c
+ * @return Object
+ */
+export function getObjectByChainStr({ obj, chainStr }: {
+    obj: any;
+    chainStr: any;
+}): any;
 /**
  * noop - 空函数
  */

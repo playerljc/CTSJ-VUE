@@ -1,0 +1,55 @@
+.Wrap {
+  min-height: 100%;
+  padding: 20px;
+  background-color: #f0f2f5;
+
+  > .Grid {
+    display: flex;
+    padding: 0 5px;
+
+    > .Item {
+      flex-grow: 1;
+      width: 25%;
+      min-width: 0;
+      padding: 5px;
+    }
+  }
+
+  .Flex {
+    display: flex;
+
+    > .Auto {
+      flex-grow: 1;
+      min-width: 0;
+    }
+
+    > .Fixed {
+      flex-shrink: 0;
+    }
+  }
+}
+
+.NavWrap {
+  > .NavInner {
+    display: flex;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+
+    > .NavItem {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 5px 10px;
+
+      &.Active {
+        color: @primary-color;
+        border-bottom: 2px solid @primary-color;
+      }
+
+      &:hover {
+        cursor: pointer;
+      }
+    }
+  }
+}

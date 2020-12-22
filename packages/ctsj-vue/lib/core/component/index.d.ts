@@ -17,13 +17,15 @@ declare class Component {
      * @param root - vue实例
      * @param parent - 父对象(可能是Vue实例，也肯能是Component实例)
      * @param route - 匹配的路由配置
+     * @param $route - 当前路由信息
      */
-    constructor(config: any, { key, el, root, parent, route }: {
+    constructor(config: any, { key, el, root, parent, route, $route }: {
         key: any;
         el: any;
         root: any;
         parent: any;
         route: any;
+        $route: any;
     });
     $el: any;
     $root: any;
@@ -31,6 +33,7 @@ declare class Component {
     $key: any;
     $router: any;
     $matchRoute: any;
+    $route: any;
     $config: any;
     $argConfig: any;
     $emit: (eventName: any, ...args: any[]) => false | undefined;

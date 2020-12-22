@@ -5,12 +5,14 @@
  * @param parentVNode - VNode 父元素VNode
  * @param parentElement - HtmlElement 父元素
  * @param route - Object 如果是路由匹配，则是匹配路由的配置项
+ * @param $route - Object 当前的路由信息
  * @return VNode | Array<VNode>
  */
-export function renderComponentNode({ context, el, parentVNode, parentElement, route }: {
+export function renderComponentNode({ context, el, parentVNode, parentElement, route, $route }: {
     context: any;
     el: any;
     parentVNode: any;
     parentElement: any;
     route: any;
+    $route: any;
 }): any;
