@@ -396,6 +396,6 @@ else {
 
 &ensp;&ensp;这篇文章只是对整体思路和流程进行了叙述，如果想了解更细节的东西，比如说模板是怎么解析的，数据观测是怎么建立起来的，组件是怎么解析的，请阅读下方的其他主题文章。
  
- - [模板解析](https://github.com/playerljc/CTSJ-VUE/blob/integrate-demo/packages/ctsj-vue/docs/README_STEP1.md)
- - [数据观测](https://github.com/playerljc/CTSJ-VUE/blob/integrate-demo/packages/ctsj-vue/docs/README_STEP1.md)
- - [组件的解析](https://github.com/playerljc/CTSJ-VUE/blob/integrate-demo/packages/ctsj-vue/docs/README_STEP1.md)
+ - [透过Vue模拟看MVVM本质系列之二(模板解析)](https://github.com/playerljc/CTSJ-VUE/blob/integrate-demo/packages/ctsj-vue/docs/README_STEP1.md)
+ - [透过Vue模拟看MVVM本质系列之三(数据观测)](https://github.com/playerljc/CTSJ-VUE/blob/integrate-demo/packages/ctsj-vue/docs/README_STEP1.md)
+ - [透过Vue模拟看MVVM本质系列之四(组件的解析)](https://github.com/playerljc/CTSJ-VUE/blob/integrate-demo/packages/ctsj-vue/docs/README_STEP1.md)
