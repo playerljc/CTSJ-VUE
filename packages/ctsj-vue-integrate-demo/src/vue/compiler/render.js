@@ -1,4 +1,5 @@
 // render
+import { isFunction } from '@ctsj/vue-util';
 import { triggerLifecycle } from '../core/util';
 import { log } from '../shared/util';
 import { renderLoop } from './renderUtil';
@@ -32,13 +33,19 @@ export function render(el, isMount) {
 
   if (!vnode) return false;
 
+  const hooks = vnode.data.hook;
+
   // vnode的hook设置
-  Object.assign(vnode.data.hook, {
+  vnode.data.hook = {
     /**
      * 一个vnode已添加
      * @param vnode
      */
-    init: (curVNode) => {
+    init(curVNode) {
+      if (isFunction(hooks.init)) {
+        hooks.init.apply(hooks, Array.from(arguments));
+      }
+
       if (curVNode === vnode) {
         triggerLifecycle.call(self, LIFECYCLE_HOOKS[1]);
       }
@@ -48,7 +55,11 @@ export function render(el, isMount) {
      * @param emptyVnode
      * @param vnode
      */
-    create: (emptyVnode, curVNode) => {
+    create(emptyVnode, curVNode) {
+      if (isFunction(hooks.create)) {
+        hooks.create.apply(hooks, Array.from(arguments));
+      }
+
       if (curVNode === vnode) {
         triggerLifecycle.call(self, LIFECYCLE_HOOKS[2]);
       }
@@ -65,7 +76,11 @@ export function render(el, isMount) {
     /**
      * 元素即将被修补
      */
-    prepatch: (oldVNode, newVNode) => {
+    prepatch(oldVNode, newVNode) {
+      if (isFunction(hooks.prepatch)) {
+        hooks.prepatch.apply(hooks, Array.from(arguments));
+      }
+
       if (newVNode === vnode) {
         // beforeUpdate
         triggerLifecycle.call(self, LIFECYCLE_HOOKS[4]);
@@ -74,7 +89,11 @@ export function render(el, isMount) {
     /**
      * 元素已被修补
      */
-    postpatch: (oldVNode, newVNode) => {
+    postpatch(oldVNode, newVNode) {
+      if (isFunction(hooks.postpatch)) {
+        hooks.postpatch.apply(hooks, Array.from(arguments));
+      }
+
       if (newVNode === vnode) {
         // update
         triggerLifecycle.call(self, LIFECYCLE_HOOKS[5]);
@@ -83,7 +102,11 @@ export function render(el, isMount) {
     /**
      * 一个元素被直接或间接删除
      */
-    destroy: (curVNode) => {
+    destroy(curVNode) {
+      if (isFunction(hooks.destroy)) {
+        hooks.destroy.apply(hooks, Array.from(arguments));
+      }
+
       // vue实例销毁的时候需要调用router的销毁,执行router的销毁操作
       self.$router.$destory();
 
@@ -91,7 +114,7 @@ export function render(el, isMount) {
         triggerLifecycle.call(self, LIFECYCLE_HOOKS[7]);
       }
     },
-  });
+  };
 
   // 挂载
   if (isMount) {

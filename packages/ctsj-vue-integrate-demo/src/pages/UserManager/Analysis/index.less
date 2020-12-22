@@ -30,5 +30,27 @@
 }
 
 .NavWrap {
+  > .NavInner {
+    display: flex;
+    margin: 0;
+    padding: 0;
+    list-style: none;
 
+    > .NavItem {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 5px 10px;
+
+      &.Active {
+        color: @primary-color;
+        border-bottom: 2px solid @primary-color;
+      }
+
+      &:hover {
+        cursor: pointer;
+      }
+    }
+
+  }
 }

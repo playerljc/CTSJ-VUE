@@ -222,7 +222,7 @@ export function renderAttr({ el, VNode }) {
            * insert - 元素已插入DOM
            * @param vnode
            */
-          insert: (vnode) => {
+          insert(vnode) {
             // 保存HtmlElement的el到$refs中
             self.$refs[val] = vnode.elm;
           },
