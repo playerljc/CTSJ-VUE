@@ -38,7 +38,6 @@ function remove(key, storage) {
 }
 
 export default {
-
   /**
    * 本地持久化一对键值(值为String)
    */
