@@ -384,7 +384,17 @@ else {
  
    父亲的更新对于子元素来说都是重新解析，而组件自身的更新只是子树中的一个局部节点进行更新，要想使只能进行path操作需要找到子树在整个树中的位置，然后替换掉。
 
-## 系列文章
+## 小结
+
+ - 首先对前端的发展进行了简述，用了一张图展现了前端的发展情况
+ - 对MVVM、虚拟DOM和Vue分别进行了介绍
+ - 对为什么选择Vue进行模拟给出了理由
+ - 用一张图和文字叙述了整体的模拟思路和流程
+ - 详细说明了模拟的内容
+ - 详细说明了模拟中的关键技术，还有为什么这些是关键技术，这些技术起到了什么作用
+
+&ensp;&ensp;这篇文章只是对整体思路和流程进行了叙述，如果想了解更细节的东西，比如说模板是怎么解析的，数据观测是怎么建立起来的，组件是怎么解析的，请阅读下方的其他主题文章。
+ 
  - [模板解析](https://github.com/playerljc/CTSJ-VUE/blob/integrate-demo/packages/ctsj-vue/docs/README_STEP1.md)
  - [数据观测](https://github.com/playerljc/CTSJ-VUE/blob/integrate-demo/packages/ctsj-vue/docs/README_STEP1.md)
  - [组件的解析](https://github.com/playerljc/CTSJ-VUE/blob/integrate-demo/packages/ctsj-vue/docs/README_STEP1.md)
