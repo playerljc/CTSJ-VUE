@@ -231,7 +231,7 @@ export function renderAttr({ el, VNode }) {
       // style属性
       else if (attrName === 'style') {
         // VNode.data.style[attrName] = val;
-        val.style
+        val
           .split(STYLE_RULE_SPLIT)
           .filter((t) => t)
           .forEach((style) => {

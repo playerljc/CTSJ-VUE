@@ -4,8 +4,12 @@ export default {
   template: `
     <div class="${styles.Wrap}">
       <div class="${styles.Header}">
-        <slot name="title"></slot>
-        <slot name="extra"></slot>
+        <div>
+          <slot name="title"></slot>
+        </div>
+        <div>
+          <slot name="extra"></slot>
+        </div>
       </div>
       <div class="${styles.Body}">
         <slot></slot>

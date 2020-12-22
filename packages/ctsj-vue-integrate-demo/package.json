@@ -40,10 +40,11 @@
     "@ctsj/build": "^3.0.2"
   },
   "dependencies": {
+    "classnames": "^2.2.6",
     "@ctsj/vue": "^1.0.0",
     "@ctsj/vue-router": "^1.0.0",
     "@ctsj/vue-util": "^1.0.0",
-    "classnames": "^2.2.6",
+    "echarts": "^4.8.0",
     "snabbdom": "^2.1.0",
     "uuid": "^8.3.2"
   }
