@@ -1,3 +1,4 @@
+import { isFunction } from '@ctsj/vue-util';
 import { triggerLifecycle } from '../core/util';
 import { renderLoop } from './renderUtil';
 import { LIFECYCLE_HOOKS } from '../shared/constants';
@@ -21,12 +22,27 @@ export function renderComponent() {
   if (!vnode) return null;
 
   // vnode的hook设置
-  Object.assign(vnode.data.hook, {
+  // 现在实现的hook有如下：
+  // init
+  // create
+  // insert
+  // prepatch
+  // postpatch
+  // destroy
+
+  // 这块可能vnode.data.hook已经有上面的生命周期函数，所以要进行判断
+  const hooks = vnode.data.hook;
+
+  vnode.data.hook = {
     /**
      * 一个vnode已添加
      * @param vnode
      */
-    init: (curVNode) => {
+    init(curVNode) {
+      if (isFunction(hooks.init)) {
+        hooks.init.apply(hooks, Array.from(arguments));
+      }
+
       if (curVNode === vnode) {
         triggerLifecycle.call(self, LIFECYCLE_HOOKS[1]);
       }
@@ -36,7 +52,11 @@ export function renderComponent() {
      * @param emptyVnode
      * @param vnode
      */
-    create: (emptyVnode, curVNode) => {
+    create(emptyVnode, curVNode) {
+      if (isFunction(hooks.create)) {
+        hooks.create.apply(hooks, Array.from(arguments));
+      }
+
       if (curVNode === vnode) {
         triggerLifecycle.call(self, LIFECYCLE_HOOKS[2]);
       }
@@ -45,7 +65,11 @@ export function renderComponent() {
      * insert - 元素已插入DOM
      * @param vnode
      */
-    insert: (curVNode) => {
+    insert(curVNode) {
+      if (isFunction(hooks.insert)) {
+        hooks.insert.apply(hooks, Array.from(arguments));
+      }
+
       if (curVNode === vnode) {
         // ------ mount
 
@@ -55,12 +79,18 @@ export function renderComponent() {
         }
 
         triggerLifecycle.call(self, LIFECYCLE_HOOKS[3]);
+
+        console.log(this.templateEl);
       }
     },
     /**
      * 元素即将被修补
      */
-    prepatch: (oldVNode, newVNode) => {
+    prepatch(oldVNode, newVNode) {
+      if (isFunction(hooks.prepatch)) {
+        hooks.prepatch.apply(hooks, Array.from(arguments));
+      }
+
       if (newVNode === vnode) {
         // beforeUpdate
         triggerLifecycle.call(self, LIFECYCLE_HOOKS[4]);
@@ -69,7 +99,11 @@ export function renderComponent() {
     /**
      * 元素已被修补
      */
-    postpatch: (oldVNode, newVNode) => {
+    postpatch(oldVNode, newVNode) {
+      if (isFunction(hooks.postpatch)) {
+        hooks.postpatch.apply(hooks, Array.from(arguments));
+      }
+
       if (newVNode === vnode) {
         // update
         triggerLifecycle.call(self, LIFECYCLE_HOOKS[5]);
@@ -78,12 +112,16 @@ export function renderComponent() {
     /**
      * 一个元素被直接或间接删除
      */
-    destroy: (curVNode) => {
+    destroy(curVNode) {
+      if (isFunction(hooks.destroy)) {
+        hooks.destroy.apply(hooks, Array.from(arguments));
+      }
+
       if (curVNode === vnode) {
         triggerLifecycle.call(self, LIFECYCLE_HOOKS[7]);
       }
     },
-  });
+  };
 
   return vnode;
 }

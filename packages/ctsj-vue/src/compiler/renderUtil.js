@@ -222,7 +222,7 @@ export function renderAttr({ el, VNode }) {
            * insert - 元素已插入DOM
            * @param vnode
            */
-          insert: (vnode) => {
+          insert(vnode) {
             // 保存HtmlElement的el到$refs中
             self.$refs[val] = vnode.elm;
           },
@@ -231,7 +231,7 @@ export function renderAttr({ el, VNode }) {
       // style属性
       else if (attrName === 'style') {
         // VNode.data.style[attrName] = val;
-        val.style
+        val
           .split(STYLE_RULE_SPLIT)
           .filter((t) => t)
           .forEach((style) => {
