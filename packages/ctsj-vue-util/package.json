@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "ctsj-vue体系的工具类",
   "main": "lib/index.js",
+  "files": [
+    "lib"
+  ],
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "buildpackage": "ctbuild buildpackagets",
