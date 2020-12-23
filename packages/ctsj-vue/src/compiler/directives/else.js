@@ -2,6 +2,7 @@ import { isElementNode, isTextNode } from '@ctsj/vue-util';
 import { hasVAttr, getVAttrNames } from './util';
 import { DIRECT_PREFIX, GROUP_KEY_NAME } from '../../shared/constants';
 import { execExpression } from '../../shared/util';
+
 /**
  * hasVElse - 是否有v-else属性
  * @param attrNames - Array 所有的指令属性集合
