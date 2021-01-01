@@ -1,5 +1,5 @@
 import { isEmpty, isString, isObject, isArray } from '@ctsj/vue-util';
-import { renderLoop } from '@/vue/compiler/renderUtil';
+import { renderLoop } from './renderUtil';
 import { CLASSNAME_SPLIT, STYLE_RULE_ENTRY_SPLIT, STYLE_RULE_SPLIT } from '../shared/regexp';
 import { getVBindEntrys, hasVBind } from './directives/bind';
 import { getAttrEntrys, getVAttrNames } from './directives/util';
