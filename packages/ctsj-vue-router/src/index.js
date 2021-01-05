@@ -258,6 +258,7 @@ function onPopstate() {
   let toRoute;
 
   const route = matchData.find((data) => data.path === to);
+
   if (route) {
     toRoute = {
       path: route.path,
