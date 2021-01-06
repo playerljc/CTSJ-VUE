@@ -23,11 +23,17 @@ export function hasVHtml(attrNames) {
  */
 export function parseVHtml({ context, el, vAttrNames, VNode }) {
   const attrName = vAttrNames.find((n) => n.indexOf(`${DIRECT_PREFIX}html`) !== -1);
+
   const value = el.getAttribute(attrName);
+
   // 在此处需要进行实体字符的替换
   // <div>111</div>
   const html = execExpression.call(this, context, value);
+
   const htmlVNode = toVNode(createElement(html));
-  VNode.children.push(htmlVNode);
+
+  // VNode.children.push(htmlVNode);
+  VNode.children = [htmlVNode];
+
   return html;
 }

@@ -1,6 +1,9 @@
 import { isArray, isObject } from '@ctsj/vue-util';
 import { createVNode } from '../core/vdom';
 import { parseOption } from './directives/model';
+import { hasVHtml } from './directives/html';
+import { hasVText } from './directives/text';
+import { getVAttrNames } from './directives/util';
 import { renderLoop, renderVAttr, renderAttr } from './renderUtil';
 
 /**
@@ -36,6 +39,13 @@ export function renderElementNode({ context, el, parentVNode, parentElement }) {
   // 处理一下option这种情况
   if (el.tagName.toLowerCase() === 'option' && parentVNode && parentElement) {
     parseOption.call(this, { context, VNode, parentElement });
+  }
+
+  const vAttrNames = getVAttrNames(el);
+
+  // 如果element元素包含v-html个v-text表明孩子是不需要迭代的
+  if (hasVHtml(vAttrNames) || hasVText(vAttrNames)) {
+    return VNode;
   }
 
   // loop children

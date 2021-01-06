@@ -369,7 +369,9 @@ class Component {
     });
 
     Object.assign(this.$noProxySrcData, this.$props);
+
     mergeProps.call(this, this.$props);
+
     this.$propsProxy = createPropsProxy.call(this, this.$props);
 
     // 在这个地方进行watch操作
@@ -379,7 +381,10 @@ class Component {
     // 把之前的props删除，混入现在的props
     mergeMethods.call(this);
 
+    // 重新计算计算属性，因为计算属性中可能用了this.props中的值
     resetComputed.call(this);
+
+    // 进行render
     const VNode = renderComponent.call(this);
 
     // class和style的处理

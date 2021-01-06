@@ -20,7 +20,6 @@ export function render(el, isMount) {
   // vue实例代表的vnode
   const startTime = new Date().getTime();
 
-  // 执行templateEl的迭代(模板的解析)
   const vnode = renderLoop.call(this, {
     context: {},
     el: this.templateEl,
