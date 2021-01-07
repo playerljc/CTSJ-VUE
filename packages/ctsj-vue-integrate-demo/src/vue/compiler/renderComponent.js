@@ -123,5 +123,8 @@ export function renderComponent() {
     },
   };
 
+  // 需要清空proxyDirtyStack
+  this.$proxyDirtyStack.clear();
+
   return vnode;
 }

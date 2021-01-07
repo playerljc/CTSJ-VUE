@@ -35,7 +35,7 @@ import { PATH_SPLIT } from './constants';
 import { wrapPathByBase, getCurRoutePath } from './util';
 
 /**
- * matchData - 匹配的路由数据
+ * matchData - 匹配的路由数据(此数据是为了在路由守卫里用)
  * 数组中的每一项 {
  *   path: string - 匹配的路径(这个路径是路由配置中的路径)
  *   regexp: Regex - 匹配的正则表达式

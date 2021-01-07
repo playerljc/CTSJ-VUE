@@ -39,25 +39,55 @@
  全局混入Vue.mixin
 .插件 ok
 .对数组的操作上代理有问题，没有考虑到push,splice等一系列操作 ok
+.动态slot(动态插槽) ok
+.v-text ok
+.v-pre ok
 
-.动态slot(动态插槽)
-.自定义指令
-.现在是替换整个el节点
+.provide和inject
+ 注意的点在模板解析{{}}中可以进行$emit操作，也可以执行inject中的方法,$emit和inject中的方法可能在父作用域中修改值执行数据相应的更新
+ 需要保证只在实例作用域中进行更新，可以执行代码的点，
+ 生命周期
+ v-on
+ watch
+
+
+.v-once(难度较高)
+ 难度较高的原因：组件自身更新的时候如果是v-once则不能更新
+ <div v-once>
+   <my-component1 /> - 不能进行自身更新(控制起来很难-不一定在哪一级)
+   <div>
+     <my-component2 /> - 不能进行自身更新(控制起来很难-不一定在哪一级)
+   </div>
+ </div>
+.keep-alive(难度较高)
+ 难度较高的原因：什么样的节点可以进行缓存，这个现在没太搞明白
+ <template />
+ <component />
+ <slot />
+ <router-view />
+ <router-link />
+ <组件的节点 />
+ <html元素节点 />
+.异步组件(代码需要改动很多，难度较高)
+ 难度较高的原因：诸多地方需要改写成异步操作，涉及核心流程
+.filter(难度较高)
+ 难度较高的原因：需要类似于c++语言中的运算符重写功能才能够实现
+
+.vuex
 .指令的简写模式
-.正真的实现computed的实时更新
-.计算属性传参数
+.自定义指令
 .v-on的其他功能，如键盘事件，只触发一次的事件
 .关键代码的异常处理(或者说是整体的一个异常处理的编写)
+.单文件组件
+
+.正真的实现computed的实时更新
 .组件上v-model
 .v-model的节流
+.现在是替换整个el节点(可以不做)
+.computed传参数(可以不做)
 .computed(不需要)
  get
  set
-.filter (很难)
- 自定义filter
-.单文件组件
-
-
 
 // components集合的键应该用元素的key
 // 每一个组件元素没有key都要随机生成一个key
@@ -77,3 +107,7 @@
    </div>
 
 </div>
+
+proxyDirtyStack不能是全局对象，应该在vue和component实例中进行实例化，也就是vue实例和
+component实例中都需要有单独的proxyDirtyStack，且push、pop和clear都需要调用各自的,
+provider和inject需要调用createExecutionContext方法

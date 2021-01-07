@@ -258,6 +258,7 @@ function onPopstate() {
   let toRoute;
 
   const route = matchData.find((data) => data.path === to);
+
   if (route) {
     toRoute = {
       path: route.path,
@@ -349,7 +350,6 @@ function historyChange({ location, onComplete, onAbort, historyChangeCallback })
     guard(toRoute, self).then(() => {
       // 到这里已经可以进行path的跳转了
 
-      debugger;
       // 2.使用history.pushState替换浏览器路径
       historyChangeCallback(toRoute);
 

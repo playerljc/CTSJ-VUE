@@ -1,6 +1,6 @@
 import { isArray, isFunction, isObject, cloneDeep } from '@ctsj/vue-util';
 import { isComputedProperty } from './util';
-import { push } from '../compiler/proxyDirtyStack';
+// import { push } from '../compiler/proxyDirtyStack';
 import { execExpression, createExecutionContext, log } from '../shared/util';
 import { render } from '../compiler/render';
 import { renderComponent } from '../compiler/renderComponent';
@@ -154,7 +154,7 @@ function createProxy(srcObj, depth, renderHandler) {
         }
 
         // 变更入栈
-        push(renderHandler, value);
+        self.$proxyDirtyStack.push(renderHandler, value);
 
         return result;
       }
@@ -234,7 +234,7 @@ function createProxy(srcObj, depth, renderHandler) {
         const result = Reflect.set(target, key, value, receiver);
 
         // 变更入栈
-        push(renderHandler, value);
+        self.$proxyDirtyStack.push(renderHandler, value);
         // -----------------------------------end
 
         return result;
@@ -282,7 +282,7 @@ function createProxy(srcObj, depth, renderHandler) {
       const result = Reflect.deleteProperty(target, property);
 
       // 变更入栈
-      push(renderHandler, property);
+      self.$proxyDirtyStack.push(renderHandler, property);
 
       return result;
     },

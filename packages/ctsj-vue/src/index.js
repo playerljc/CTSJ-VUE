@@ -222,7 +222,6 @@ const router = new VueRouter({
 
 // 全局的 beforeEach 守卫
 router.beforeEach((to, from, next) => {
-  debugger;
   next(true);
 });
 
@@ -231,6 +230,7 @@ const ins = new Vue({
   router,
   template: `
     <div>
+      <div v-if="a" v-for="" v-once>111</div>
       <router-view></router-view>
     </div>
   `,

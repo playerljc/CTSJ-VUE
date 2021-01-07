@@ -1,6 +1,7 @@
-import { isElementNode, isObject } from '@ctsj/vue-util';
+import { isArray, isElementNode, isFunction, isObject } from '@ctsj/vue-util';
 import { existsComponentByGlobal, existsComponentByComponent, getConfig } from './register';
 import { isVueInstance } from '../util';
+import { createExecutionContext } from '../../shared/util';
 
 import Component from './index';
 
@@ -105,4 +106,60 @@ export function getComponentConfig(ins, componentName) {
  */
 export function isComponentInstance(ins) {
   return isObject(ins) && ins instanceof Component;
+}
+
+/**
+ * findProviderHasMethodInsByName - 在provider中查找是否含有methodName的属性
+ * @param methodName
+ * @return {any}
+ */
+function findProviderHasMethodInsByName(methodName) {
+  let ins = this.$parent;
+
+  while (ins) {
+    if ('provider' in ins.$config && isFunction(ins.$config.provider)) {
+      // 获取provider对象
+      const provider = ins.$config.provider.call(ins);
+
+      // 如果methodName在provider中且类型是Function
+      if (methodName in provider && isFunction(provider[methodName])) {
+        break;
+      }
+    }
+
+    ins = ins.$parent;
+  }
+
+  return ins;
+}
+
+/**
+ * inject - 处理依赖注入
+ * @return boolean
+ */
+export function inject() {
+  if (!('inject' in this.$config) || !isArray(this.$config.inject)) return false;
+
+  // 获取配置中的inject属性
+  const { inject = [] } = this.$config;
+
+  // inject: ['getMap','display','setPage']
+  // 迭代inject属性(是一个数组)
+  // {{display()}}
+  inject.forEach((methodName) => {
+    const ins = findProviderHasMethodInsByName.call(this, methodName);
+
+    if (ins) {
+      const provider = ins.$config.provider.call(ins);
+
+      this[methodName] = function () {
+        // provider[methodName].bind(ins);
+        return createExecutionContext.call(ins, ins, function () {
+          return provider[methodName].apply(ins.$dataProxy, Array.from(arguments));
+        });
+      };
+    }
+  });
+
+  return true;
 }

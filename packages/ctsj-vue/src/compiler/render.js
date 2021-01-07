@@ -39,7 +39,7 @@ export function render(el, isMount) {
   vnode.data.hook = {
     /**
      * 一个vnode已添加
-     * @param vnode
+     * @param curVNode
      */
     init(curVNode) {
       if (isFunction(hooks.init)) {
@@ -53,7 +53,7 @@ export function render(el, isMount) {
     /**
      * 已基于vnode创建了一个DOM元素
      * @param emptyVnode
-     * @param vnode
+     * @param curVNode
      */
     create(emptyVnode, curVNode) {
       if (isFunction(hooks.create)) {
@@ -138,6 +138,9 @@ export function render(el, isMount) {
 
     log(`patch所用时间${(endTime - startTime) / 1000}m`);
   }
+
+  // 需要清空proxyDirtyStack
+  this.$proxyDirtyStack.clear();
 
   return true;
 }

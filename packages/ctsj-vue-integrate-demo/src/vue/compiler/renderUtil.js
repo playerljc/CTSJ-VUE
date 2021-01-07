@@ -36,6 +36,8 @@ import { FORM_CONTROL_BINDING_TAG_NAMES } from '../shared/constants';
 import { hasVModel, isFormTag, parseVModel } from './directives/model';
 import { hasVOn, parseVOn } from './directives/on';
 import { hasVHtml, parseVHtml } from './directives/html';
+import { hasVText, parseVText } from './directives/text';
+import { hasVPre, parseVPre } from './directives/pre';
 import { CLASSNAME_SPLIT, STYLE_RULE_ENTRY_SPLIT, STYLE_RULE_SPLIT } from '../shared/regexp';
 
 /**
@@ -149,6 +151,17 @@ export function renderVAttr({ el, parentVNode, parentElement, context, renderFun
   // createVNode
   const VNode = createVNode(tagName);
 
+  // 解析v-pre
+  if (hasVPre(vAttrNames)) {
+    // parse v-pre
+    parseVPre.call(this, { el, VNode });
+
+    return {
+      Continue: false,
+      VNode,
+    };
+  }
+
   // 解析v-show
   if (hasVShow(vAttrNames)) {
     // parse v-show
@@ -187,6 +200,12 @@ export function renderVAttr({ el, parentVNode, parentElement, context, renderFun
     parseVHtml.call(this, { context, el, vAttrNames, VNode });
     // v-html在最后解析，因为v-html的children就是一个文本节点，不需要在进行children的loop
     // return VNode;
+  }
+
+  // 解析v-text
+  if (hasVText(vAttrNames)) {
+    // parse v-text
+    parseVText.call(this, { context, el, vAttrNames, VNode });
   }
 
   return {
@@ -299,27 +318,27 @@ export function renderLoop({ context, el, parentVNode, parentElement }) {
   }
 
   if (!isComponent) {
-    // 如果是template元素
+    // 如果是template元素<template />
     if (isTemplateNode(el)) {
       return renderTemplateNode.call(this, { context, el, parentVNode, parentElement });
     }
 
-    // 如果是slot元素 vue实例没有slot元素
+    // 如果是slot元素 vue实例没有slot元素<slot />
     if (!isVueIns && isSlotNode(el)) {
       return renderSlotNode.call(this, { context, el, parentVNode, parentElement });
     }
 
-    // 如果是component元素
+    // 如果是component元素<component />
     if (isDynamicComponentNode(el)) {
       return renderDynamicComponentNode.call(this, { context, el, parentVNode, parentElement });
     }
 
-    // 如果是router-link元素
+    // 如果是router-link元素<router-link />
     if (isRouterLinkNode(el)) {
       return renderRouterLinkNode.call(this, { context, el, parentVNode, parentElement });
     }
 
-    // 如果是router-view元素
+    // 如果是router-view元素<router-view />
     if (isRouterViewNode(el)) {
       return renderRouterViewNode.call(this, { context, el, parentVNode, parentElement });
     }
