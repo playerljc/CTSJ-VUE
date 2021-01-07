@@ -59,8 +59,8 @@ const Test = {
   `,
   methods: {
     display() {
-      // this.msg = new Date().getTime();
-      return '111';
+      this.msg = new Date().getTime();
+      // return '111';
     },
   },
   provider() {
@@ -70,11 +70,23 @@ const Test = {
   },
   components: {
     sub1: {
+      data() {
+        return {
+          msg: 'sub1',
+        };
+      },
+      methods: {
+        change() {
+          this.msg = `sub1${new Date().getTime()}`;
+          this.display();
+        },
+      },
+      inject: ['display'],
       template: `
         <div>
-          <div >{{display()}}</div>
+          <div>{{msg}}</div>
+          <div v-on:click="change">修改</div>
         </div>`,
-      inject: ['display'],
     },
   },
 };

@@ -1,5 +1,5 @@
 import { resetComputed } from '../core/util';
-import { clear, isEmpty as dirtyStackIsEmpty, getRenderHandler } from '../compiler/proxyDirtyStack';
+// import { clear, isEmpty as dirtyStackIsEmpty, getRenderHandler } from '../compiler/proxyDirtyStack';
 import { DIRECT_DIVIDING_SYMBOL, IS_LOG_OUTPUT } from './constants';
 
 /**
@@ -97,19 +97,23 @@ export function createExecutionContext(codeCallContext, codeCallBack) {
     'codeCallBack', // 代码执行的回调函数
     'dirtyCallContext', // 进行渲染函数的调用上下文
     'dirtyCallBack', // 执行渲染的回调函数
-    'codeCallBack.call(codeCallContext);dirtyCallBack.call(dirtyCallContext);', // 连续调用codeCallContext，dirtyCallBack两个函数
+    `
+     const result = codeCallBack.call(codeCallContext);
+     dirtyCallBack.call(dirtyCallContext);
+     return result;
+    `, // 连续调用codeCallContext，dirtyCallBack两个函数
   );
 
   const self = this;
 
-  executionContext(codeCallContext, codeCallBack, this, function () {
+  return executionContext(codeCallContext, codeCallBack, this, function () {
     // 判断是否有数据的修改，如果有执行render或者
-    if (dirtyStackIsEmpty()) return false;
+    if (self.$proxyDirtyStack.isEmpty()) return false;
 
     // 先获取renderHandler
-    const renderHandler = getRenderHandler();
+    const renderHandler = self.$proxyDirtyStack.getRenderHandler();
     // 在清空
-    clear();
+    self.$proxyDirtyStack.clear();
     // 以上2行代码的位置不能改变，否则会引起死循环
 
     // $stack不为空说明了有数据的修改
