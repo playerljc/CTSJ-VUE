@@ -1,3 +1,5 @@
+import { isFunction } from '@ctsj/vue-util';
+
 import { isFormTag } from './model';
 import { execExpression, createExecutionContext, log } from '../../shared/util';
 import { createContext } from '../../core/proxy';
@@ -29,7 +31,7 @@ export function getVOnEntrys({ el, vAttrNames }) {
 }
 
 /**
- * executeVOn - 执行v-on内部的逻辑 带执行上下文
+ * executeExecutionContextVOn - 执行v-on内部的逻辑 带执行上下文
  * @param context - Object 上下文对象
  * @param entry - Object v-on实体对象
  * @param e - Event Html事件的对象
@@ -44,7 +46,11 @@ export function executeExecutionContextVOn({ context, entry, e, argv = [] }) {
 
   // 函数名形式
   // TODO: HTML的事件处理函数
-  if (entry.expression in (self.$config.methods || {})) {
+  if (
+    (entry.expression in (self.$config.methods || {}) &&
+      isFunction((self.$config.methods || {})[entry.expression])) ||
+    (entry.expression in this && isFunction(this[entry.expression]))
+  ) {
     createExecutionContext.call(this, this, function () {
       // 函数名形式 直接调用
       this[entry.expression].call(this.$dataProxy, e || (argv && argv.length ? argv[0] : null));

@@ -45,6 +45,41 @@ Vue.component('user-list', UserList);
 Vue.component('user-save-or-update', SaveOrUpdate);
 Vue.component('task-manager', TaskManager);
 
+const Test = {
+  data() {
+    return {
+      msg: new Date().getTime(),
+    };
+  },
+  template: `
+    <div>
+      <div>{{msg}}</div>
+      <sub1 />
+    </div>
+  `,
+  methods: {
+    display() {
+      this.msg = new Date().getTime();
+    },
+  },
+  provider() {
+    return {
+      display: this.display,
+    };
+  },
+  components: {
+    sub1: {
+      template: `
+        <div>
+          <div v-on:click="display">121212</div>
+        </div>`,
+      inject: ['display'],
+    },
+  },
+};
+
+Vue.component('test', Test);
+
 export default new VueRouter({
   routes: [
     {
@@ -98,6 +133,11 @@ export default new VueRouter({
           ],
         },
       ],
+      exact: 'exact',
+    },
+    {
+      path: '/test',
+      component: Test,
     },
   ],
 });

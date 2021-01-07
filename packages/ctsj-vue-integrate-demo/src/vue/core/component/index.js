@@ -9,7 +9,7 @@ import {
   isPascalCase,
   pascalCaseToKebabCase,
 } from '../../shared/util';
-import { getComponentConfig } from './util';
+import { getComponentConfig, inject } from './util';
 import { mergeComputed, mergeData, mergeMethods, mergeRouterHooks, mergeProps } from '../merge';
 import { resetComputed, triggerLifecycle, mixinConfig } from '../util';
 
@@ -58,7 +58,7 @@ function getPropsAndAttrs() {
   Object.keys(attrs).forEach((key) => {
     // 在props中寻找key是否存在
     // 因为在props中定义的是驼峰形式，而在组件标签中定义的是xxx-xxx-xxx形式，所以prop要转换成驼峰形式
-    const index = props.findIndex((prop) => pascalCaseToKebabCase(prop) === key);
+    const index = props.findIndex((p) => pascalCaseToKebabCase(p) === key);
     if (index !== -1) {
       prop[props[index]] = attrs[key];
     } else {
@@ -197,6 +197,9 @@ class Component {
 
     // methods混入
     mergeMethods.call(this);
+
+    // inject
+    inject.call(this);
 
     // 组件路由钩子混入
     mergeRouterHooks.call(this);
@@ -370,6 +373,7 @@ class Component {
 
     Object.assign(this.$noProxySrcData, this.$props);
 
+    // 把之前的props删除，混入现在的props
     mergeProps.call(this, this.$props);
 
     this.$propsProxy = createPropsProxy.call(this, this.$props);
@@ -378,8 +382,7 @@ class Component {
     // 修改被代理对象的props，而不是修改$dataProxy对象，这样不会触发set
     // 这样写就不能进行watch操作
 
-    // 把之前的props删除，混入现在的props
-    mergeMethods.call(this);
+    // mergeMethods.call(this);
 
     // 重新计算计算属性，因为计算属性中可能用了this.props中的值
     resetComputed.call(this);

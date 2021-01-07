@@ -44,8 +44,6 @@
 .v-pre ok
 
 .provide和inject
-
-
 .v-once(难度较高)
  难度较高的原因：组件自身更新的时候如果是v-once则不能更新
  <div v-once>
@@ -54,7 +52,6 @@
      <my-component2 /> - 不能进行自身更新(控制起来很难-不一定在哪一级)
    </div>
  </div>
-
 .keep-alive(难度较高)
  难度较高的原因：什么样的节点可以进行缓存，这个现在没太搞明白
  <template />
@@ -64,10 +61,8 @@
  <router-link />
  <组件的节点 />
  <html元素节点 />
-
 .异步组件(代码需要改动很多，难度较高)
  难度较高的原因：诸多地方需要改写成异步操作，涉及核心流程
-
 .filter(难度较高)
  难度较高的原因：需要类似于c++语言中的运算符重写功能才能够实现
 
@@ -105,3 +100,7 @@
    </div>
 
 </div>
+
+proxyDirtyStack不能是全局对象，应该在vue和component实例中进行实例化，也就是vue实例和
+component实例中都需要有单独的proxyDirtyStack，且push、pop和clear都需要调用各自的,
+provider和inject需要调用createExecutionContext方法
