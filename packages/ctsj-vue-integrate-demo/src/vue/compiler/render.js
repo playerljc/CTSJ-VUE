@@ -139,5 +139,8 @@ export function render(el, isMount) {
     log(`patch所用时间${(endTime - startTime) / 1000}m`);
   }
 
+  // 需要清空proxyDirtyStack
+  this.$proxyDirtyStack.clear();
+
   return true;
 }

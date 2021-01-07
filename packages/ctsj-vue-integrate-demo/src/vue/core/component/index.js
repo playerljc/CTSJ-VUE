@@ -16,6 +16,7 @@ import { resetComputed, triggerLifecycle, mixinConfig } from '../util';
 import { getGlobalConfig } from '../index';
 
 import { LIFECYCLE_HOOKS } from '../../shared/constants';
+import ProxyDirtyStack from '../../compiler/proxyDirtyStack';
 
 /**
  * getPropsAndAttrs - 获取argConfig中的props和attrs
@@ -154,6 +155,9 @@ class Component {
 
     // 组件的配置对象
     this.$config = this.$getConfig();
+
+    // proxy的脏数据栈
+    this.$proxyDirtyStack = new ProxyDirtyStack();
 
     // 构造函数的配置
     this.$argConfig = config;

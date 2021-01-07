@@ -59,7 +59,8 @@ const Test = {
   `,
   methods: {
     display() {
-      this.msg = new Date().getTime();
+      // this.msg = new Date().getTime();
+      return '111';
     },
   },
   provider() {
@@ -71,7 +72,7 @@ const Test = {
     sub1: {
       template: `
         <div>
-          <div v-on:click="display">121212</div>
+          <div >{{display()}}</div>
         </div>`,
       inject: ['display'],
     },
@@ -82,6 +83,10 @@ Vue.component('test', Test);
 
 export default new VueRouter({
   routes: [
+    {
+      path: '/test',
+      component: Test,
+    },
     {
       path: '/',
       component: App,
@@ -133,11 +138,7 @@ export default new VueRouter({
           ],
         },
       ],
-      exact: 'exact',
-    },
-    {
-      path: '/test',
-      component: Test,
+      // exact: 'exact',
     },
   ],
 });

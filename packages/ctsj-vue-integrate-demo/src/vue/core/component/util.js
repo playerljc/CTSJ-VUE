@@ -1,6 +1,7 @@
 import { isArray, isElementNode, isFunction, isObject } from '@ctsj/vue-util';
 import { existsComponentByGlobal, existsComponentByComponent, getConfig } from './register';
 import { isVueInstance } from '../util';
+import { createExecutionContext } from '../../shared/util';
 
 import Component from './index';
 
@@ -144,13 +145,19 @@ export function inject() {
 
   // inject: ['getMap','display','setPage']
   // 迭代inject属性(是一个数组)
+  // {{display()}}
   inject.forEach((methodName) => {
     const ins = findProviderHasMethodInsByName.call(this, methodName);
 
     if (ins) {
       const provider = ins.$config.provider.call(ins);
 
-      this[methodName] = provider[methodName].bind(ins);
+      this[methodName] = function () {
+        // provider[methodName].bind(ins);
+        return createExecutionContext.call(ins, ins, function () {
+          return provider[methodName].apply(ins.$dataProxy, Array.from(arguments));
+        });
+      };
     }
   });
 

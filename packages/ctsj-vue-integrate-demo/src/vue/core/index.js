@@ -15,6 +15,7 @@ import { LIFECYCLE_HOOKS } from '../shared/constants';
 import { mergeData, mergeComputed, mergeMethods } from './merge';
 import { triggerLifecycle, getEl, mixinConfig } from './util';
 import { createVueProxy } from './proxy';
+import ProxyDirtyStack from '../compiler/proxyDirtyStack';
 
 /**
  * findVNodeParentByKey - 查询key的Parent
@@ -162,6 +163,9 @@ class Vue {
     if (this.$router && isFunction(this.$router.$setVueIns)) {
       this.$router.$setVueIns(this);
     }
+
+    // proxy的脏数据栈
+    this.$proxyDirtyStack = new ProxyDirtyStack();
 
     // 纯净的data数据，没有进行代理的，在watch中使用
     this.$noProxySrcData = cloneDeep(isFunction(this.$config.data) ? this.$config.data() : {});
