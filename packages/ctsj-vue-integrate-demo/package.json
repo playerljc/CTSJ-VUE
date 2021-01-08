@@ -32,18 +32,18 @@
   "devDependencies": {
     "@babel/plugin-transform-modules-commonjs": "^7.12.1",
     "@babel/runtime": "^7.7.4",
+    "@ctsj/build": "^3.0.2",
     "@umijs/fabric": "^2.0.8",
     "eslint": "^6.8.0",
     "husky": "^4.2.5",
     "lint-staged": "^10.2.0",
-    "prettier": "^2.0.5",
-    "@ctsj/build": "^3.0.2"
+    "prettier": "^2.0.5"
   },
   "dependencies": {
-    "classnames": "^2.2.6",
     "@ctsj/vue": "^1.0.0",
     "@ctsj/vue-router": "^1.0.0",
     "@ctsj/vue-util": "^1.0.0",
+    "classnames": "^2.2.6",
     "echarts": "^4.8.0",
     "snabbdom": "^2.1.0",
     "uuid": "^8.3.2"
