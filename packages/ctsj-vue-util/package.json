@@ -31,6 +31,9 @@
     "url": "https://github.com/playerljc/CTSJ-VUE/issues"
   },
   "homepage": "https://github.com/playerljc/CTSJ-VUE#readme",
+  "publishConfig": {
+    "access": "public"
+  },
   "devDependencies": {
     "@babel/runtime": "^7.7.4",
     "@ctsj/build": "^4.0.2",

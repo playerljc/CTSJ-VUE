@@ -2,6 +2,7 @@
   "name": "root",
   "private": true,
   "scripts": {
+    "publish": "lerna publish",
     "bootstrap": "lerna bootstrap",
     "clean": "lerna clean",
     "link": "lerna link",

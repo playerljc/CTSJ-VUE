@@ -32,6 +32,9 @@
     "url": "https://github.com/playerljc/CTSJ-VUE/issues"
   },
   "homepage": "https://github.com/playerljc/CTSJ-VUE#readme",
+  "publishConfig": {
+    "access": "public"
+  },
   "devDependencies": {
     "@babel/plugin-transform-modules-commonjs": "^7.12.1",
     "@babel/runtime": "^7.7.4",
