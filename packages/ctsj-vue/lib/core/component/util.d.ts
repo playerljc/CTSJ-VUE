@@ -48,4 +48,11 @@ export function getComponentConfig(ins: any, componentName: any): any;
  * @return boolean
  */
 export function isComponentInstance(ins: any): boolean;
+/**
+ * inject - 处理依赖注入
+ * @return boolean
+ */
+export function inject(): boolean;
+export class inject {
+}
 import Component from ".";

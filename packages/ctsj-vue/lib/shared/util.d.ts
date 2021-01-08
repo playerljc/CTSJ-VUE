@@ -37,7 +37,7 @@ export function execExpression(context: any, expressionStr: any): any;
  * @param codeCallContext - Object 调用上下文
  * @param codeCallBack - Function 回调的函数
  */
-export function createExecutionContext(codeCallContext: any, codeCallBack: any): void;
+export function createExecutionContext(codeCallContext: any, codeCallBack: any): any;
 /**
  * log - 输出
  * @param argv

@@ -42,8 +42,7 @@
 .动态slot(动态插槽) ok
 .v-text ok
 .v-pre ok
-
-.provide和inject
+.provide和inject ok
  注意的点在模板解析{{}}中可以进行$emit操作，也可以执行inject中的方法,$emit和inject中的方法可能在父作用域中修改值执行数据相应的更新
  需要保证只在实例作用域中进行更新，可以执行代码的点，
  生命周期

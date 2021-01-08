@@ -45,6 +45,7 @@ declare class Vue {
     $config: any;
     $refs: {};
     $router: any;
+    $proxyDirtyStack: ProxyDirtyStack;
     $noProxySrcData: any;
     $dataProxy: ProxyConstructor;
     templateEl: Element;
@@ -67,3 +68,4 @@ declare class Vue {
      */
     $forceUpdate(): boolean;
 }
+import ProxyDirtyStack from "../compiler/proxyDirtyStack";

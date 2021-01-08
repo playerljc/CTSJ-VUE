@@ -1,0 +1,2 @@
+"use strict";Object.defineProperty(exports,"__esModule",{value:!0}),exports.parseVPre=exports.hasVPre=void 0;var vdom_1=require("../../core/vdom"),util_1=require("./util"),constants_1=require("../../shared/constants");function hasVPre(e){return util_1.hasVAttr(e,constants_1.DIRECT_PREFIX+"pre")}function parseVPre(e){var r=e.el,e=e.VNode,r=vdom_1.toVNode(r);e.children=[r]}exports.hasVPre=hasVPre,exports.parseVPre=parseVPre;
+//# sourceMappingURL=pre.js.map

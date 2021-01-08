@@ -15,7 +15,7 @@ export function getVOnEntrys({ el, vAttrNames }: {
     vAttrNames: any;
 }): any[];
 /**
- * executeVOn - 执行v-on内部的逻辑 带执行上下文
+ * executeExecutionContextVOn - 执行v-on内部的逻辑 带执行上下文
  * @param context - Object 上下文对象
  * @param entry - Object v-on实体对象
  * @param e - Event Html事件的对象

@@ -35,6 +35,7 @@ declare class Component {
     $matchRoute: any;
     $route: any;
     $config: any;
+    $proxyDirtyStack: ProxyDirtyStack;
     $argConfig: any;
     $emit: (eventName: any, ...args: any[]) => false | undefined;
     $refs: {};
@@ -92,3 +93,4 @@ declare class Component {
      */
     $update(): any;
 }
+import ProxyDirtyStack from "../../compiler/proxyDirtyStack";
